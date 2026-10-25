@@ -154,8 +154,11 @@ export function evaluateCase(
   for (const def of doc.circumstances) {
     if (!applies(def.utilities)) continue;
     const signals: CaseSignal[] = def.signals.flatMap((l) => (seen.has(l.id) ? [{ ...seen.get(l.id)!, strength: l.strength }] : []));
-    const strong = signals.filter((s) => s.strength === "strong").length;
-    const flagged = def.sensitivity === "standard" ? strong >= 1 || signals.length - strong >= 2 : strong >= 1;
+    // Area signals describe where someone lives, not the person: they never count towards flagging, but once a
+    // circumstance is flagged by the customer's own evidence they stay in its signals and add their points.
+    const own = signals.filter((s) => s.source !== "area");
+    const strong = own.filter((s) => s.strength === "strong").length;
+    const flagged = def.sensitivity === "standard" ? strong >= 1 || own.length - strong >= 2 : strong >= 1;
     if (!flagged) continue;
     circumstances.push({
       circumstanceId: def.id,
