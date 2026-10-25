@@ -172,7 +172,7 @@ export function CasePageGuide() {
       <section className="case-card bts-facts" aria-labelledby="cp-flags">
         <h2 id="cp-flags">Behind the scenes: circumstances, solutions and priority</h2>
         <ul className="plain history">
-          <li><strong>A circumstance is flagged</strong> when its linked signals include 1 strong signal or 2 supporting ones. Sensitive and safety circumstances need a strong one. Only circumstances that apply to electricity are checked.</li>
+          <li><strong>A circumstance is flagged</strong> when its linked signals include 1 strong signal or 2 supporting ones. Sensitive and safety circumstances need a strong one. The area signal (ABS SEIFA: the customer's postcode is among the most disadvantaged 20% in WA) never counts towards this; it only adds points once the customer's own evidence has flagged a circumstance. Only circumstances that apply to electricity are checked.</li>
           <li><strong>Weather is a risk, not an event.</strong> Extreme heat is a strong signal for "Heatwave or cold snap", and a supporting one for medical need for cooling, life support, rationing and prepay self-disconnection, so it adds weight where the customer is already vulnerable. Fire danger only supports "Bushfire, flood, cyclone or storm", so a forecast alone never claims a disaster happened.</li>
           <li><strong>Support areas</strong> are the flowchart categories with at least one flagged circumstance.</li>
           <li><strong>Solutions</strong> are every solution linked to a flagged circumstance, each listed once with the circumstances it is for. Their standard order is the order they appear in the flowchart file.</li>

@@ -83,7 +83,8 @@ function Panel({ refr, path, index, onSelect }: { refr: Ref | null; path: Path; 
     const def = index.circumstances.get(refr.id);
     const x = path.flagged.get(refr.id);
     const links = def?.signals ?? [];
-    const seenLinks = links.filter((l) => path.seen.has(l.id));
+    // Area signals never count towards flagging (see evaluateCase), so they are left out of the count.
+    const seenLinks = links.filter((l) => path.seen.has(l.id) && path.seen.get(l.id)!.source !== "area");
     const strong = seenLinks.filter((l) => l.strength === "strong").length;
     return (
       <>
