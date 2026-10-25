@@ -1,4 +1,7 @@
 import type { FlowDoc, FlowOp, WeatherSignal } from "@greenspark/shared";
+import type { CreateGroupTask, GroupTask, GroupTaskDetail, GroupTaskPreview, GroupTaskSelection } from "@greenspark/shared";
+
+export interface GroupTaskList { tasks: GroupTask[]; users: StaffUser[]; actorId: string; canAssignOthers: boolean }
 import type {
   AssessmentStatus, CaseStatus, CircumstanceDefinition, EvidenceFieldDefinition, Person, QueueCase,
   QueueQuery, RecommendationDefinition, ReviewStatus, StaffUser, SupportArea,
@@ -71,6 +74,12 @@ export interface FlowSnapshot { doc: FlowDoc | null; hash: string; problems: str
 export interface FlowSaved { hash: string; previousHash: string; changed: boolean }
 
 export interface ApiClient {
+  groupTasks?(eventDate: string): Promise<GroupTaskList>;
+  previewGroupTask?(selection: GroupTaskSelection): Promise<GroupTaskPreview>;
+  createGroupTask?(input: CreateGroupTask): Promise<{ task: GroupTask; preview: GroupTaskPreview }>;
+  groupTask?(id: string, page?: number): Promise<GroupTaskDetail>;
+  updateGroupTask?(id: string, input: { expectedVersion: number; personIds: string[]; completed: boolean }): Promise<{ task: GroupTask }>;
+  cancelGroupTask?(id: string, expectedVersion: number): Promise<{ task: GroupTask }>;
   /** The utility hardship flow behind the Flowchart page (a JSON file on the server). */
   flow(): Promise<FlowSnapshot>;
   weather?(): Promise<WeatherStatus>;
@@ -129,13 +138,18 @@ export interface OutlookTown {
 }
 export interface ClimateInfo { thresholds: { hot: number; veryHot: number }; baselineYears: [number, number]; scenario: string; period: string }
 export interface OutlookCustomer {
-  personId: string; townId: string; tier: "act" | "watch"; score: number; exposure: number;
+  personId: string; townId: string; tier: "act" | "watch" | null; score: number; exposure: number;
   /** `firstDate`: the first hot or dangerous forecast day (a warning is in force from today, so it is left out). */
   kinds: HazardKind[]; firstDate: string | null; firstKind: HazardKind | null; worst: string | null;
   sensitivity: { id: string; group: "health" | "supply" | "cost" | "isolation"; label: string }[];
   accountNumber: string | null; displayName: string; suburb: string; postcode: string | null;
   risk: { probability: number; baseRate: number | null } | null;
   priority: { label: string; score: number } | null; status: string | null;
+  group?: import("@greenspark/shared").SupportGroupId;
+  supportNeeds?: import("@greenspark/shared").SupportGroupId[];
+  location?: [number, number] | null;
+  assignedTo?: string | null;
+  daily?: { date: string; tier: "act" | "watch" | null; exposure: number; score: number }[];
 }
 export type Outlook =
   | { available: false; weather: WeatherStatus }
@@ -147,6 +161,7 @@ export type Outlook =
     warnings: { title: string; districts: string[]; expires: string | null }[];
     totals: { covered: number; uncovered: number; exposed: number; vulnerable: number; act: number; watch: number };
     customers: OutlookCustomer[];
+    groupCustomers?: OutlookCustomer[];
   };
 
 export interface CaseForecast {
@@ -205,6 +220,12 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     return json as T;
   }
   return {
+    groupTasks: (eventDate) => req("GET", `/api/group-tasks?eventDate=${encodeURIComponent(eventDate)}`),
+    previewGroupTask: (selection) => req("POST", "/api/group-tasks/preview", selection),
+    createGroupTask: (input) => req("POST", "/api/group-tasks", input),
+    groupTask: (id, page = 1) => req("GET", `/api/group-tasks/${encodeURIComponent(id)}?page=${page}`),
+    updateGroupTask: (id, input) => req("PATCH", `/api/group-tasks/${encodeURIComponent(id)}/progress`, input),
+    cancelGroupTask: (id, expectedVersion) => req("POST", `/api/group-tasks/${encodeURIComponent(id)}/cancel`, { expectedVersion }),
     flow: () => req("GET", "/api/admin/flow"),
     weather: () => req("GET", "/api/weather"),
     ai: () => req("GET", "/api/ai"),

@@ -1,4 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
+import { GroupTasks } from "./groupTasks";
+import { SOLUTIONS, type SolutionId } from "@greenspark/shared";
 import { join } from "node:path";
 import compression from "compression";
 import express, { type NextFunction, type Request, type Response } from "express";
@@ -14,7 +16,7 @@ import type { Clock } from "./clock";
 import { FlowFile } from "./flow";
 import type { Predictions } from "./predictions";
 import { draftPlan, PLAN_KINDS, perthToday, planFacts, type AiConfig, type ContactRules, type PlanKind, type SupportPlan } from "./plan";
-import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
+import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, primarySupportGroup, supportGroupNeeds, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
 import type { ClimateHeat } from "./climate";
 import { SyntheticModelAdapter, withAssessments, type ModelAdapter } from "./adapters";
 
@@ -33,6 +35,14 @@ const noteBody = z.object({ text: z.string().trim().min(1), expectedVersion: z.n
 const reviewBody = z.object({ reviewStatus: z.enum(["needs_review", "reviewed"]), expectedVersion: z.number().int().min(1) }).strict();
 // The worker for a new case: required from a manager; a support worker's new case is theirs.
 const assignee = { assigneeUserId: z.string().min(1).optional() };
+const taskDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => { const d = new Date(`${s}T00:00:00Z`); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s; }, "Choose a valid date");
+const taskPeople = z.array(z.string().min(1).max(100)).min(1).max(50000).refine((ids) => new Set(ids).size === ids.length, "Duplicate customers");
+const taskSelection = z.object({ groupId: z.enum(["health", "supply", "bills", "concessions", "coaching", "monitor"]),
+  solutionId: z.enum(Object.keys(SOLUTIONS) as [SolutionId, ...SolutionId[]]), eventDate: taskDate,
+  scope: z.string().trim().min(1).max(150), personIds: taskPeople }).strict();
+const taskCreate = taskSelection.extend({ assigneeUserId: z.string().min(1), dueDate: taskDate }).strict();
+const taskProgress = z.object({ expectedVersion: z.number().int().min(1), personIds: taskPeople, completed: z.boolean() }).strict();
+const taskCancel = z.object({ expectedVersion: z.number().int().min(1) }).strict();
 const newCaseBody = z.union([
   z.object({ personId: z.string().min(1), ...assignee }).strict(),
   z.object({ displayName: z.string().trim().min(1).max(100), suburb: z.string().trim().min(1).max(100), ...assignee }).strict(),
@@ -93,6 +103,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
   const model = options.modelAdapter ?? new SyntheticModelAdapter(store);
   const useModel = async () => !!options.modelAdapter || !(await currentFlowDoc());
   const service = new WorkflowService(store, clock);
+  const groupTasks = new GroupTasks(store, clock);
   const flow = options.flowFile ? new FlowFile(options.flowFile) : null;
   async function currentFlowDoc() { return flow ? flow.current() : null; }
   // Circumstances and solutions come from the Admin flow file when it is configured and valid; otherwise the
@@ -208,6 +219,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
       res.set("WWW-Authenticate", 'Basic realm="GreenSpark demo"').status(401).send("Authentication required.");
     });
   }
+  app.use("/api/group-tasks", express.json({ limit: "6mb" }));
   app.use(express.json({ limit: "100kb" }));
 
   app.get("/api/health", (_req, res) => { res.json({ ok: true, demo: true }); });
@@ -222,6 +234,27 @@ export function createApp(store: Store, options: AppOptions = {}) {
   const auth = (req: Request, res: Response, next: NextFunction) => { res.locals.actor = actorOf(req); next(); };
   app.use("/api", auth);
   const actor = (res: Response) => res.locals.actor as StaffUser;
+
+  app.get("/api/group-tasks", (req, res) => {
+    const eventDate = parse(taskDate, req.query.eventDate);
+    const a = actor(res);
+    res.json({ tasks: groupTasks.list(eventDate), actorId: a.id,
+      canAssignOthers: a.role === "manager", users: store.catalog.users.filter((u) => u.role === "support_worker") });
+  });
+  app.post("/api/group-tasks/preview", (req, res) => { res.json(groupTasks.preview(parse(taskSelection, req.body))); });
+  app.post("/api/group-tasks", (req, res) => {
+    res.status(201).json(groupTasks.create(actor(res), parse(taskCreate, req.body)));
+  });
+  app.get("/api/group-tasks/:taskId", (req, res) => {
+    const page = parse(z.coerce.number().int().min(1).max(100000), req.query.page ?? 1);
+    res.json(groupTasks.detail(String(req.params.taskId), page));
+  });
+  app.patch("/api/group-tasks/:taskId/progress", (req, res) => {
+    res.json({ task: groupTasks.update(actor(res), String(req.params.taskId), parse(taskProgress, req.body)) });
+  });
+  app.post("/api/group-tasks/:taskId/cancel", (req, res) => {
+    res.json({ task: groupTasks.cancel(actor(res), String(req.params.taskId), parse(taskCancel, req.body).expectedVersion) });
+  });
 
   app.get("/api/session", (_req, res) => {
     res.json({ user: actor(res), demoIdentity: true, isSynthetic: store.catalog.isSynthetic, asOf: store.catalog.asOf });
@@ -318,12 +351,14 @@ export function createApp(store: Store, options: AppOptions = {}) {
     const data = await dataset();
     const cases = new Map(data.cases.map((c) => [c.personId, c]));
     let uncovered = 0;
+    const forecastDates = [...new Set(Object.values(w.towns).flatMap((t) => t.days.filter((d) => d.date >= today).map((d) => d.date)))].sort().slice(0, 7);
     const rows = data.people.flatMap((p) => {
       const risk = riskFor(p);
       const highRisk = !!risk && risk.baseRate !== null && risk.probability >= 4 * risk.baseRate;
       const o = customerOutlook(p, w, today, highRisk, risk?.probability ?? 0);
       if (!o) { uncovered++; return []; }
       const c = cases.get(p.id);
+      const supportSignals = [...o.sensitivity, ...(p.signalSummary?.account ?? []), ...(p.signalSummary?.selfReport ?? [])];
       // The town's hazards are sent once with the town, so each row only says when it starts and the worst of it.
       const worst = o.hazards.reduce<typeof o.hazards[number] | null>((a, h) => (!a || h.severity > a.severity ? h : a), null);
       return [{
@@ -333,6 +368,13 @@ export function createApp(store: Store, options: AppOptions = {}) {
         kinds: [...new Set(o.hazards.map((h) => h.kind))], dates: [...new Set(o.hazards.map((h) => h.date))], firstDate: o.hazards.find((h) => h.kind !== "warning")?.date ?? null, firstKind: o.hazards.find((h) => h.kind !== "warning")?.kind ?? null, worst: worst?.text ?? null,
         sensitivity: o.sensitivity.map(({ id, group, label }) => ({ id, group, label })), accountNumber: p.accountNumber ?? null, displayName: p.displayName, suburb: p.suburb, postcode: p.address?.postcode ?? null, risk,
         priority: c?.modelAssessment.priority ? { label: c.modelAssessment.priority.label, score: c.modelAssessment.priority.score } : null, status: c?.workflow.status ?? null,
+        group: primarySupportGroup(supportSignals), supportNeeds: supportGroupNeeds(supportSignals),
+        location: p.address?.postcode ? POSTCODE_LOCATION[p.address.postcode] ?? null : null,
+        assignedTo: c?.workflow.assignedToUserId ?? null,
+        daily: forecastDates.map((date) => {
+          const day = customerOutlook(p, w, date, highRisk, risk?.probability ?? 0, date)!;
+          return { date, tier: day.tier, exposure: day.exposure, score: day.score };
+        }),
       }];
     });
     // Each town sits at the average of its postcodes; its own hazards use the north's heat limits above the 26th parallel.
@@ -361,6 +403,8 @@ export function createApp(store: Store, options: AppOptions = {}) {
       warnings: w.warnings.filter((x) => x.districts.length).map((x) => ({ title: x.title, districts: x.districts.map((d) => w.districts[d] ?? d), expires: x.expires })),
       totals: { covered: rows.length, uncovered, exposed: rows.filter((r) => r.exposure > 0).length, vulnerable: rows.filter((r) => r.vulnerable).length, act: listed.filter((r) => r.tier === "act").length, watch: listed.filter((r) => r.tier === "watch").length },
       customers: listed.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
+      // Group planning includes covered customers outside the priority list, without changing the funnel contract.
+      groupCustomers: rows.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
     };
     outlookCache = { key, body };
     res.json(body);

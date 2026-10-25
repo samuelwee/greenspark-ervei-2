@@ -57,21 +57,21 @@ export function sensitivityOf(person: Person): SensitivityFactor[] {
 const weekday = (date: string) => new Date(`${date}T00:00:00Z`).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).replace(",", "");
 
 /** Each day's hazards in a forecast town, looking ahead from `today`. North of the 26th parallel uses higher heat limits. */
-export function townHazards(w: WeatherSnapshot, townId: string, north: boolean, today: string): Hazard[] {
+export function townHazards(w: WeatherSnapshot, townId: string, north: boolean, today: string, through?: string): Hazard[] {
   const town = w.towns[townId];
   if (!town) return [];
   const limit = north ? HEAT_THRESHOLD.north : HEAT_THRESHOLD.south;
   const out: Hazard[] = [];
   for (const d of town.days) {
-    if (d.date < today || d.max === null) continue;
+    if (d.date < today || (through && d.date > through) || d.max === null) continue;
     if (d.max >= limit) out.push({ kind: "heat", date: d.date, severity: d.max >= limit + 3 ? 4 : 3, text: `${d.max}°C ${weekday(d.date)}` });
     else if (d.max >= limit - HOT_MARGIN) out.push({ kind: "hot", date: d.date, severity: 1, text: `${d.max}°C ${weekday(d.date)}` });
   }
   for (const f of w.fireDanger[town.district] ?? []) {
     const rank = FIRE_RATINGS.indexOf(f.rating);
-    if (f.date >= today && rank >= FIRE_RATINGS.indexOf("Extreme")) out.push({ kind: "fire", date: f.date, severity: rank === FIRE_RATINGS.length - 1 ? 4 : 3, text: `${f.rating} fire danger ${weekday(f.date)}` });
+    if (f.date >= today && (!through || f.date <= through) && rank >= FIRE_RATINGS.indexOf("Extreme")) out.push({ kind: "fire", date: f.date, severity: rank === FIRE_RATINGS.length - 1 ? 4 : 3, text: `${f.rating} fire danger ${weekday(f.date)}` });
   }
-  for (const x of w.warnings) if (x.districts.includes(town.district) && isRelevantWarning(x.title)) out.push({ kind: "warning", date: today, severity: 3, text: x.title });
+  for (const x of w.warnings) if (x.districts.includes(town.district) && isRelevantWarning(x.title) && (!x.expires || Date.parse(x.expires) > Date.parse(`${today}T00:00:00+08:00`))) out.push({ kind: "warning", date: today, severity: 3, text: x.title });
   return out.sort((a, b) => a.date.localeCompare(b.date) || b.severity - a.severity);
 }
 
@@ -86,12 +86,12 @@ export interface OutlookCustomer {
  * (life support, medical cooling, a supply that has stopped or is about to). Watch: any hot weather and a need that
  * adds up (a concession card alone doesn't), or dangerous weather and a high predicted risk.
  */
-export function customerOutlook(person: Person, w: WeatherSnapshot, today: string, highRisk: boolean, risk = 0): OutlookCustomer | null {
+export function customerOutlook(person: Person, w: WeatherSnapshot, today: string, highRisk: boolean, risk = 0, through?: string): OutlookCustomer | null {
   const postcode = person.address?.postcode;
   const townId = postcode ? POSTCODE_TOWN[postcode] : undefined;
   if (!townId || !w.towns[townId]) return null;
   const north = person.account?.region.northOf26th ?? person.signalSummary?.northOf26th ?? false;
-  const hazards = townHazards(w, townId, north, today);
+  const hazards = townHazards(w, townId, north, today, through);
   const sensitivity = sensitivityOf(person);
   const exposure = Math.max(0, ...hazards.map((h) => h.severity));
   const groups = new Set(sensitivity.map((s) => s.group));

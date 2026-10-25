@@ -20,6 +20,7 @@
     "dev:api": "npm run dev -w api",
     "reset": "npm run reset -w api",
     "dev:web": "npm run dev -w web",
-    "test:e2e": "npm run test -w e2e"
+    "test:e2e": "npm run test -w e2e",
+    "test:groups": "npm run test -w e2e -- --config playwright.support.config.ts"
   }
 }

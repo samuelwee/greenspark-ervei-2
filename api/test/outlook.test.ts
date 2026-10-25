@@ -57,4 +57,22 @@ describe("weather outlook", () => {
     const { body } = await h.call("staff-manager", "GET", "/api/outlook");
     expect(body.available).toBe(false);
   });
+
+  it("provides every forecast-covered customer once for grouping, including daily attention and approximate locations", async () => {
+    const snapshot = sampleWeather("2026-10-16");
+    h = await start(":memory:", undefined, { weather: { current: () => snapshot, status: () => ({ mode: "demo" }), setMode: async () => undefined } });
+    const { body } = await h.call("staff-manager", "GET", "/api/outlook");
+    expect(body.groupCustomers).toHaveLength(body.totals.covered);
+    expect(new Set(body.groupCustomers.map((c: any) => c.personId)).size).toBe(body.totals.covered);
+    expect(body.groupCustomers.some((c: any) => c.tier === null)).toBe(true);
+    for (const row of body.groupCustomers) {
+      expect(["health", "supply", "bills", "concessions", "coaching", "monitor"]).toContain(row.group);
+      expect(row.supportNeeds).toContain(row.group);
+      expect(row.daily).toHaveLength(7);
+      expect(row).not.toHaveProperty("account");
+      if (row.location) expect(row.location).toHaveLength(2);
+    }
+    // The existing funnel and weekly priority list keep their contract.
+    expect(body.customers).toHaveLength(body.totals.act + body.totals.watch);
+  });
 });

@@ -45,4 +45,11 @@ describe("weather outlook", () => {
     expect(tier(["ask_older"], 25, false, warned)).toBe("act");
     expect(customerOutlook(person(["ask_older"], "9999"), snapshot(40), today, false)).toBe(null);
   });
+
+  it("evaluates a single day without importing later heat, and drops expired warnings", () => {
+    const forecast = snapshot(41, { warnings: [{ id: "W1", title: "Severe Heatwave Warning", districts: ["WA_PW009"], expires: "2026-10-23T16:00:00Z" }] });
+    expect(customerOutlook(person(["acct_life_support"]), forecast, "2026-10-23", false, 0, "2026-10-23")?.tier).toBe("act");
+    expect(customerOutlook(person(["acct_life_support"]), forecast, "2026-10-24", false, 0, "2026-10-24")?.tier).toBe(null);
+    expect(customerOutlook(person(["acct_life_support"]), forecast, "2026-10-25", false, 0, "2026-10-25")?.tier).toBe("act");
+  });
 });

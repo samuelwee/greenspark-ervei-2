@@ -4,6 +4,18 @@ import { dirname } from "node:path";
 import { accountSignalSummary, toDataset, type CaseNote, type CustomerAccount, type Person, type QueueCase, type QueueDataset, type RawFixture } from "@greenspark/shared";
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS group_tasks (
+ id TEXT PRIMARY KEY, group_id TEXT NOT NULL, solution_id TEXT NOT NULL, event_date TEXT NOT NULL,
+ scope TEXT NOT NULL, assignee_user_id TEXT NOT NULL, due_date TEXT NOT NULL, created_by TEXT NOT NULL,
+ created_at TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1, cancelled INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS group_task_members (
+ task_id TEXT NOT NULL REFERENCES group_tasks(id) ON DELETE CASCADE, person_id TEXT NOT NULL,
+ case_id TEXT NOT NULL, completed INTEGER NOT NULL DEFAULT 0, updated_by TEXT, updated_at TEXT,
+ PRIMARY KEY(task_id, person_id)
+);
+CREATE INDEX IF NOT EXISTS group_task_member_person ON group_task_members(person_id);
+CREATE INDEX IF NOT EXISTS group_task_event_solution ON group_tasks(event_date, solution_id, cancelled);
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS people (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, doc TEXT NOT NULL, is_created INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS accounts (person_id TEXT PRIMARY KEY, doc TEXT NOT NULL);
@@ -13,6 +25,7 @@ CREATE TABLE IF NOT EXISTS cases (
   version INTEGER NOT NULL, status TEXT NOT NULL, assigned_to TEXT, follow_up_at TEXT,
   review_status TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS cases_person_seq ON cases(person_id, seq);
 CREATE TABLE IF NOT EXISTS notes (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, case_id TEXT NOT NULL, author_id TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL, edited_at TEXT, edited_by TEXT);
 CREATE TABLE IF NOT EXISTS note_edits (seq INTEGER PRIMARY KEY AUTOINCREMENT, note_id TEXT NOT NULL, previous_text TEXT NOT NULL, edited_by TEXT NOT NULL, edited_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS workflow_actions (id TEXT PRIMARY KEY, type TEXT NOT NULL, actor_id TEXT NOT NULL, created_at TEXT NOT NULL, undone_at TEXT, undone_by TEXT);
@@ -186,7 +199,7 @@ export class Store {
   /** Empties every table, ready to seed a new dataset. */
   private clear() {
     this.transaction(() => {
-      for (const t of ["workflow_action_items", "workflow_actions", "note_edits", "notes", "cases", "accounts", "people", "meta"]) this.db.exec(`DELETE FROM ${t}`);
+      for (const t of ["group_task_members", "group_tasks", "workflow_action_items", "workflow_actions", "note_edits", "notes", "cases", "accounts", "people", "meta"]) this.db.exec(`DELETE FROM ${t}`);
     });
   }
 

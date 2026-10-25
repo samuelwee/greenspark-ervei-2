@@ -403,7 +403,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
         <a
           className="brand"
           href="/"
-          aria-label="ERVEI casework: go to the weather outlook"
+          title="Go to the weather outlook"
           onClick={(e) => {
             if (isModifiedClick(e)) return; // let the browser open a new tab
             e.preventDefault();

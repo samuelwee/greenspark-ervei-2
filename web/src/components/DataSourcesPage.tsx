@@ -148,7 +148,8 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
               <tr><th scope="row">Predicted risk</th><td>A statistical model trained on the monthly panel (see Risk model). Not generative AI.</td></tr>
               <tr><th scope="row">Weather outlook, act now and watch, and the funnel</th><td>Worked out by the app from the forecast and each customer's signals (see Weather outlook).</td></tr>
               <tr><th scope="row">Sample heatwave</th><td>Built into the app, used when the weather source is set to Sample heatwave: a hand-written week for each forecast town, with a three-day heatwave over the Lower West.</td></tr>
-              <tr><th scope="row">Map locations</th><td>Approximate suburb centres added for the queue's map; the dataset has no coordinates. On the outlook map each forecast town sits at the average of its postcodes.</td></tr>
+              <tr><th scope="row">Map locations and groups</th><td>Approximate postcode centres; the dataset has no household coordinates. Each circle counts one primary support group in a postcode. Hue identifies the group; shade shows its highest weather-response urgency. Translucent fills and small symbol offsets reveal overlapping groups. No customer is counted in two primary groups.</td></tr>
+              <tr><th scope="row">Temperature map shading</th><td>A fixed °C scale of town forecast daily maximums, estimated between up to four nearby towns within 120 km. Town labels show source values. Whole week shows each town’s peak; select a date for the same-day comparison. This is an estimated temperature surface, not the Bureau’s official heatwave-severity product. Values are fictional when Sample heatwave is selected. Public BoM district boundaries (IDM00001) mask out the ocean.</td></tr>
             </tbody>
           </table>
         </div>
