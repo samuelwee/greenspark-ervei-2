@@ -55,6 +55,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
     <div className="vis-grid">
       <section className="case-card vis-card" aria-labelledby="vis-pri">
         <h2 id="vis-pri">How urgent</h2>
+        <p className="vis-what">How serious their situation is now. Orders the case queue.</p>
         {priority ? (
           <>
             <Gauge score={priority.score} color={PRIORITY_COLOR[priority.label] ?? "var(--muted)"} label="Priority" />
@@ -67,6 +68,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
 
       <section className="case-card vis-card" aria-labelledby="vis-risk">
         <h2 id="vis-risk">Chance of harm, next 90 days</h2>
+        <p className="vis-what">Predicted from their account history. Ignores the weather.</p>
         {item.prediction ? (
           <ul className="vis-bars">
             {OUTCOME_ORDER.map((id) => {

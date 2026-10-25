@@ -103,6 +103,7 @@ function OutlookBanner({ f }: { f: NonNullable<CaseItem["forecast"]> }) {
       : o.exposure > 0 ? "Hot weather is coming, but nothing we know makes it riskier for them." : "No hot or dangerous weather is forecast for them this week.";
   return (
     <div className={`outlook-banner outlook-${o.tier ?? "none"}`}>
+      <p className="vis-what">Whether this week's weather could hurt them, given what we know about them.</p>
       <div className="ob-head">
         <span className={`badge ${o.tier === "act" ? "badge-urgent" : o.tier === "watch" ? "badge-high" : "badge-none"}`}>{o.tier === "act" ? "Act now" : o.tier === "watch" ? "Watch" : "Not on the outlook"}</span>
         <span>{why}</span>

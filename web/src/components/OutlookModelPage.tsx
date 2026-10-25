@@ -81,6 +81,16 @@ export function OutlookModelPage() {
         </ul>
       </section>
 
+      <section className="case-card bts-facts" aria-labelledby="om-other">
+        <h2 id="om-other">Not the same as priority or predicted risk</h2>
+        <ul className="plain history">
+          <li><strong>Outlook:</strong> could this week's weather hurt them? The next 7 days.</li>
+          <li><strong>Predicted risk:</strong> how likely is harm to their account in the next 90 days, from account history? It ignores the weather.</li>
+          <li><strong>Priority:</strong> how serious is their situation right now? It orders the case queue, and weather can add to it.</li>
+          <li>So a customer can be urgent but not on the outlook (serious hardship, mild weather), or act now but routine priority (on life support, healthy finances, a heatwave coming).</li>
+        </ul>
+      </section>
+
       <section className="case-card bts-facts" aria-labelledby="om-trust">
         <h2 id="om-trust">How much to trust it</h2>
         <ul className="plain history">

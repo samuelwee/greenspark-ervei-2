@@ -69,6 +69,21 @@ export function CasePageGuide() {
         </div>
       </section>
 
+      <section className="case-card" aria-labelledby="cp-three">
+        <h2 id="cp-three">Outlook, predicted risk and priority</h2>
+        <p className="hint">Three different measures, each answering its own question. In one line: the outlook is the next 7 days, predicted risk is the next 90 days, and priority is today.</p>
+        <div className="table-scroll">
+          <table className="mini-table ds-table">
+            <thead><tr><th scope="col">Measure</th><th scope="col">The question</th><th scope="col">How it's worked out</th><th scope="col">Changes when</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Outlook (Act now, Watch)</th><td>Could this week's weather hurt them?</td><td>The Bureau's forecast for their area, combined with what makes them vulnerable, such as life support or a supply that could be cut off.</td><td>The forecast changes (hourly with live data)</td></tr>
+              <tr><th scope="row">Predicted risk (Low to Very high)</th><td>How likely is something bad to happen to their account in the next 90 days: being disconnected, debt passing $1,000, or a payment plan breaking?</td><td>A statistical model trained on account history. It ignores the weather.</td><td>The model is retrained</td></tr>
+              <tr><th scope="row">Priority (Routine to Urgent, out of 100)</th><td>How serious is their situation right now?</td><td>Points for each problem the flowchart finds, such as job loss, growing debt or illness, and the evidence behind each. Weather can add to it.</td><td>The case, its signals or the forecast change</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section className="case-card bts-facts" aria-labelledby="cp-before">
         <h2 id="cp-before">Before you get in touch</h2>
         <ul className="plain history">

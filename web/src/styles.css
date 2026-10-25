@@ -690,3 +690,4 @@ select:not([multiple]):disabled { opacity: .6; }
 .outlook-watch { border-left-color: #e0a030; background: var(--high-bg); }
 .outlook-none { border-left-color: #c1c7d0; }
 .ob-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 14px; }
+.vis-what { margin: -4px 0 8px; font-size: 12px; color: var(--muted); }
