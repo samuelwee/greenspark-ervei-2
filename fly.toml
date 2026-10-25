@@ -1,5 +1,5 @@
 # Fly.io config. Built from the repo's Dockerfile; /data is a Fly volume holding the SQLite case database and the Admin flow JSON.
-app = "greenspark-ervei"
+app = "ervei"
 primary_region = "iad"
 # A little swap as headroom.
 swap_size_mb = 256
@@ -8,6 +8,8 @@ swap_size_mb = 256
 [env]
   GREENSPARK_DATASET = "all"
   NODE_OPTIONS = "--max-old-space-size=320"
+  # The case database copied from the old greenspark-ervei app on 25 Oct 2026, so workers' changes carried over.
+  GREENSPARK_DB = "/data/cases.sqlite"
 
 [build]
   dockerfile = "Dockerfile"

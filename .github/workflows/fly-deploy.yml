@@ -1,5 +1,5 @@
-# Deploys to Fly.io (app greenspark-ervei, see fly.toml) on every push to main, building on Fly's remote builder.
-# Needs the repository secret FLY_API_TOKEN: a deploy token from `fly tokens create deploy -a greenspark-ervei`.
+# Deploys to Fly.io (app ervei, see fly.toml) on every push to main, building on Fly's remote builder.
+# Needs the repository secret FLY_API_TOKEN: a deploy token from `fly tokens create deploy -a ervei`.
 name: Deploy to Fly.io
 
 on:
