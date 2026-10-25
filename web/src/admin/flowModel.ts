@@ -7,7 +7,7 @@ export const refKey = (r: Ref) => nodeKey(r.kind, r.id);
 export const UTILITY_LABEL: Record<string, string> = { electricity: "Electricity", gas: "Gas", water: "Water", telco: "Phone/internet" };
 export const UTILITY_LETTER: Record<string, string> = { electricity: "E", gas: "G", water: "W", telco: "P" };
 export const KIND_LABEL: Record<FlowKind, string> = { signal: "Signal", circumstance: "Circumstance", solution: "Solution" };
-export const SOURCE_LABEL: Record<string, string> = { account: "From account data", self_report: "Asked of the customer", weather: "From weather forecasts" };
+export const SOURCE_LABEL: Record<string, string> = { account: "From account data", self_report: "Asked of the customer", weather: "From weather forecasts", area: "From area statistics" };
 
 export interface LinkRef { from: string; to: string; strength: Strength | null; kind: "signal-circumstance" | "circumstance-solution"; key: string }
 
@@ -85,7 +85,7 @@ export const appliesTo = (e: { utilities: string[] }, utility: string) => utilit
 export interface Group<T> { id: string; label: string; items: T[] }
 
 export function groupSignals(doc: FlowDoc, utility: string): Group<FlowSignal>[] {
-  return ["account", "self_report", "weather"].map((source) => ({ id: source, label: SOURCE_LABEL[source]!, items: doc.signals.filter((s) => s.source === source && appliesTo(s, utility)) })).filter((g) => g.items.length > 0);
+  return ["account", "self_report", "weather", "area"].map((source) => ({ id: source, label: SOURCE_LABEL[source]!, items: doc.signals.filter((s) => s.source === source && appliesTo(s, utility)) })).filter((g) => g.items.length > 0);
 }
 
 export function groupCircumstances(doc: FlowDoc, utility: string): Group<FlowCircumstance>[] {

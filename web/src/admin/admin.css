@@ -36,6 +36,7 @@
 .mk.acct { background: var(--moderate); }
 .mk.ask { background: var(--surface); border: 2px solid var(--moderate); }
 .mk.wx { background: #2f80c9; }
+.mk.area { background: #7b5ea7; }
 .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; display: inline-block; }
 .dot.sensitive { background: var(--high); }
 .dot.safety { background: var(--urgent); }

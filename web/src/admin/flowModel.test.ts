@@ -8,9 +8,9 @@ const idx = buildIndex(doc);
 
 describe("flow model", () => {
   it("builds every link from the circumstances", () => {
-    expect(idx.links).toHaveLength(517);
+    expect(idx.links).toHaveLength(521);
     expect(idx.links.filter((l) => l.strength === "strong")).toHaveLength(108);
-    expect(idx.links.filter((l) => l.strength === "supporting")).toHaveLength(124);
+    expect(idx.links.filter((l) => l.strength === "supporting")).toHaveLength(128);
     expect(idx.circumstancesOfSignal.get("ask_lost_job")).toEqual([{ id: "job_loss", strength: "strong" }]);
     expect(idx.circumstancesOfSolution.get("fdv_helplines")).toEqual(expect.arrayContaining(["family_violence", "economic_abuse", "elder_abuse"]));
   });
@@ -31,11 +31,11 @@ describe("flow model", () => {
   });
 
   it("groups each lane and respects the utility filter", () => {
-    expect(groupSignals(doc, "all").map((g) => [g.id, g.items.length])).toEqual([["account", 50], ["self_report", 57], ["weather", 3]]);
+    expect(groupSignals(doc, "all").map((g) => [g.id, g.items.length])).toEqual([["account", 50], ["self_report", 57], ["weather", 3], ["area", 1]]);
     expect(groupCircumstances(doc, "all")).toHaveLength(14);
     expect(groupSolutions(doc, "all").reduce((n, g) => n + g.items.length, 0)).toBe(49);
     const telco = groupSignals(doc, "telco").reduce((n, g) => n + g.items.length, 0);
-    expect(telco).toBeLessThan(110);
+    expect(telco).toBeLessThan(111);
     expect(groupSignals(doc, "telco").every((g) => g.items.every((s) => s.utilities.includes("telco")))).toBe(true);
   });
 

@@ -29,7 +29,7 @@ describe("the real file", () => {
   it("is valid and already consistent: normalising changes nothing", () => {
     expect(validateDoc(original)).toEqual([]);
     expect(JSON.stringify(normalizeDoc(fresh()), null, 2)).toBe(raw); // byte for byte, so the first save leaves no diff
-    expect(original.meta.counts).toEqual({ signals: 110, circumstances: 99, solutions: 49, links: 517 });
+    expect(original.meta.counts).toEqual({ signals: 111, circumstances: 99, solutions: 49, links: 521 });
   });
 });
 
@@ -47,7 +47,7 @@ describe("links", () => {
   it("can change a strength and link solutions", () => {
     let doc = applyOp(fresh(), { type: "setLink", signalId: "acct_missed_payment", circumstanceId: "job_loss", strength: "strong" });
     expect(sig(doc, "acct_missed_payment").points_to.find((l) => l.id === "job_loss")?.strength).toBe("strong");
-    expect(doc.meta.counts.links).toBe(517);
+    expect(doc.meta.counts.links).toBe(521);
     doc = applyOp(doc, { type: "addSolutionLink", circumstanceId: "job_loss", solutionId: "fdv_helplines" });
     expect(sol(doc, "fdv_helplines").used_for).toContain("job_loss");
     expect(circ(doc, "job_loss").solutions).toContain("fdv_helplines");
@@ -74,7 +74,7 @@ describe("entities", () => {
     expect(added).toMatchObject({ name: "New signal", source: "account", sensitive: false, utilities: ["electricity", "gas", "water", "telco"] });
     expect(added.points_to).toEqual([{ id: "job_loss", strength: "supporting" }]);
     expect(circ(doc, "job_loss").signals.at(-1)).toEqual({ id: "acct_new_signal", strength: "supporting" });
-    expect(doc.meta.counts).toMatchObject({ signals: 111, links: 518 });
+    expect(doc.meta.counts).toMatchObject({ signals: 112, links: 522 });
   });
 
   it("adds a circumstance and a solution", () => {
@@ -101,7 +101,7 @@ describe("entities", () => {
     expect(validateDoc(doc)).toEqual([]);
     const gone = applyOp(fresh(), { type: "deleteEntity", kind: "signal", id: "ask_lost_job" });
     expect(circ(gone, "job_loss").signals.some((l) => l.id === "ask_lost_job")).toBe(false);
-    expect(gone.meta.counts.links).toBeLessThan(517);
+    expect(gone.meta.counts.links).toBeLessThan(521);
   });
 
   it("refuses bad values", () => {
