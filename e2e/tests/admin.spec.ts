@@ -28,7 +28,7 @@ test("Flowchart and Data sources are in the BTS menu", async ({ page }) => {
   await nav.getByRole("link", { name: "Flowchart" }).click();
   await expect(page).toHaveURL(/\/bts\/flowchart$/);
   await expect(page.getByRole("heading", { name: "Utility hardship flow" })).toBeVisible();
-  await expect(page.getByTestId("count-signals")).toHaveText("110");
+  await expect(page.getByTestId("count-signals")).toHaveText("111");
   await expect(page.getByTestId("count-circumstances")).toHaveText("99");
   await expect(page.getByTestId("count-solutions")).toHaveText("49");
   await nav.getByRole("button", { name: /BTS/ }).click();
@@ -87,10 +87,10 @@ test("links can be changed from either end and stay consistent in the file", asy
   await saved(page);
   d = onDisk();
   expect(d.circumstances.find((c: { id: string }) => c.id === "job_loss").signals.some((l: { id: string }) => l.id === "ask_lost_job")).toBe(false);
-  expect(d.meta.counts.links).toBe(516);
+  expect(d.meta.counts.links).toBe(520);
   await page.getByRole("button", { name: /^Undo/ }).click();
   await saved(page);
-  expect(onDisk().meta.counts.links).toBe(517);
+  expect(onDisk().meta.counts.links).toBe(521);
 });
 
 test("add a signal, then delete it and undo", async ({ page }) => {
@@ -100,15 +100,15 @@ test("add a signal, then delete it and undo", async ({ page }) => {
   await details(page).getByRole("button", { name: "Add", exact: true }).click();
   await saved(page);
   expect(onDisk().signals.some((s: { name: string }) => s.name === "Test signal from browser")).toBe(true);
-  await expect(page.getByTestId("count-signals")).toHaveText("111");
+  await expect(page.getByTestId("count-signals")).toHaveText("112");
   await details(page).getByRole("button", { name: "Delete", exact: true }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete" }).click();
   await saved(page);
-  await expect(page.getByTestId("count-signals")).toHaveText("110");
-  await page.getByRole("button", { name: /^Undo/ }).click();
   await expect(page.getByTestId("count-signals")).toHaveText("111");
+  await page.getByRole("button", { name: /^Undo/ }).click();
+  await expect(page.getByTestId("count-signals")).toHaveText("112");
   await saved(page);
-  expect(onDisk().meta.counts.signals).toBe(111);
+  expect(onDisk().meta.counts.signals).toBe(112);
 });
 
 test("settings dialog opens with categories and circumstance types", async ({ page }) => {

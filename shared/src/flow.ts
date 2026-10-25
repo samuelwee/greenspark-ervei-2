@@ -47,7 +47,7 @@ export interface FlowDoc {
 
 export type FlowEntity = FlowSignal | FlowCircumstance | FlowSolution;
 
-export const SIGNAL_SOURCES = ["account", "self_report", "weather"] as const;
+export const SIGNAL_SOURCES = ["account", "self_report", "weather", "area"] as const;
 export const SENSITIVITIES: Sensitivity[] = ["standard", "sensitive", "safety"];
 export const STRENGTHS: Strength[] = ["strong", "supporting"];
 

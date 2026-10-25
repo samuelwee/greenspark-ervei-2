@@ -44,6 +44,12 @@ export const DATA_SOURCE_GROUPS: DataSourceGroup[] = [
       { id: "bom_warnings", name: "Warnings", detail: "IDW2xxxx, while active", signals: ["wx_warning"] },
     ],
   },
+  {
+    id: "abs", label: "Australian Bureau of Statistics",
+    items: [
+      { id: "seifa", name: "Area disadvantage", detail: "SEIFA 2021, IRSD by postcode", signals: ["area_disadvantage"] },
+    ],
+  },
 ];
 
 export const sourceKey = (id: string) => `source:${id}`;

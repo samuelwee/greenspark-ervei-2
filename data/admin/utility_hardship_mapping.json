@@ -28,10 +28,10 @@
       "Measure outcomes, not flags: did the customer actually get connected to the help?"
     ],
     "counts": {
-      "signals": 110,
+      "signals": 111,
       "circumstances": 99,
       "solutions": 49,
-      "links": 517
+      "links": 521
     }
   },
   "circumstance_types": [
@@ -2768,6 +2768,38 @@
           "strength": "supporting"
         }
       ]
+    },
+    {
+      "id": "area_disadvantage",
+      "name": "Lives in a disadvantaged area",
+      "source": "area",
+      "detect": "The customer's postcode is among the most disadvantaged 20% in WA (ABS SEIFA 2021, Index of Relative Socio-economic Disadvantage, WA decile 1 or 2). It describes the area, not the person, so it only ever supports other evidence.",
+      "example_rule": "irsd_wa_decile(postcode) <= 2",
+      "utilities": [
+        "electricity",
+        "gas",
+        "water",
+        "telco"
+      ],
+      "sensitive": false,
+      "points_to": [
+        {
+          "id": "low_fixed_income",
+          "strength": "supporting"
+        },
+        {
+          "id": "cost_of_living",
+          "strength": "supporting"
+        },
+        {
+          "id": "renter_inefficient_home",
+          "strength": "supporting"
+        },
+        {
+          "id": "rationing",
+          "strength": "supporting"
+        }
+      ]
     }
   ],
   "circumstances": [
@@ -2981,6 +3013,10 @@
         },
         {
           "id": "acct_repeated_late",
+          "strength": "supporting"
+        },
+        {
+          "id": "area_disadvantage",
           "strength": "supporting"
         }
       ],
@@ -3196,6 +3232,10 @@
         },
         {
           "id": "acct_rising_arrears",
+          "strength": "supporting"
+        },
+        {
+          "id": "area_disadvantage",
           "strength": "supporting"
         }
       ],
@@ -3852,6 +3892,10 @@
         },
         {
           "id": "acct_seasonal_peak",
+          "strength": "supporting"
+        },
+        {
+          "id": "area_disadvantage",
           "strength": "supporting"
         }
       ],
@@ -5666,6 +5710,10 @@
         },
         {
           "id": "wx_extreme_heat",
+          "strength": "supporting"
+        },
+        {
+          "id": "area_disadvantage",
           "strength": "supporting"
         }
       ],

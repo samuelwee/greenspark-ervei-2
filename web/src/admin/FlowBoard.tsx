@@ -232,7 +232,7 @@ export function FlowBoard(props: Props) {
           groups={signalGroups}
           render={(s: FlowSignal) => (
             <Node key={s.id} kind="signal" id={s.id} label={`Signal: ${s.name}${signalHasData(s) ? "" : ", data is missing"}`} selected={isSel("signal", s.id)} on={isOn("signal", s.id)} match={isMatch("signal", s.id)} onSelect={props.onSelect}>
-              <i className={`mk ${s.source === "account" ? "acct" : s.source === "weather" ? "wx" : "ask"}`} aria-hidden="true" />
+              <i className={`mk ${s.source === "account" ? "acct" : s.source === "weather" ? "wx" : s.source === "area" ? "area" : "ask"}`} aria-hidden="true" />
               <span className="nl">{s.name}</span>
               {signalHasData(s) ? null : <span className="nodata" aria-hidden="true">No data</span>}
               {s.sensitive ? <i className="dot sensitive" aria-label="Sensitive" /> : null}

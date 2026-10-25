@@ -93,7 +93,7 @@ function fieldsFor(kind: FlowKind, doc: FlowDoc): FieldDef[] {
   if (kind === "signal") {
     return [
       { key: "name", label: "Name", type: "text" },
-      { key: "source", label: "Where it comes from", type: "select", options: [{ value: "account", label: SOURCE_LABEL.account! }, { value: "self_report", label: SOURCE_LABEL.self_report! }, { value: "weather", label: SOURCE_LABEL.weather! }] },
+      { key: "source", label: "Where it comes from", type: "select", options: [{ value: "account", label: SOURCE_LABEL.account! }, { value: "self_report", label: SOURCE_LABEL.self_report! }, { value: "weather", label: SOURCE_LABEL.weather! }, { value: "area", label: SOURCE_LABEL.area! }] },
       { key: "detect", label: "What it means", type: "textarea" },
       { key: "example_rule", label: "Example rule", type: "text" },
       { key: "sensitive", label: "Sensitive (use only with care and consent)", type: "checkbox" },

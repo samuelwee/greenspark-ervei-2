@@ -32,7 +32,7 @@ describe("reading the flow", () => {
       const r = await h.call(user, "GET", "/api/admin/flow");
       expect(r.status).toBe(200);
       expect(r.body.problems).toEqual([]);
-      expect(r.body.doc.meta.counts).toEqual({ signals: 110, circumstances: 99, solutions: 49, links: 517 });
+      expect(r.body.doc.meta.counts).toEqual({ signals: 111, circumstances: 99, solutions: 49, links: 521 });
       expect(r.body.hash).toMatch(/^[0-9a-f]{64}$/);
     }
   });
@@ -54,7 +54,7 @@ describe("editing writes straight to the JSON file", () => {
     const doc = onDisk();
     expect(doc.circumstances.find((c: any) => c.id === "job_loss").signals.find((l: any) => l.id === "ask_lost_job").strength).toBe("supporting");
     expect(doc.signals.find((s: any) => s.id === "ask_lost_job").points_to.find((l: any) => l.id === "job_loss").strength).toBe("supporting");
-    expect(doc.meta.counts.links).toBe(517);
+    expect(doc.meta.counts.links).toBe(521);
     // Only the two strength lines differ from the original file.
     const a = before.split("\n"), b = bytes().split("\n");
     expect(b.length).toBe(a.length);
@@ -66,7 +66,7 @@ describe("editing writes straight to the JSON file", () => {
     const doc = onDisk();
     expect(doc.circumstances.find((c: any) => c.id === "cost_of_living").signals.some((l: any) => l.id === "acct_missed_payment")).toBe(true);
     expect(doc.signals.find((s: any) => s.id === "acct_missed_payment").points_to.some((l: any) => l.id === "cost_of_living")).toBe(true);
-    expect(doc.meta.counts.links).toBe(518);
+    expect(doc.meta.counts.links).toBe(522);
   });
 
   it("works for any demo user and renames a node", async () => {
@@ -79,11 +79,11 @@ describe("editing writes straight to the JSON file", () => {
   it("adds and deletes nodes, updating counts and links", async () => {
     await post([{ type: "addEntity", kind: "solution", entity: { id: "new_help", name: "New help", used_for: ["job_loss"] } }]);
     let doc = onDisk();
-    expect(doc.meta.counts).toMatchObject({ solutions: 50, links: 518 });
+    expect(doc.meta.counts).toMatchObject({ solutions: 50, links: 522 });
     expect(doc.circumstances.find((c: any) => c.id === "job_loss").solutions).toContain("new_help");
     await post([{ type: "deleteEntity", kind: "solution", id: "new_help" }]);
     doc = onDisk();
-    expect(doc.meta.counts).toMatchObject({ solutions: 49, links: 517 });
+    expect(doc.meta.counts).toMatchObject({ solutions: 49, links: 521 });
     expect(bytes()).toBe(readFileSync(SOURCE, "utf8").trimEnd().replace(/\s+$/, "")); // back to exactly the original
   });
 

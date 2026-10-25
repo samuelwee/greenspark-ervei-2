@@ -8,6 +8,7 @@
 import { ACCOUNT_SIGNAL_IDS, detectAccountSignals } from "./accountSignals";
 import { priorityFromSignals } from "./priority";
 import { WEATHER_SIGNAL_IDS, type WeatherSignal } from "./weather";
+import { AREA_SIGNAL_ID, areaSignal } from "./area";
 import type { FlowDoc } from "./flow";
 import type {
   AccountSignalSummary, CaseCircumstance, CaseRecommendation, CaseSignal, CircumstanceDefinition, Person, QueueCase, QueueDataset,
@@ -66,6 +67,7 @@ const applies = (utilities: string[]) => utilities.includes(CASE_UTILITY);
 export function signalHasData(signal: { id: string; source: string }): boolean {
   if (signal.source === "account") return ACCOUNT_SIGNAL_IDS.includes(signal.id);
   if (signal.source === "weather") return WEATHER_SIGNAL_IDS.includes(signal.id);
+  if (signal.source === "area") return signal.id === AREA_SIGNAL_ID;
   return [...SURVEY_SIGNALS, ...TRANSCRIPT_SIGNALS, ...ACCOUNT_FACT_SIGNALS].some((m) => m.signalId === signal.id);
 }
 
@@ -135,6 +137,9 @@ export function caseSignals(
     if (names.has(s.id)) out.push({ id: s.id, name: names.get(s.id)!, source: "self_report", evidence: s.evidence });
   }
   for (const s of weather) if (names.has(s.id)) out.push({ id: s.id, name: names.get(s.id)!, source: "weather", evidence: s.evidence });
+  // Where the customer lives (ABS SEIFA): worked out from the postcode each time, so it needs no stored summary.
+  const area = areaSignal(person?.address?.postcode);
+  if (area && names.has(area.id)) out.push({ id: area.id, name: names.get(area.id)!, source: "area", evidence: area.evidence });
   // One entry per signal: account data first, then the survey, then account facts, transcripts and weather.
   const seen = new Set<string>();
   return out.filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)));
