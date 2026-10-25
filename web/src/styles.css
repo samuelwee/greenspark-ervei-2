@@ -703,3 +703,4 @@ select:not([multiple]):disabled { opacity: .6; }
 .future-table .town-name { font-weight: 600; display: block; }
 .future-add { color: var(--urgent); font-weight: 600; }
 .future-note { padding: 0 16px 14px; margin: 8px 0 0; }
+.vis-card .outlook-banner { margin-bottom: 0; }

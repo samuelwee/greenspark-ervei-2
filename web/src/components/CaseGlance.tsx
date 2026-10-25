@@ -1,6 +1,6 @@
 import { detectAccountSignals } from "../domain/types";
 import type { ApiClient, CaseItem, Catalog, SupportPlan } from "../data/api";
-import { CaseWeather } from "./CaseWeather";
+import { CaseWeather, OutlookBanner } from "./CaseWeather";
 import { UsageChart } from "./AccountDetails";
 import { paragraphs } from "./paragraphs";
 import { OUTCOME_LABEL, OUTCOME_ORDER, band, percent } from "./predictionText";
@@ -53,6 +53,14 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
 
   return (
     <div className="vis-grid">
+      {item.forecast?.outlook ? (
+        <section className="case-card vis-card vis-wide" aria-labelledby="vis-outlook">
+          <h2 id="vis-outlook">Weather outlook this week</h2>
+          <p className="vis-what">Whether this week's weather could hurt them, given what we know about them.</p>
+          <OutlookBanner f={item.forecast} />
+          <button type="button" className="link-btn vis-more" onClick={() => document.getElementById("vis-wx")?.scrollIntoView({ behavior: "smooth", block: "start" })}>The forecast and warnings →</button>
+        </section>
+      ) : null}
       <section className="case-card vis-card" aria-labelledby="vis-pri">
         <h2 id="vis-pri">How urgent</h2>
         <p className="vis-what">How serious their situation is now. Orders the case queue.</p>

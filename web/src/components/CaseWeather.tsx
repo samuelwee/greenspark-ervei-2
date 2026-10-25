@@ -37,7 +37,6 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
   return (
     <section className="case-card vis-card vis-wide" aria-labelledby="vis-wx">
       <h2 id="vis-wx">Weather and warnings this week</h2>
-      <OutlookBanner f={f} />
       <div className="case-wx">
         {f.location ? (
           <Suspense fallback={<div className="case-wx-map" role="status">Loading the map…</div>}>
@@ -93,7 +92,7 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
 }
 
 /** Where the customer sits on the weather outlook this week: act now, watch or neither, and why. */
-function OutlookBanner({ f }: { f: NonNullable<CaseItem["forecast"]> }) {
+export function OutlookBanner({ f }: { f: NonNullable<CaseItem["forecast"]> }) {
   const o = f.outlook;
   if (!o) return null;
   const needs = o.sensitivity;
@@ -104,7 +103,6 @@ function OutlookBanner({ f }: { f: NonNullable<CaseItem["forecast"]> }) {
       : o.exposure > 0 ? "Hot weather is coming, but nothing we know makes it riskier for them." : "No hot or dangerous weather is forecast for them this week.";
   return (
     <div className={`outlook-banner outlook-${o.tier ?? "none"}`}>
-      <p className="vis-what">Whether this week's weather could hurt them, given what we know about them.</p>
       <div className="ob-head">
         <span className={`badge ${o.tier === "act" ? "badge-urgent" : o.tier === "watch" ? "badge-high" : "badge-none"}`}>{o.tier === "act" ? "Act now" : o.tier === "watch" ? "Watch" : "Not on the outlook"}</span>
         <span>{why}</span>
