@@ -53,8 +53,9 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
 
   return (
     <div className="vis-grid">
+      <div className="vis-top vis-wide">
       {item.forecast?.outlook ? (
-        <section className="case-card vis-card vis-wide" aria-labelledby="vis-outlook">
+        <section className="case-card vis-card" aria-labelledby="vis-outlook">
           <h2 id="vis-outlook">Weather outlook this week</h2>
           <p className="vis-what">Whether this week's weather could hurt them, given what we know about them.</p>
           <OutlookBanner f={item.forecast} />
@@ -95,6 +96,8 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
         ) : <p className="muted">No prediction for this customer.</p>}
         {item.prediction ? <More label="Predicted risk" onClick={() => onOpen("priority")} /> : null}
       </section>
+
+      </div>
 
       <section className="case-card vis-card vis-wide" aria-labelledby="vis-facts">
         <h2 id="vis-facts">The account</h2>
