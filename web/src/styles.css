@@ -691,3 +691,15 @@ select:not([multiple]):disabled { opacity: .6; }
 .outlook-none { border-left-color: #c1c7d0; }
 .ob-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 14px; }
 .vis-what { margin: -4px 0 8px; font-size: 12px; color: var(--muted); }
+
+/* Long-term heat: now vs around 2050 */
+.lt-rows { display: grid; gap: 6px; margin: 0 0 6px; }
+.lt-rows li { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 40px; align-items: center; gap: 10px; font-size: 13px; }
+.lt-rows .sub { display: block; }
+.lt-rows strong { text-align: right; font-variant-numeric: tabular-nums; }
+.lt-bar { height: 10px; border-radius: 5px; background: var(--border); overflow: hidden; }
+.lt-bar i { display: block; height: 100%; }
+.lt-now { background: #f29d52; } .lt-future { background: #ae2e24; }
+.future-table .town-name { font-weight: 600; display: block; }
+.future-add { color: var(--urgent); font-weight: 600; }
+.future-note { padding: 0 16px 14px; margin: 8px 0 0; }

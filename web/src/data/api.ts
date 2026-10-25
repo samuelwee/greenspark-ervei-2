@@ -124,7 +124,10 @@ export interface OutlookTown {
   id: string; name: string; district: string; districtName: string; lat: number; lng: number;
   days: { date: string; max: number | null; min: number | null; precis: string }[];
   hazards: OutlookHazard[]; customers: number; exposed: number; act: number; watch: number;
+  /** Very hot days a year now (SILO) and around 2050 (CMIP6), averaged over the town's postcodes. */
+  climate: { hot: number | null; hot2050: number | null; veryHot: number | null; veryHot2050: number | null } | null;
 }
+export interface ClimateInfo { thresholds: { hot: number; veryHot: number }; baselineYears: [number, number]; scenario: string; period: string }
 export interface OutlookCustomer {
   personId: string; townId: string; tier: "act" | "watch"; score: number; exposure: number;
   /** `firstDate`: the first hot or dangerous forecast day (a warning is in force from today, so it is left out). */
@@ -140,6 +143,7 @@ export type Outlook =
     available: true; weather: WeatherStatus; today: string; demo: boolean; issuedAt: string | null;
     days: { date: string; peak: { max: number; town: string } | null; exposed: number; act: number; watch: number }[];
     towns: OutlookTown[];
+    climate: ClimateInfo | null;
     warnings: { title: string; districts: string[]; expires: string | null }[];
     totals: { covered: number; uncovered: number; exposed: number; vulnerable: number; act: number; watch: number };
     customers: OutlookCustomer[];
@@ -150,6 +154,8 @@ export interface CaseForecast {
   days: { date: string; max: number | null; min: number | null; precis: string }[]; hazards: OutlookHazard[];
   /** Where the customer sits on the weather outlook this week, and the needs behind it. */
   outlook: { tier: "act" | "watch" | null; exposure: number; highRisk: boolean; sensitivity: OutlookCustomer["sensitivity"] } | null;
+  /** Long-term heat where they live: very hot days a year now and around 2050. */
+  climate: (ClimateInfo & { hot: number; veryHot: number; summerMax: number; hot2050: number | null; veryHot2050: number | null }) | null;
 }
 export interface EmergencyAlert {
   id: string; headline: string; event: string; category: string; alertLevel: string; severity: string; sent: string | null;

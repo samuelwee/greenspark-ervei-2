@@ -85,6 +85,7 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
               </ul>
             ) : <p className="muted wx-none">No warnings near {suburb}.</p>}
           </section>
+          {f.climate ? <LongTermHeat c={f.climate} /> : null}
         </div>
       </div>
     </section>
@@ -115,5 +116,25 @@ function OutlookBanner({ f }: { f: NonNullable<CaseItem["forecast"]> }) {
         </span>
       ) : null}
     </div>
+  );
+}
+
+/** Very hot days a year where the customer lives, now and around 2050: a longer view than this week's forecast. */
+function LongTermHeat({ c }: { c: NonNullable<NonNullable<CaseItem["forecast"]>["climate"]> }) {
+  const max = Math.max(1, c.hot, c.hot2050 ?? 0);
+  const bar = (n: number | null, cls: string) => <span className="lt-bar"><i className={cls} style={{ width: `${((n ?? 0) / max) * 100}%` }} /></span>;
+  const n = (v: number) => (v < 1 && v > 0 ? "under 1" : String(Math.round(v)));
+  return (
+    <section className="wx-block" aria-labelledby="wx-lt">
+      <h3 id="wx-lt" className="wx-head"><span>Long-term heat</span><span className="sub">days a year at {c.thresholds.hot}°C or more</span></h3>
+      <ul className="plain lt-rows">
+        <li><span>Now <span className="sub">{c.baselineYears[0]}–{c.baselineYears[1]} average</span></span>{bar(c.hot, "lt-now")}<strong>{n(c.hot)}</strong></li>
+        {c.hot2050 !== null ? <li><span>Around 2050 <span className="sub">{c.period}, {c.scenario}</span></span>{bar(c.hot2050, "lt-future")}<strong>{n(c.hot2050)}</strong></li> : null}
+      </ul>
+      <p className="sub">
+        {c.thresholds.veryHot}°C or more: {n(c.veryHot)} a year now{c.veryHot2050 !== null ? `, about ${n(c.veryHot2050)} around 2050` : ""}. Average summer maximum {c.summerMax}°C.
+        {" "}A middle emissions path; a guide to long-term exposure, not a forecast.
+      </p>
+    </section>
   );
 }

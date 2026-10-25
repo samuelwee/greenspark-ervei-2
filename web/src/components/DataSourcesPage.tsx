@@ -189,6 +189,24 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
         </div>
       </section>
 
+      <section className="case-card" aria-labelledby="ds-climate">
+        <h2 id="ds-climate">Climate: past and projected heat</h2>
+        <p className="hint">
+          Downloaded once by <code>scripts/build-climate-heat.mts</code> into <code>data/climate/heat-by-postcode.v1.json</code>, a small
+          table of very hot days a year for each postcode, now and around 2050. Shown on the case page's weather card and the outlook's
+          "Hotter years ahead" table. It doesn't change any signal, priority or outlook tier. ERVEI is a non-commercial project.
+        </p>
+        <div className="table-scroll">
+          <table className="mini-table ds-table">
+            <thead><tr><th scope="col">Source</th><th scope="col">What is used</th><th scope="col">Licence and credit</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">SILO (Queensland Government)</th><td>Daily maximum temperature at each postcode's location, 1995 to 2024, from its 5 km grid built from Bureau of Meteorology observations: days a year at 35°C and 40°C or more, and the average summer maximum.</td><td>CC BY 4.0. Contains SILO data from the Queensland Government, based on Bureau of Meteorology observations.</td></tr>
+              <tr><th scope="row">Climate Change in Australia, CMIP6 application-ready data</th><td>Daily maximum temperature from three climate models (ACCESS-CM2, EC-Earth3, NorESM2-MM) for 2035–2064 under SSP2-4.5, a middle emissions path, scaled to AGCD observations. The change in hot days at each forecast town from 1985–2014 (the median of the three) is added to each postcode's SILO figure. Every third year is sampled.</td><td>CC BY 4.0. CSIRO, the Bureau of Meteorology and the Australian Climate Service. The projections are a guide only and not for financial decisions.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section className="case-card" aria-labelledby="ds-files">
         <h2 id="ds-files">Files <span className="pill">{SOURCES.length}</span></h2>
         <div className="table-scroll">

@@ -15,6 +15,7 @@ import { FlowFile } from "./flow";
 import type { Predictions } from "./predictions";
 import { draftPlan, PLAN_KINDS, perthToday, planFacts, type AiConfig, type ContactRules, type PlanKind, type SupportPlan } from "./plan";
 import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
+import type { ClimateHeat } from "./climate";
 import { SyntheticModelAdapter, withAssessments, type ModelAdapter } from "./adapters";
 
 const STATUSES = ["new", "in_progress", "waiting", "resolved"] as const;
@@ -72,6 +73,8 @@ export interface AppOptions {
   weather?: { current(): WeatherSnapshot | null; status(): unknown; setMode(mode: "live" | "demo" | "off"): Promise<void> };
   /** The 90-day risk model's scores and model card. Without it there are no predictions. */
   predictions?: Predictions | null;
+  /** Very hot days a year now and around 2050, per postcode. Without it there is no long-term heat. */
+  climate?: ClimateHeat | null;
   /** Emergency WA warnings (DFES) for the outlook map. Without it the map has none. */
   emergency?: { current(): { available: boolean; fetchedAt: string | null; error: string | null; alerts: unknown[] } };
 }
@@ -117,6 +120,20 @@ export function createApp(store: Store, options: AppOptions = {}) {
     const w = options.weather?.current() ?? null;
     return person ? detectWeatherSignals(person.address?.postcode, (person.account?.region.northOf26th ?? person.signalSummary?.northOf26th ?? false), w, perthToday(clock())) : [];
   };
+  /** Long-term heat where a person lives: very hot days a year now and around 2050. */
+  const climateFor = (postcode: string | null | undefined) => {
+    const c = options.climate;
+    const h = c && postcode ? c.postcodes[postcode] : undefined;
+    return c && h ? { ...h, thresholds: c.thresholds, baselineYears: c.baseline.years, scenario: c.projection.scenario, period: c.projection.period } : null;
+  };
+  /** A forecast town's long-term heat: the average of its postcodes. */
+  const townClimate = (townId: string) => {
+    const c = options.climate;
+    const hs = c ? Object.values(c.postcodes).filter((h) => h.town === townId) : [];
+    if (!c || !hs.length) return null;
+    const avg = (f: (h: (typeof hs)[number]) => number | null) => { const v = hs.map(f).filter((x): x is number => x !== null); return v.length ? Math.round((v.reduce((a, b) => a + b, 0) / v.length) * 10) / 10 : null; };
+    return { hot: avg((h) => h.hot), hot2050: avg((h) => h.hot2050), veryHot: avg((h) => h.veryHot), veryHot2050: avg((h) => h.veryHot2050) };
+  };
   /** Where a person sits on the weather outlook (act now, watch or neither) and why, the same way the outlook works it out. */
   const outlookFor = (person: Person, w: WeatherSnapshot, today: string) => {
     const risk = riskFor(person);
@@ -137,6 +154,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
       townId, town: t.name, district: w.districts[t.district] ?? t.district, demo: w.demo, issuedAt: w.issuedAt,
       location: POSTCODE_LOCATION[postcode!] ?? null, days: t.days.filter((d) => d.date >= today).slice(0, 7), hazards: townHazards(w, townId, north, today),
       outlook: outlookFor(person!, w, today),
+      climate: climateFor(postcode),
     };
   };
   const weatherKey = () => { const w = options.weather?.current(); return w ? `${w.fetchedAt}` : ""; };
@@ -326,6 +344,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
       return [{
         id, name: t.name, district: t.district, districtName: w.districts[t.district] ?? t.district, lat, lng, days: t.days.filter((d) => d.date >= today),
         hazards: townHazards(w, id, lat > -26, today), customers: here.length, exposed: here.filter((r) => r.exposure > 0).length,
+        climate: townClimate(id),
         act: here.filter((r) => r.tier === "act").length, watch: here.filter((r) => r.tier === "watch").length,
       }];
     });
@@ -338,6 +357,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
     const listed = rows.filter((r) => r.tier).sort((a, b) => (a.tier === b.tier ? 0 : a.tier === "act" ? -1 : 1) || b.score - a.score);
     const body = {
       available: true, weather: status, today, demo: w.demo, issuedAt: w.issuedAt, days, towns,
+      climate: options.climate ? { thresholds: options.climate.thresholds, baselineYears: options.climate.baseline.years, scenario: options.climate.projection.scenario, period: options.climate.projection.period } : null,
       warnings: w.warnings.filter((x) => x.districts.length).map((x) => ({ title: x.title, districts: x.districts.map((d) => w.districts[d] ?? d), expires: x.expires })),
       totals: { covered: rows.length, uncovered, exposed: rows.filter((r) => r.exposure > 0).length, vulnerable: rows.filter((r) => r.vulnerable).length, act: listed.filter((r) => r.tier === "act").length, watch: listed.filter((r) => r.tier === "watch").length },
       customers: listed.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),

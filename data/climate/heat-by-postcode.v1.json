@@ -1,0 +1,1033 @@
+{
+ "id": "climate-heat.v1",
+ "builtAt": "2026-10-25T15:24:48.261Z",
+ "thresholds": {
+  "hot": 35,
+  "veryHot": 40
+ },
+ "baseline": {
+  "source": "SILO daily maximum temperature (Queensland Government), from Bureau of Meteorology observations",
+  "years": [
+   1995,
+   2024
+  ],
+  "licence": "CC BY 4.0"
+ },
+ "projection": {
+  "source": "CMIP6 application-ready daily data, Climate Change in Australia (CSIRO, Bureau of Meteorology, Australian Climate Service)",
+  "scenario": "SSP2-4.5",
+  "period": "2035-2064",
+  "baselinePeriod": "1985-2014 (AGCD)",
+  "models": [
+   "ACCESS-CM2",
+   "EC-Earth3",
+   "NorESM2-MM"
+  ],
+  "sampledYears": {
+   "baseline": [
+    1985,
+    1988,
+    1991,
+    1994,
+    1997,
+    2000,
+    2003,
+    2006,
+    2009,
+    2012
+   ],
+   "future": [
+    2035,
+    2038,
+    2041,
+    2044,
+    2047,
+    2050,
+    2053,
+    2056,
+    2059,
+    2062
+   ]
+  },
+  "method": "Median across models of the change in days a year at the forecast town, added to each postcode's SILO baseline",
+  "licence": "CC BY 4.0"
+ },
+ "towns": {
+  "WA_PT053": {
+   "hot": 6.6,
+   "veryHot": 1.3,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 11.3,
+     "veryHot": 2.4
+    },
+    "EC-Earth3": {
+     "hot": 4.8,
+     "veryHot": 1.3
+    },
+    "NorESM2-MM": {
+     "hot": 6.6,
+     "veryHot": 1.2
+    }
+   }
+  },
+  "WA_PT060": {
+   "hot": 4.4,
+   "veryHot": 0.3,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 7.8,
+     "veryHot": 1.3
+    },
+    "EC-Earth3": {
+     "hot": 3.3,
+     "veryHot": 0.2
+    },
+    "NorESM2-MM": {
+     "hot": 4.4,
+     "veryHot": 0.3
+    }
+   }
+  },
+  "WA_PT058": {
+   "hot": 6.3,
+   "veryHot": 1.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 9.4,
+     "veryHot": 1.8
+    },
+    "EC-Earth3": {
+     "hot": 4.4,
+     "veryHot": 1.1
+    },
+    "NorESM2-MM": {
+     "hot": 6.3,
+     "veryHot": 1.4
+    }
+   }
+  },
+  "WA_PT030": {
+   "hot": 7,
+   "veryHot": 1.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 9.8,
+     "veryHot": 2.1
+    },
+    "EC-Earth3": {
+     "hot": 5.4,
+     "veryHot": 1.4
+    },
+    "NorESM2-MM": {
+     "hot": 7,
+     "veryHot": 1.2
+    }
+   }
+  },
+  "WA_PT044": {
+   "hot": 9.6,
+   "veryHot": 2.8,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 12.8,
+     "veryHot": 4.4
+    },
+    "EC-Earth3": {
+     "hot": 7.5,
+     "veryHot": 2.8
+    },
+    "NorESM2-MM": {
+     "hot": 9.6,
+     "veryHot": 2.4
+    }
+   }
+  },
+  "WA_PT252": {
+   "hot": 9.9,
+   "veryHot": 3.1,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 13.1,
+     "veryHot": 4.3
+    },
+    "EC-Earth3": {
+     "hot": 8.7,
+     "veryHot": 3.1
+    },
+    "NorESM2-MM": {
+     "hot": 9.9,
+     "veryHot": 2.5
+    }
+   }
+  },
+  "WA_PT017": {
+   "hot": 7.7,
+   "veryHot": 1.5,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 11.6,
+     "veryHot": 2.7
+    },
+    "EC-Earth3": {
+     "hot": 6.2,
+     "veryHot": 1.5
+    },
+    "NorESM2-MM": {
+     "hot": 7.7,
+     "veryHot": 1.4
+    }
+   }
+  },
+  "WA_PT028": {
+   "hot": 5.1,
+   "veryHot": 0.3,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 7.9,
+     "veryHot": 1.5
+    },
+    "EC-Earth3": {
+     "hot": 4.1,
+     "veryHot": 0.3
+    },
+    "NorESM2-MM": {
+     "hot": 5.1,
+     "veryHot": 0.3
+    }
+   }
+  },
+  "WA_PT055": {
+   "hot": 4.8,
+   "veryHot": 1.1,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 8.7,
+     "veryHot": 1.9
+    },
+    "EC-Earth3": {
+     "hot": 4.7,
+     "veryHot": 0.8
+    },
+    "NorESM2-MM": {
+     "hot": 4.8,
+     "veryHot": 1.1
+    }
+   }
+  },
+  "WA_PT012": {
+   "hot": 5.4,
+   "veryHot": 0.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 7.6,
+     "veryHot": 1.1
+    },
+    "EC-Earth3": {
+     "hot": 5.3,
+     "veryHot": 0.3
+    },
+    "NorESM2-MM": {
+     "hot": 5.4,
+     "veryHot": 0.4
+    }
+   }
+  },
+  "WA_PT020": {
+   "hot": 6.2,
+   "veryHot": 2,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 10.1,
+     "veryHot": 2.3
+    },
+    "EC-Earth3": {
+     "hot": 6,
+     "veryHot": 0.9
+    },
+    "NorESM2-MM": {
+     "hot": 6.2,
+     "veryHot": 2
+    }
+   }
+  },
+  "WA_PT003": {
+   "hot": 4.9,
+   "veryHot": 0.5,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 6.5,
+     "veryHot": 0.7
+    },
+    "EC-Earth3": {
+     "hot": 4.9,
+     "veryHot": 0.5
+    },
+    "NorESM2-MM": {
+     "hot": 3.6,
+     "veryHot": 0.5
+    }
+   }
+  },
+  "WA_PT040": {
+   "hot": 2.7,
+   "veryHot": 0.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 2.7,
+     "veryHot": 0.5
+    },
+    "EC-Earth3": {
+     "hot": 2.1,
+     "veryHot": 0
+    },
+    "NorESM2-MM": {
+     "hot": 2.7,
+     "veryHot": 0.4
+    }
+   }
+  },
+  "WA_PT004": {
+   "hot": 3,
+   "veryHot": 0.7,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 4.1,
+     "veryHot": 0.7
+    },
+    "EC-Earth3": {
+     "hot": 3,
+     "veryHot": 0.8
+    },
+    "NorESM2-MM": {
+     "hot": 2.3,
+     "veryHot": 0.4
+    }
+   }
+  },
+  "WA_PT001": {
+   "hot": 0.8,
+   "veryHot": 0.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 1.2,
+     "veryHot": 0.5
+    },
+    "EC-Earth3": {
+     "hot": 0.8,
+     "veryHot": 0.3
+    },
+    "NorESM2-MM": {
+     "hot": 0.6,
+     "veryHot": 0.4
+    }
+   }
+  },
+  "WA_PT050": {
+   "hot": 15.2,
+   "veryHot": 4.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 21.8,
+     "veryHot": 9.8
+    },
+    "EC-Earth3": {
+     "hot": 12.4,
+     "veryHot": 4.1
+    },
+    "NorESM2-MM": {
+     "hot": 15.2,
+     "veryHot": 4.4
+    }
+   }
+  },
+  "WA_PT009": {
+   "hot": 21.5,
+   "veryHot": 9,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 26.2,
+     "veryHot": 12.2
+    },
+    "EC-Earth3": {
+     "hot": 9,
+     "veryHot": 6.1
+    },
+    "NorESM2-MM": {
+     "hot": 21.5,
+     "veryHot": 9
+    }
+   }
+  },
+  "WA_PT008": {
+   "hot": 8.1,
+   "veryHot": 4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 11.5,
+     "veryHot": 7.7
+    },
+    "EC-Earth3": {
+     "hot": 7.4,
+     "veryHot": 2.5
+    },
+    "NorESM2-MM": {
+     "hot": 8.1,
+     "veryHot": 4
+    }
+   }
+  },
+  "WA_PT005": {
+   "hot": 6.4,
+   "veryHot": 2.1,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 10.9,
+     "veryHot": 4.5
+    },
+    "EC-Earth3": {
+     "hot": 5.3,
+     "veryHot": 1.7
+    },
+    "NorESM2-MM": {
+     "hot": 6.4,
+     "veryHot": 2.1
+    }
+   }
+  },
+  "WA_PT010": {
+   "hot": 31.3,
+   "veryHot": 18.3,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 49.7,
+     "veryHot": 28.5
+    },
+    "EC-Earth3": {
+     "hot": 17.4,
+     "veryHot": 11.7
+    },
+    "NorESM2-MM": {
+     "hot": 31.3,
+     "veryHot": 18.3
+    }
+   }
+  },
+  "WA_PT056": {
+   "hot": 26.8,
+   "veryHot": 26.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 39.8,
+     "veryHot": 42.3
+    },
+    "EC-Earth3": {
+     "hot": 12.5,
+     "veryHot": 12.4
+    },
+    "NorESM2-MM": {
+     "hot": 26.8,
+     "veryHot": 26.4
+    }
+   }
+  },
+  "WA_PT015": {
+   "hot": 40.4,
+   "veryHot": 21.6,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 64.9,
+     "veryHot": 30
+    },
+    "EC-Earth3": {
+     "hot": 15.3,
+     "veryHot": 12.7
+    },
+    "NorESM2-MM": {
+     "hot": 40.4,
+     "veryHot": 21.6
+    }
+   }
+  },
+  "WA_PT002": {
+   "hot": 66.3,
+   "veryHot": 8.3,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 96.2,
+     "veryHot": 10.8
+    },
+    "EC-Earth3": {
+     "hot": 31.1,
+     "veryHot": 6.2
+    },
+    "NorESM2-MM": {
+     "hot": 66.3,
+     "veryHot": 8.3
+    }
+   }
+  },
+  "WA_PT025": {
+   "hot": 52.8,
+   "veryHot": 37.3,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 89.4,
+     "veryHot": 37.3
+    },
+    "EC-Earth3": {
+     "hot": 36.4,
+     "veryHot": 13.6
+    },
+    "NorESM2-MM": {
+     "hot": 52.8,
+     "veryHot": 37.7
+    }
+   }
+  },
+  "WA_PT011": {
+   "hot": 41.2,
+   "veryHot": 61.2,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 69.8,
+     "veryHot": 62.5
+    },
+    "EC-Earth3": {
+     "hot": 33.8,
+     "veryHot": 28.6
+    },
+    "NorESM2-MM": {
+     "hot": 41.2,
+     "veryHot": 61.2
+    }
+   }
+  },
+  "WA_PT027": {
+   "hot": 32.5,
+   "veryHot": 65.6,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 64.2,
+     "veryHot": 79.9
+    },
+    "EC-Earth3": {
+     "hot": 20.5,
+     "veryHot": 11.7
+    },
+    "NorESM2-MM": {
+     "hot": 32.5,
+     "veryHot": 65.6
+    }
+   }
+  },
+  "WA_PT029": {
+   "hot": 44.2,
+   "veryHot": 50.4,
+   "models": {
+    "ACCESS-CM2": {
+     "hot": 69.2,
+     "veryHot": 50.4
+    },
+    "EC-Earth3": {
+     "hot": 15.1,
+     "veryHot": 13.5
+    },
+    "NorESM2-MM": {
+     "hot": 44.2,
+     "veryHot": 53.9
+    }
+   }
+  }
+ },
+ "postcodes": {
+  "6000": {
+   "hot": 24.7,
+   "veryHot": 3.3,
+   "summerMax": 30.7,
+   "hot2050": 31.3,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6004": {
+   "hot": 24.7,
+   "veryHot": 3.3,
+   "summerMax": 30.7,
+   "hot2050": 31.3,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6008": {
+   "hot": 24.7,
+   "veryHot": 3.3,
+   "summerMax": 30.7,
+   "hot2050": 31.3,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6009": {
+   "hot": 21.3,
+   "veryHot": 2.3,
+   "summerMax": 30.1,
+   "hot2050": 27.9,
+   "veryHot2050": 3.6,
+   "town": "WA_PT053"
+  },
+  "6010": {
+   "hot": 21.3,
+   "veryHot": 2.3,
+   "summerMax": 30.1,
+   "hot2050": 27.9,
+   "veryHot2050": 3.6,
+   "town": "WA_PT053"
+  },
+  "6011": {
+   "hot": 17.9,
+   "veryHot": 2,
+   "summerMax": 29.6,
+   "hot2050": 22.3,
+   "veryHot2050": 2.3,
+   "town": "WA_PT060"
+  },
+  "6018": {
+   "hot": 22.6,
+   "veryHot": 2.8,
+   "summerMax": 30.3,
+   "hot2050": 28.9,
+   "veryHot2050": 4.2,
+   "town": "WA_PT058"
+  },
+  "6021": {
+   "hot": 24.9,
+   "veryHot": 3.3,
+   "summerMax": 30.8,
+   "hot2050": 31.5,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6023": {
+   "hot": 23.3,
+   "veryHot": 2.9,
+   "summerMax": 30.5,
+   "hot2050": 30.3,
+   "veryHot2050": 4.3,
+   "town": "WA_PT030"
+  },
+  "6025": {
+   "hot": 21.1,
+   "veryHot": 2.5,
+   "summerMax": 30.2,
+   "hot2050": 28.1,
+   "veryHot2050": 3.9,
+   "town": "WA_PT030"
+  },
+  "6027": {
+   "hot": 22,
+   "veryHot": 2.6,
+   "summerMax": 30.4,
+   "hot2050": 29,
+   "veryHot2050": 4,
+   "town": "WA_PT030"
+  },
+  "6030": {
+   "hot": 23.4,
+   "veryHot": 3,
+   "summerMax": 30.6,
+   "hot2050": 30.4,
+   "veryHot2050": 4.4,
+   "town": "WA_PT030"
+  },
+  "6050": {
+   "hot": 24.7,
+   "veryHot": 3.3,
+   "summerMax": 30.7,
+   "hot2050": 31.3,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6051": {
+   "hot": 29,
+   "veryHot": 4.1,
+   "summerMax": 31.2,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6053": {
+   "hot": 28.9,
+   "veryHot": 4.1,
+   "summerMax": 31.2,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6054": {
+   "hot": 32.5,
+   "veryHot": 5.1,
+   "summerMax": 31.7,
+   "hot2050": 39.1,
+   "veryHot2050": 6.4,
+   "town": "WA_PT053"
+  },
+  "6056": {
+   "hot": 35.4,
+   "veryHot": 6,
+   "summerMax": 32.1,
+   "hot2050": 45,
+   "veryHot2050": 8.8,
+   "town": "WA_PT044"
+  },
+  "6061": {
+   "hot": 24.9,
+   "veryHot": 3.3,
+   "summerMax": 30.8,
+   "hot2050": 31.5,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6062": {
+   "hot": 28.9,
+   "veryHot": 4.1,
+   "summerMax": 31.2,
+   "hot2050": 35.5,
+   "veryHot2050": 5.4,
+   "town": "WA_PT053"
+  },
+  "6064": {
+   "hot": 24.9,
+   "veryHot": 3.3,
+   "summerMax": 30.8,
+   "hot2050": 31.5,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6065": {
+   "hot": 24.4,
+   "veryHot": 3.3,
+   "summerMax": 30.8,
+   "hot2050": 31.4,
+   "veryHot2050": 4.7,
+   "town": "WA_PT030"
+  },
+  "6069": {
+   "hot": 33.5,
+   "veryHot": 5.6,
+   "summerMax": 32,
+   "hot2050": 43.4,
+   "veryHot2050": 8.7,
+   "town": "WA_PT252"
+  },
+  "6100": {
+   "hot": 28.6,
+   "veryHot": 3.9,
+   "summerMax": 31.2,
+   "hot2050": 35.2,
+   "veryHot2050": 5.2,
+   "town": "WA_PT053"
+  },
+  "6104": {
+   "hot": 29,
+   "veryHot": 4.1,
+   "summerMax": 31.2,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6107": {
+   "hot": 32.1,
+   "veryHot": 4.8,
+   "summerMax": 31.7,
+   "hot2050": 38.7,
+   "veryHot2050": 6.1,
+   "town": "WA_PT053"
+  },
+  "6108": {
+   "hot": 31.9,
+   "veryHot": 4.7,
+   "summerMax": 31.7,
+   "hot2050": 38.5,
+   "veryHot2050": 6,
+   "town": "WA_PT053"
+  },
+  "6109": {
+   "hot": 34.1,
+   "veryHot": 5.3,
+   "summerMax": 32,
+   "hot2050": 40.7,
+   "veryHot2050": 6.6,
+   "town": "WA_PT053"
+  },
+  "6110": {
+   "hot": 32.5,
+   "veryHot": 4.6,
+   "summerMax": 31.8,
+   "hot2050": 40.2,
+   "veryHot2050": 6.1,
+   "town": "WA_PT017"
+  },
+  "6111": {
+   "hot": 23.5,
+   "veryHot": 2.2,
+   "summerMax": 30.8,
+   "hot2050": 31.2,
+   "veryHot2050": 3.7,
+   "town": "WA_PT017"
+  },
+  "6112": {
+   "hot": 30,
+   "veryHot": 3.7,
+   "summerMax": 31.6,
+   "hot2050": 37.7,
+   "veryHot2050": 5.2,
+   "town": "WA_PT017"
+  },
+  "6151": {
+   "hot": 24.7,
+   "veryHot": 3.3,
+   "summerMax": 30.7,
+   "hot2050": 31.3,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6152": {
+   "hot": 24.7,
+   "veryHot": 3.3,
+   "summerMax": 30.7,
+   "hot2050": 31.3,
+   "veryHot2050": 4.6,
+   "town": "WA_PT053"
+  },
+  "6155": {
+   "hot": 28.1,
+   "veryHot": 3.6,
+   "summerMax": 31.2,
+   "hot2050": 34.7,
+   "veryHot2050": 4.9,
+   "town": "WA_PT053"
+  },
+  "6160": {
+   "hot": 17.3,
+   "veryHot": 1.9,
+   "summerMax": 29.5,
+   "hot2050": 22.4,
+   "veryHot2050": 2.2,
+   "town": "WA_PT028"
+  },
+  "6163": {
+   "hot": 19.9,
+   "veryHot": 2,
+   "summerMax": 30,
+   "hot2050": 25,
+   "veryHot2050": 2.3,
+   "town": "WA_PT028"
+  },
+  "6164": {
+   "hot": 22.9,
+   "veryHot": 2.5,
+   "summerMax": 30.5,
+   "hot2050": 28,
+   "veryHot2050": 2.8,
+   "town": "WA_PT028"
+  },
+  "6167": {
+   "hot": 15,
+   "veryHot": 1,
+   "summerMax": 29.2,
+   "hot2050": 19.8,
+   "veryHot2050": 2.1,
+   "town": "WA_PT055"
+  },
+  "6168": {
+   "hot": 14.6,
+   "veryHot": 0.9,
+   "summerMax": 29.2,
+   "hot2050": 19.4,
+   "veryHot2050": 2,
+   "town": "WA_PT055"
+  },
+  "6171": {
+   "hot": 18.4,
+   "veryHot": 1.6,
+   "summerMax": 30.1,
+   "hot2050": 23.2,
+   "veryHot2050": 2.7,
+   "town": "WA_PT055"
+  },
+  "6210": {
+   "hot": 12.8,
+   "veryHot": 0.6,
+   "summerMax": 29.2,
+   "hot2050": 18.2,
+   "veryHot2050": 1,
+   "town": "WA_PT012"
+  },
+  "6225": {
+   "hot": 17.9,
+   "veryHot": 1,
+   "summerMax": 30.1,
+   "hot2050": 24.1,
+   "veryHot2050": 3,
+   "town": "WA_PT020"
+  },
+  "6230": {
+   "hot": 11.7,
+   "veryHot": 0.3,
+   "summerMax": 29.4,
+   "hot2050": 16.6,
+   "veryHot2050": 0.8,
+   "town": "WA_PT003"
+  },
+  "6258": {
+   "hot": 8.9,
+   "veryHot": 0.6,
+   "summerMax": 27.2,
+   "hot2050": 11.6,
+   "veryHot2050": 1,
+   "town": "WA_PT040"
+  },
+  "6280": {
+   "hot": 7.9,
+   "veryHot": 0.1,
+   "summerMax": 29,
+   "hot2050": 10.9,
+   "veryHot2050": 0.8,
+   "town": "WA_PT004"
+  },
+  "6312": {
+   "hot": 21.4,
+   "veryHot": 2.4,
+   "summerMax": 30.5,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6330": {
+   "hot": 3.1,
+   "veryHot": 0.4,
+   "summerMax": 23.5,
+   "hot2050": 3.9,
+   "veryHot2050": 0.8,
+   "town": "WA_PT001"
+  },
+  "6401": {
+   "hot": 48.8,
+   "veryHot": 10.4,
+   "summerMax": 33.7,
+   "hot2050": 64,
+   "veryHot2050": 14.8,
+   "town": "WA_PT050"
+  },
+  "6430": {
+   "hot": 45.9,
+   "veryHot": 11,
+   "summerMax": 33,
+   "hot2050": 67.4,
+   "veryHot2050": 20,
+   "town": "WA_PT009"
+  },
+  "6450": {
+   "hot": 12,
+   "veryHot": 2.4,
+   "summerMax": 26,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6530": {
+   "hot": 38.4,
+   "veryHot": 8.8,
+   "summerMax": 31.8,
+   "hot2050": 46.5,
+   "veryHot2050": 12.8,
+   "town": "WA_PT008"
+  },
+  "6701": {
+   "hot": 33.1,
+   "veryHot": 7.3,
+   "summerMax": 31.9,
+   "hot2050": 39.5,
+   "veryHot2050": 9.4,
+   "town": "WA_PT005"
+  },
+  "6707": {
+   "hot": 106.6,
+   "veryHot": 18.7,
+   "summerMax": 36.5,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6714": {
+   "hot": 134.3,
+   "veryHot": 23.6,
+   "summerMax": 36.5,
+   "hot2050": 165.6,
+   "veryHot2050": 41.9,
+   "town": "WA_PT010"
+  },
+  "6718": {
+   "hot": 179.9,
+   "veryHot": 56,
+   "summerMax": 38.5,
+   "hot2050": 206.7,
+   "veryHot2050": 82.4,
+   "town": "WA_PT056"
+  },
+  "6721": {
+   "hot": 146.4,
+   "veryHot": 28.5,
+   "summerMax": 36.4,
+   "hot2050": null,
+   "veryHot2050": null,
+   "town": null
+  },
+  "6722": {
+   "hot": 155.4,
+   "veryHot": 32.7,
+   "summerMax": 36.7,
+   "hot2050": 195.8,
+   "veryHot2050": 54.3,
+   "town": "WA_PT015"
+  },
+  "6725": {
+   "hot": 64.1,
+   "veryHot": 4,
+   "summerMax": 33.4,
+   "hot2050": 130.4,
+   "veryHot2050": 12.3,
+   "town": "WA_PT002"
+  },
+  "6728": {
+   "hot": 186.7,
+   "veryHot": 16.8,
+   "summerMax": 35.8,
+   "hot2050": 239.5,
+   "veryHot2050": 54.1,
+   "town": "WA_PT025"
+  },
+  "6743": {
+   "hot": 197,
+   "veryHot": 32.1,
+   "summerMax": 36,
+   "hot2050": 238.2,
+   "veryHot2050": 93.3,
+   "town": "WA_PT011"
+  },
+  "6765": {
+   "hot": 227.5,
+   "veryHot": 77.9,
+   "summerMax": 37.9,
+   "hot2050": 260,
+   "veryHot2050": 143.5,
+   "town": "WA_PT027"
+  },
+  "6770": {
+   "hot": 164.8,
+   "veryHot": 27.5,
+   "summerMax": 36.4,
+   "hot2050": 209,
+   "veryHot2050": 77.9,
+   "town": "WA_PT029"
+  }
+ }
+}

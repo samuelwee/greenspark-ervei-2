@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { sampleWeather } from "@greenspark/shared";
+import { POSTCODE_TOWN, sampleWeather } from "@greenspark/shared";
 import { start, type Harness } from "./helpers";
 
 let h: Harness | null = null;
@@ -36,6 +36,20 @@ describe("weather outlook", () => {
     expect((await h.call("staff-manager", "POST", "/api/cases/bulk/status", { status: next, items: [{ caseId: c.id, expectedVersion: c.version }] })).status).toBe(200);
     const after = (await h.call("staff-manager", "GET", "/api/outlook")).body;
     expect(after.customers.find((x: any) => x.personId === row.personId).status).toBe(next);
+  });
+
+  it("adds long-term heat to the outlook's towns and the case page's forecast", async () => {
+    const snapshot = sampleWeather("2026-10-16");
+    const postcodes = Object.fromEntries(Object.entries(POSTCODE_TOWN).map(([pc, town]) => [pc, { hot: 10, veryHot: 1, summerMax: 31, hot2050: 16, veryHot2050: 3, town }]));
+    const climate = { id: "test", thresholds: { hot: 35, veryHot: 40 }, baseline: { source: "SILO", years: [1995, 2024] as [number, number], licence: "CC BY 4.0" },
+      projection: { source: "CMIP6", scenario: "SSP2-4.5", period: "2035-2064", models: ["A"], method: "", licence: "CC BY 4.0" }, postcodes };
+    h = await start(":memory:", undefined, { climate, weather: { current: () => snapshot, status: () => ({ mode: "demo" }), setMode: async () => undefined } });
+    const outlook = (await h.call("staff-manager", "GET", "/api/outlook")).body;
+    expect(outlook.climate.scenario).toBe("SSP2-4.5");
+    expect(outlook.towns.find((t: any) => t.name === "Perth").climate).toEqual({ hot: 10, hot2050: 16, veryHot: 1, veryHot2050: 3 });
+    const account = outlook.customers[0].accountNumber;
+    const c = (await h.call("staff-manager", "GET", `/api/accounts/${account}`)).body;
+    expect(c.forecast.climate).toMatchObject({ hot: 10, hot2050: 16, period: "2035-2064" });
   });
 
   it("says when there is no forecast", async () => {
