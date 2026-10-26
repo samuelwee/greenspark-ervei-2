@@ -100,7 +100,7 @@ export function AreaMapPage({ client }: { client: Pick<ApiClient, "outlook"> }) 
               <option value="disadvantaged">Most disadvantaged 20% in WA</option>
             </select>
           </label>
-          <label className="area-check"><input type="checkbox" checked={sized} onChange={(e) => setSized(e.target.checked)} /> Size by customers</label>
+          <label className="area-check switch"><input type="checkbox" role="switch" checked={sized} onChange={(e) => setSized(e.target.checked)} /> Size by customers</label>
           <p className="area-stat">{outlook?.available ? <><strong>{inMostCustomers.toLocaleString("en-AU")}</strong> of {total.toLocaleString("en-AU")} covered customers live in the most disadvantaged 20% of WA postcodes</> : "Loading customers…"}</p>
         </div>
         <div className="area-map-wrap">

@@ -114,8 +114,8 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
             {ready.days.map((day) => <button key={day.date} type="button" className={day.date === date ? "is-on" : ""} aria-pressed={day.date === date} onClick={() => setDate(day.date)}><span>{dayName(day.date)}</span>{dayDate(day.date)}</button>)}
           </div>
           <div className="support-layer-controls">
-            <label className="check"><input type="checkbox" checked={showHeat} onChange={() => setShowHeat((value) => !value)} /><span>Temperature layer</span></label>
-            <label className="check"><input type="checkbox" checked={showAlerts && !!emergency?.available} disabled={!emergency?.available} onChange={() => setShowAlerts((value) => !value)} /><span>Emergency WA{emergency && !emergency.available ? " · unavailable" : ""}</span></label>
+            <label className="check switch"><input type="checkbox" role="switch" checked={showHeat} onChange={() => setShowHeat((value) => !value)} /><span>Temperature layer</span></label>
+            <label className="check switch"><input type="checkbox" role="switch" checked={showAlerts && !!emergency?.available} disabled={!emergency?.available} onChange={() => setShowAlerts((value) => !value)} /><span>Emergency WA{emergency && !emergency.available ? " · unavailable" : ""}</span></label>
           </div>
         </div>
       </div>

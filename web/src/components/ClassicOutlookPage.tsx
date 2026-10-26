@@ -161,9 +161,9 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           <Suspense fallback={<div className="outlook-map" role="status">Loading the map…</div>}>
             <OutlookMap towns={ready.towns} alerts={warnings} showTowns={layers.towns} showAlerts={layers.alerts && !!emergency?.available} chosen={town} onChoose={setTown} controls={
           <span className="map-layers" role="group" aria-label="Show on the map">
-            <label className="check"><input type="checkbox" checked={layers.towns} onChange={() => toggle("towns")} /><span>Forecast towns</span></label>
-            <label className="check">
-              <input type="checkbox" checked={layers.alerts} disabled={!emergency?.available} onChange={() => toggle("alerts")} />
+            <label className="check switch"><input type="checkbox" role="switch" checked={layers.towns} onChange={() => toggle("towns")} /><span>Forecast towns</span></label>
+            <label className="check switch">
+              <input type="checkbox" role="switch" checked={layers.alerts} disabled={!emergency?.available} onChange={() => toggle("alerts")} />
               <span>Emergency WA warnings{emergency?.available ? null : <span className="sub"> {emergency ? "unavailable" : "loading…"}</span>}</span>
             </label>
           </span>

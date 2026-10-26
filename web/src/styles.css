@@ -792,3 +792,26 @@ select:not([multiple]):disabled { opacity: .6; }
 .case-wx-days li button[aria-pressed="true"] { border-color: #1b2a24; background: #fff; }
 .case-wx-map-wrap > .case-wx-play { position: absolute; left: 12px; bottom: 30px; z-index: 450; width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; background: #006c50; font-size: 15px; cursor: pointer; box-shadow: 0 1px 4px rgba(9, 30, 66, .3); }
 .case-wx-map-wrap > .case-wx-play:hover { background: #005a42; }
+
+@media (max-width: 800px) {
+  .week-list { min-width: 0; padding: 10px 14px 6px; }
+  .week-head { display: none; }
+  .week-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .week-person { padding: 12px 0; }
+  .week-needs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .week-days { gap: 3px; margin-top: 12px; }
+  .week-cell { height: 30px; }
+  .week-cell::after { content: attr(data-day); position: absolute; top: -14px; left: 0; right: 0; text-align: center; font-size: 10px; color: var(--muted); }
+  .week-risk { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 10px; }
+  .week-risk strong { white-space: nowrap; }
+}
+
+/* A checkbox drawn as an on/off switch: <label class="switch"><input type="checkbox" role="switch">…</label> */
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+.switch input[type="checkbox"] { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 40px; height: 24px; margin: 0; border-radius: 99px; background: #b6bdc8; transition: background .15s; cursor: inherit; }
+.switch input[type="checkbox"]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(9, 30, 66, .3); transition: transform .15s; }
+.switch input[type="checkbox"]:checked { background: #006c50; }
+.switch input[type="checkbox"]:checked::after { transform: translateX(16px); }
+.switch input[type="checkbox"]:focus-visible { outline: 2px solid #006c50; outline-offset: 2px; }
+.switch input[type="checkbox"]:disabled { opacity: .5; cursor: not-allowed; }
+.check.switch input { width: 40px; height: 24px; }

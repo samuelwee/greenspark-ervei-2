@@ -77,7 +77,7 @@ export function OutlookWeekList({ rows, towns, dates, today, navigate }: {
                 const hazards = (town?.hazards ?? []).filter((h) => h.date === d && h.kind !== "warning");
                 const worst = hazards.reduce((a, h) => Math.max(a, h.severity), 0);
                 const label = hazards.length ? hazards.map((h) => h.text || HAZARD_LABEL[h.kind]).join(", ") : "No hazard";
-                return <span key={d} role="cell" className={`week-cell${d === firstDay ? " is-first" : ""}${warned && d === today ? " is-warned" : ""}`} style={{ background: hazards.length ? hazardColor(worst) : "#eef1f4" }} title={`${dayName(d)} ${dayDate(d)}: ${label}${warned && d === today ? " · warning in force" : ""}`} aria-label={`${dayName(d)}: ${label}`} />;
+                return <span key={d} role="cell" data-day={dayName(d)} className={`week-cell${d === firstDay ? " is-first" : ""}${warned && d === today ? " is-warned" : ""}`} style={{ background: hazards.length ? hazardColor(worst) : "#eef1f4" }} title={`${dayName(d)} ${dayDate(d)}: ${label}${warned && d === today ? " · warning in force" : ""}`} aria-label={`${dayName(d)}: ${label}`} />;
               })}</div>
               <div role="cell" className="week-risk">
                 {c.risk && b ? <><strong>{b.text} · {percent(c.risk.probability)}</strong><span className="week-bar"><i style={{ width: `${Math.max(3, Math.min(100, c.risk.probability * 100))}%`, background: RISK_COLOR[b.id] ?? "#888780" }} /></span></> : <span className="sub">No prediction</span>}

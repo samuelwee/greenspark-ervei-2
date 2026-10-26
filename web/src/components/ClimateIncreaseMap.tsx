@@ -128,8 +128,8 @@ export function ClimateIncreaseMap({ data, threshold, selected, onSelect }: {
       <div className="decade-map-bar">
         <p className="decade-map-title"><strong>Increase in days a year at {data.thresholds[threshold]}°C or more</strong> <span className="sub">{lastObserved.replace("-", "–")} to {lastProjected.replace("-", "–")}, over disadvantage by postcode</span></p>
         <div className="decade-map-layers" role="group" aria-label="Map layers">
-          <label><input type="checkbox" checked={showIncrease} onChange={(e) => setShowIncrease(e.target.checked)} /> Increase in hot days (towns)</label>
-          <label><input type="checkbox" checked={showSeifa} onChange={(e) => setShowSeifa(e.target.checked)} /> SEIFA disadvantage (postcodes)</label>
+          <label className="switch"><input type="checkbox" role="switch" checked={showIncrease} onChange={(e) => setShowIncrease(e.target.checked)} /> Increase in hot days (towns)</label>
+          <label className="switch"><input type="checkbox" role="switch" checked={showSeifa} onChange={(e) => setShowSeifa(e.target.checked)} /> SEIFA disadvantage (postcodes)</label>
         </div>
       </div>
       <div className="decade-map-wrap">
