@@ -79,7 +79,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
       </section>
 
       <section className="case-card vis-card" aria-labelledby="vis-risk">
-        <h2 id="vis-risk">Chance of harm, next 90 days</h2>
+        <h2 id="vis-risk">Chance of hardship, next 90 days</h2>
         <p className="vis-what">Predicted from their account history. Ignores the weather.</p>
         {item.prediction ? (
           <ul className="vis-bars">
@@ -97,7 +97,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
             })}
           </ul>
         ) : <p className="muted">No prediction for this customer.</p>}
-        {item.prediction ? <More label="Predicted risk" onClick={() => onOpen("priority")} /> : null}
+        {item.prediction ? <More label="Chance of hardship" onClick={() => onOpen("priority")} /> : null}
       </section>
 
       </div>

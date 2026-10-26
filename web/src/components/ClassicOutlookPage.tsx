@@ -105,7 +105,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           <strong>{ready.totals.act}</strong><span>Act now</span><small>Dangerous weather and a health or supply need</small>
         </button>
         <button type="button" className={`kpi kpi-watch${tier === "watch" ? " is-on" : ""}`} aria-pressed={tier === "watch"} onClick={() => setTier(tier === "watch" ? "" : "watch")}>
-          <strong>{ready.totals.watch}</strong><span>Watch</span><small>Hot weather and needs that add up, or high predicted risk</small>
+          <strong>{ready.totals.watch}</strong><span>Watch</span><small>Hot weather and needs that add up, or a high chance of hardship</small>
         </button>
         <div className="kpi">
           <strong>{ready.totals.exposed}</strong><span>In hazard areas</span><small>of {ready.totals.covered} customers near a forecast town</small>
@@ -232,7 +232,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
               <thead>
                 <tr>
                   <th scope="col">Outlook</th><th scope="col">Customer</th><th scope="col">Weather coming</th>
-                  <th scope="col">Why they’re vulnerable</th><th scope="col">Contact by</th><th scope="col">Predicted risk <span className="sim">90 days</span></th>
+                  <th scope="col">Why they’re vulnerable</th><th scope="col">Contact by</th><th scope="col">Chance of hardship <span className="sim">90 days</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -258,7 +258,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                         <span className="need-chips">
                           {c.sensitivity.slice(0, 5).map((s) => <span key={s.id} className={`need need-${s.group}`} title={GROUP_LABEL[s.group]}>{s.label}</span>)}
                           {c.sensitivity.length > 5 ? <span className="need need-more">+{c.sensitivity.length - 5}</span> : null}
-                          {!c.sensitivity.length ? <span className="sub">High predicted risk</span> : null}
+                          {!c.sensitivity.length ? <span className="sub">High chance of hardship</span> : null}
                         </span>
                       </td>
                       <td>
@@ -273,7 +273,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           </div>
         )}
         <div className="pager">
-          <span>{rows.length ? `Showing ${Math.min(shown, rows.length)} of ${rows.length}, act now first, then by weather × need × predicted risk` : ""}</span>
+          <span>{rows.length ? `Showing ${Math.min(shown, rows.length)} of ${rows.length}, act now first, then by weather × need × chance of hardship` : ""}</span>
           {shown < rows.length ? <button type="button" className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>Show {Math.min(PAGE, rows.length - shown)} more</button> : null}
         </div>
       </section>
