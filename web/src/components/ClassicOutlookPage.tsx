@@ -58,6 +58,11 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
   useEffect(() => { document.title = "Classic outlook · ERVEI"; }, []);
   useEffect(() => setShown(PAGE), [tier, hazard, group, town]);
 
+  // Clicking a town's Act or Watch count narrows the list below to those customers and brings it into view.
+  const showTier = (id: string, which: "act" | "watch") => {
+    setTown(id); setTier(which);
+    requestAnimationFrame(() => document.getElementById("who-title")?.scrollIntoView({ block: "start", behavior: "smooth" }));
+  };
   const ready = data?.available ? data : null;
   const townsById = useMemo(() => new Map(ready?.towns.map((t) => [t.id, t]) ?? []), [ready]);
   // The outlook comes first: by contact day, then the first hazard date; the server's order (act now, then score) breaks ties.
@@ -194,7 +199,8 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                       const day = t.days.find((x) => x.date === d.date);
                       return <td key={d.date} className="t-day" style={tempColor(day?.max ?? null)} title={day?.precis}>{day?.max ?? "–"}</td>;
                     })}
-                    <td className="t-num">{t.act || ""}</td><td className="t-num">{t.watch || ""}</td>
+                    <td className="t-num">{t.act ? <button type="button" className="tier-btn n-act" title={`Show the ${t.act} act-now customers in ${t.name}`} onClick={() => showTier(t.id, "act")}>{t.act}</button> : ""}</td>
+                    <td className="t-num">{t.watch ? <button type="button" className="tier-btn n-watch" title={`Show the ${t.watch} watch customers in ${t.name}`} onClick={() => showTier(t.id, "watch")}>{t.watch}</button> : ""}</td>
                   </tr>
                 ))}
               </tbody>

@@ -880,3 +880,8 @@ select:not([multiple]):disabled { opacity: .6; }
   .ins-bars .ins-bar-track { grid-column: 1 / -1; grid-row: 2; }
   .ins-hero strong { font-size: 32px; }
 }
+
+.tier-btn { border: 0; background: none; padding: 2px 6px; border-radius: 6px; font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.tier-btn:hover { background: #eef1f4; }
+.tier-btn.n-act { color: #ae2e24; }
+.tier-btn.n-watch { color: #a8670a; }
