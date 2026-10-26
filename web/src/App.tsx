@@ -9,7 +9,7 @@ import { CaseTable } from "./components/CaseTable";
 import type { MapSummary } from "./data/api";
 // Leaflet only loads when the map view is first opened.
 const CaseMap = lazy(() => import("./components/CaseMap").then((m) => ({ default: m.CaseMap })));
-import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, NEW_OUTLOOK_PATH, CLIMATE_PATH, isModifiedClick, useRoute, type Page } from "./route";
+import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, NEW_OUTLOOK_PATH, CLIMATE_PATH, AREA_MAP_PATH, isModifiedClick, useRoute, type Page } from "./route";
 import { DemoSettings } from "./components/DemoSettings";
 import { OutlookPage } from "./components/OutlookPage";
 import { ClassicOutlookPage } from "./components/ClassicOutlookPage";
@@ -21,6 +21,7 @@ const CasePageGuide = lazy(() => import("./components/CasePageGuide").then((m) =
 const PredictionsPage = lazy(() => import("./components/PredictionsPage").then((m) => ({ default: m.PredictionsPage })));
 const RiskModelPage = lazy(() => import("./components/RiskModelPage").then((m) => ({ default: m.RiskModelPage })));
 const OutlookModelPage = lazy(() => import("./components/OutlookModelPage").then((m) => ({ default: m.OutlookModelPage })));
+const AreaMapPage = lazy(() => import("./components/AreaMapPage").then((m) => ({ default: m.AreaMapPage })));
 const ClimateOutlookPage = lazy(() => import("./components/ClimateOutlookPage").then((m) => ({ default: m.ClimateOutlookPage })));
 const FunnelPage = lazy(() => import("./components/FunnelPage").then((m) => ({ default: m.FunnelPage })));
 const AdminPage = lazy(() => import("./admin/AdminPage").then((m) => ({ default: m.AdminPage })));
@@ -427,6 +428,8 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
         <OutlookPage client={client} navigate={navigate} />
       ) : props.page === "classic" ? (
         <ClassicOutlookPage client={client} navigate={navigate} />
+      ) : props.page === "areamap" ? (
+        <AreaMapPage client={client} />
       ) : props.page === "climate" ? (
         <ClimateOutlookPage client={client} />
       ) : props.page === "funnel" ? (
@@ -638,7 +641,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   );
 }
 
-const WIP_ITEMS = [[NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
+const WIP_ITEMS = [[NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [AREA_MAP_PATH, "Area map", "areamap"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
 // In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
 const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Classic outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
 

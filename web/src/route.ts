@@ -23,12 +23,13 @@ export function isModifiedClick(e: { metaKey: boolean; ctrlKey: boolean; shiftKe
   return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
 }
 
-export type Page = "outlook" | "classic" | "climate" | "funnel" | "queue" | "case" | "admin" | "data" | "priority" | "casepage" | "riskmodel" | "outlookmodel" | "predictions";
+export type Page = "outlook" | "classic" | "climate" | "areamap" | "funnel" | "queue" | "case" | "admin" | "data" | "priority" | "casepage" | "riskmodel" | "outlookmodel" | "predictions";
 
 /** The home page is the classic outlook; the grouped support workspace is the new outlook. */
 export const QUEUE_PATH = "/queue";
 export const FUNNEL_PATH = "/funnel";
 export const CLIMATE_PATH = "/climate";
+export const AREA_MAP_PATH = "/area-map";
 /** The classic outlook (act-now and watch list) is the home page. */
 export const CLASSIC_OUTLOOK_PATH = "/";
 /** The grouped support workspace. */
@@ -52,6 +53,7 @@ export function pageFromPath(path: string): Page {
   if (predictionsAccountFromPath(path)) return "predictions";
   if (/^\/funnel\/?$/.test(path)) return "funnel";
   if (/^\/climate\/?$/.test(path)) return "climate";
+  if (/^\/area-map\/?$/.test(path)) return "areamap";
   if (/^\/outlook\/new\/?$/.test(path)) return "outlook";
   if (accountFromPath(path)) return "case";
   return /^\/queue\/?$/.test(path) ? "queue" : "classic"; // "/", the old /outlook/classic link and anything unknown

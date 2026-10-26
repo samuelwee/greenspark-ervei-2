@@ -763,3 +763,12 @@ select:not([multiple]):disabled { opacity: .6; }
 .week-risk { display: grid; gap: 3px; font-size: 13px; }
 .week-bar { display: block; height: 6px; border-radius: 3px; background: #eef1f4; overflow: hidden; }
 .week-bar i { display: block; height: 100%; }
+
+.area-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; padding: 16px 22px; }
+.area-check { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.area-stat { margin: 0 0 0 auto; font-size: 14px; max-width: 420px; }
+.area-map-wrap { position: relative; border-top: 1px solid var(--border); }
+.area-map { height: calc(100vh - 300px); min-height: 560px; z-index: 0; }
+.area-legend { position: absolute; left: 14px; bottom: 26px; z-index: 500; display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px; }
+.area-ramp { display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.area-ramp i { display: block; width: 18px; height: 12px; }
