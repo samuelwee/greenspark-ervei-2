@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { ApiClient, CaseItem, EmergencyFeed } from "../data/api";
 import { readableDates } from "../domain/format";
-import { GROUP_LABEL, HAZARD_ICON, alertColor, dayDate, dayName, isWarning, km, tempColor } from "./outlookText";
+import { HAZARD_ICON, alertColor, dayDate, dayName, isWarning, km, tempColor } from "./outlookText";
 
 // Leaflet only loads when a case has somewhere to show.
 const CaseWeatherMap = lazy(() => import("./CaseWeatherMap").then((m) => ({ default: m.CaseWeatherMap })));
@@ -102,18 +102,12 @@ export function OutlookBanner({ f }: { f: NonNullable<CaseItem["forecast"]> }) {
       ? needs.length ? "Hot or dangerous weather is coming, and their needs add up. Check in if you can." : "Dangerous weather is coming and their predicted risk is high. Check in if you can."
       : o.exposure > 0 ? "Hot weather is coming, but nothing we know makes it riskier for them." : "No hot or dangerous weather is forecast for them this week.";
   return (
-    <div className={`outlook-banner outlook-${o.tier ?? "none"}`}>
-      <div className="ob-head">
-        <span className={`badge ${o.tier === "act" ? "badge-urgent" : o.tier === "watch" ? "badge-high" : "badge-none"}`}>{o.tier === "act" ? "Act now" : o.tier === "watch" ? "Watch" : "Not on the outlook"}</span>
-        <span>{why}</span>
+    <>
+      <div className={`outlook-banner outlook-${o.tier ?? "none"}`}>
+        <strong className="ob-tier">{o.tier === "act" ? "Act now" : o.tier === "watch" ? "Watch" : "Not on the outlook"}</strong>
       </div>
-      {o.tier && needs.length ? (
-        <span className="need-chips">
-          {needs.map((n) => <span key={n.id} className={`need need-${n.group}`} title={GROUP_LABEL[n.group]}>{n.label}</span>)}
-          {o.highRisk ? <span className="need need-more">High predicted risk</span> : null}
-        </span>
-      ) : null}
-    </div>
+      <p className="ob-why">{why}</p>
+    </>
   );
 }
 

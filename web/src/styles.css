@@ -690,6 +690,10 @@ select:not([multiple]):disabled { opacity: .6; }
 .outlook-watch { border-left-color: #e0a030; background: var(--high-bg); }
 .outlook-none { border-left-color: #c1c7d0; }
 .ob-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 14px; }
+.ob-tier { font-size: 18px; font-weight: 700; }
+.outlook-act .ob-tier { color: var(--urgent); }
+.outlook-watch .ob-tier { color: #8a5a00; }
+.ob-why { margin: 10px 0 0; font-size: 14px; }
 .vis-what { margin: -4px 0 8px; font-size: 12px; color: var(--muted); }
 
 /* Long-term heat: now vs around 2050 */
@@ -729,3 +733,11 @@ select:not([multiple]):disabled { opacity: .6; }
 @media (max-width: 640px) { .future-bars li { grid-template-columns: 110px minmax(0, 1fr) 72px; gap: 8px; } }
 .future-table .t-group { text-align: center; border-bottom: 1px solid var(--border); }
 .future-table .t-split { border-left: 1px solid var(--border); }
+
+/* Climate outlook: decade by decade */
+.decades-note { padding: 0 16px; margin: 8px 0; }
+.decades-table .t-group { text-align: center; border-bottom: 1px solid var(--border); }
+.decades-table .t-split { border-left: 2px solid var(--border); }
+.decades-table .t-heat { text-align: center; font-weight: 600; min-width: 52px; }
+.decades-table .t-proj { background-image: repeating-linear-gradient(135deg, transparent 0 6px, #ffffff33 6px 8px); }
+.decades-table .town-name { font-weight: 600; display: block; }
