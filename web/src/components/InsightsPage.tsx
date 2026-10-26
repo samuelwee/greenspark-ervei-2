@@ -25,20 +25,33 @@ const SENSITIVITY_TAG: Record<string, string> = { sensitive: "Sensitive", safety
 const n = (v: number) => v.toLocaleString("en-AU");
 const pct = (v: number, total: number) => (total ? `${Math.round((v / total) * 100)}%` : "0%");
 
-/** A ring split into slices, drawn with stroked circle arcs. */
-function Donut({ slices, total, centre }: { slices: { color: string; value: number; label: string }[]; total: number; centre: string }) {
+/** A ring split into slices, drawn with stroked circle arcs. Hovering (or tabbing to) a slice shows its details in the centre. */
+function Donut({ slices, total, active, onActive, caption }: {
+  slices: { key: string; color: string; value: number; label: string }[]; total: number; active: string | null; onActive: (key: string | null) => void; caption: string;
+}) {
   const r = 70, c = 2 * Math.PI * r;
   let offset = 0;
+  const on = slices.find((x) => x.key === active) ?? null;
   return (
-    <svg viewBox="0 0 200 200" className="ins-donut" role="img" aria-label={slices.map((s) => `${s.label} ${s.value}`).join(", ")}>
+    <svg viewBox="0 0 200 200" className="ins-donut" role="group" aria-label={slices.map((x) => `${x.label} ${x.value}`).join(", ")}>
       <circle cx="100" cy="100" r={r} fill="none" stroke="#eef1f4" strokeWidth="34" />
-      {slices.filter((s) => s.value > 0).map((s) => {
-        const len = (s.value / Math.max(1, total)) * c, el = <circle key={s.label} cx="100" cy="100" r={r} fill="none" stroke={s.color} strokeWidth="34" strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-offset} transform="rotate(-90 100 100)"><title>{s.label}: {s.value}</title></circle>;
+      {slices.filter((x) => x.value > 0).map((x) => {
+        const len = (x.value / Math.max(1, total)) * c;
+        const el = (
+          <circle
+            key={x.key} cx="100" cy="100" r={r} fill="none" stroke={x.color} strokeWidth={active === x.key ? 40 : 34}
+            strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-offset} transform="rotate(-90 100 100)" opacity={active && active !== x.key ? 0.35 : 1}
+            tabIndex={0} aria-label={`${x.label}: ${x.value}, ${pct(x.value, total)}`}
+            onMouseEnter={() => onActive(x.key)} onMouseLeave={() => onActive(null)} onFocus={() => onActive(x.key)} onBlur={() => onActive(null)}
+            style={{ cursor: "pointer", transition: "opacity .12s" }}
+          />
+        );
         offset += len;
         return el;
       })}
-      <text x="100" y="98" textAnchor="middle" className="ins-donut-n">{centre}</text>
-      <text x="100" y="120" textAnchor="middle" className="ins-donut-l">customers</text>
+      <text x="100" y={on ? 84 : 98} textAnchor="middle" className="ins-donut-n">{on ? n(on.value) : n(total)}</text>
+      <text x="100" y={on ? 104 : 120} textAnchor="middle" className="ins-donut-l" style={on ? { fontSize: 10 } : undefined}>{on ? on.label : caption}</text>
+      {on ? <text x="100" y="122" textAnchor="middle" className="ins-donut-l">{pct(on.value, total)} of {n(total)}</text> : null}
     </svg>
   );
 }
@@ -61,6 +74,7 @@ function Bars({ rows, total, color }: { rows: { key: string; label: string; coun
 export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }) {
   const [d, setD] = useState<Insights | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   useEffect(() => { document.title = "Customer insights · ERVEI"; }, []);
   useEffect(() => {
     let live = true;
@@ -76,6 +90,9 @@ export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }
   const multi = d.howMany.filter((h) => h.n >= 2).reduce((a, h) => a + h.count, 0);
   const maxHow = Math.max(1, ...d.howMany.map((h) => h.count));
   const groupLabel = (id: string) => SUPPORT_GROUPS.find((g) => g.id === id)!;
+  // Customers with nothing specific to act on (Monitor and follow-up) are left out of this picture.
+  const supportShown = d.supportGroups.filter((g) => g.id !== "monitor");
+  const needSupport = supportShown.reduce((a, g) => a + g.count, 0);
 
   return (
     <main id="queue" className="outlook insights" tabIndex={-1}>
@@ -130,12 +147,12 @@ export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }
       <div className="ins-two">
         <section className="panel ins-panel" aria-labelledby="ins-groups">
           <h2 id="ins-groups">What support they need first</h2>
-          <p className="hint">Each customer's main support group (A to F).</p>
+          <p className="hint">Each customer's main support group, for customers who need support. Hover a slice for details.</p>
           <div className="ins-donut-wrap">
-            <Donut total={d.total} centre={n(d.total)} slices={d.supportGroups.map((g) => ({ color: SUPPORT_GROUP_COLORS[g.id as keyof typeof SUPPORT_GROUP_COLORS].strong, value: g.count, label: groupLabel(g.id).label }))} />
+            <Donut total={needSupport} caption="needing support" active={hoverGroup} onActive={setHoverGroup} slices={supportShown.map((g) => ({ key: g.id, color: SUPPORT_GROUP_COLORS[g.id as keyof typeof SUPPORT_GROUP_COLORS].strong, value: g.count, label: groupLabel(g.id).label }))} />
             <ul className="ins-legend is-col">
-              {d.supportGroups.map((g) => (
-                <li key={g.id}><i style={{ background: SUPPORT_GROUP_COLORS[g.id as keyof typeof SUPPORT_GROUP_COLORS].strong }} /><span><strong>{groupLabel(g.id).letter} {groupLabel(g.id).label}</strong> {n(g.count)} <span className="sub">{pct(g.count, d.total)}</span></span></li>
+              {supportShown.map((g) => (
+                <li key={g.id} className={hoverGroup === g.id ? "is-on" : undefined} onMouseEnter={() => setHoverGroup(g.id)} onMouseLeave={() => setHoverGroup(null)}><i style={{ background: SUPPORT_GROUP_COLORS[g.id as keyof typeof SUPPORT_GROUP_COLORS].strong }} /><span><strong>{groupLabel(g.id).label}</strong> {n(g.count)} <span className="sub">{pct(g.count, needSupport)}</span></span></li>
               ))}
             </ul>
           </div>

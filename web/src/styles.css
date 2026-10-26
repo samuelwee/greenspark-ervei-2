@@ -888,3 +888,7 @@ select:not([multiple]):disabled { opacity: .6; }
 .tier-btn.n-act { color: #ae2e24; }
 .tier-btn.n-watch { color: #a8670a; }
 .btn[hidden] { display: none; }
+.ins-legend li.is-on { font-weight: 600; }
+.ins-legend.is-col li { padding: 2px 6px; margin: -2px -6px; border-radius: 8px; }
+.ins-legend.is-col li.is-on { background: #f1f4f2; }
+.ins-donut circle:focus { outline: none; }
