@@ -199,7 +199,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
           <div className="board-scroll">
             <FlowBoard
               doc={doc} index={index} selected={selected} trace={tracing} utility={utility} showAllLinks={showAllLinks} strongOnly={strongOnly}
-              matches={matches} readOnly={readOnly} hideAdd={!editMode} only={demo && selected && tracing ? tracing.nodes : null} onSelect={select} onAdd={(kind) => { setSelected(null); setCreating(kind); }}
+              matches={matches} readOnly={readOnly} hideAdd={!editMode} hideNoData={demo} only={demo && selected && tracing ? tracing.nodes : null} onSelect={select} onAdd={(kind) => { setSelected(null); setCreating(kind); }}
               sources={DATA_SOURCE_GROUPS} onSourceSelect={() => select(null)} hidden={hiddenColumns}
             />
           </div>

@@ -17,6 +17,8 @@ interface Props {
   onAdd: (kind: FlowKind) => void;
   /** When set, only these nodes (nodeKey) are shown, e.g. one case's path. */
   only?: Set<string> | null;
+  /** Leaves out signals the demo data can't feed (the ones marked "No data"). */
+  hideNoData?: boolean;
   /** Hides the + Add buttons (read-only views). */
   hideAdd?: boolean;
   /** When set, a Data sources column comes first, linked to the signals each source feeds. */
@@ -80,9 +82,12 @@ export function FlowBoard(props: Props) {
   const [paths, setPaths] = useState<Path[]>([]);
   const [size, setSize] = useState({ w: 0, h: 0 });
 
-  const { only } = props;
-  const keep = useCallback(<T extends { id: string }>(kind: FlowKind, groups: Group<T>[]) =>
-    only ? groups.map((g) => ({ ...g, items: g.items.filter((i) => only.has(nodeKey(kind, i.id))) })).filter((g) => g.items.length > 0) : groups, [only]);
+  const { only, hideNoData } = props;
+  const keep = useCallback(<T extends { id: string }>(kind: FlowKind, groups: Group<T>[]) => {
+    if (!only && !hideNoData) return groups;
+    const shown = (i: T) => (!only || only.has(nodeKey(kind, i.id))) && !(hideNoData && kind === "signal" && !signalHasData(i as unknown as FlowSignal));
+    return groups.map((g) => ({ ...g, items: g.items.filter(shown) })).filter((g) => g.items.length > 0);
+  }, [only, hideNoData]);
   const signalGroups = useMemo(() => keep("signal", groupSignals(doc, utility)), [doc, utility, keep]);
   const circGroups = useMemo(() => keep("circumstance", groupCircumstances(doc, utility)), [doc, utility, keep]);
   const solGroups = useMemo(() => keep("solution", groupSolutions(doc, utility)), [doc, utility, keep]);
