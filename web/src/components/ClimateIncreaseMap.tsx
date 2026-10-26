@@ -1,5 +1,5 @@
 // How much hotter each forecast town gets (hot days a year in the last projected decade minus the latest observed
-// decade), as circles sized and coloured by the increase. Towns that would overlap merge into one circle showing the
+// decade), as circles coloured by the increase, with the number on each. Towns that would overlap merge into one circle showing the
 // range, and split as you zoom in. Clicking a town selects it in the table below. Postcode areas shaded by how
 // disadvantaged they are (ABS SEIFA 2021, IRSD; ABS postal area boundaries) can be switched on as a second layer.
 // The SEIFA layer describes areas, never people.
@@ -91,28 +91,26 @@ export function ClimateIncreaseMap({ data, threshold, selected, onSelect }: {
     const m = map.current;
     if (!m) return;
     const sign = (n: number) => (Math.round(n) > 0 ? `+${Math.round(n)}` : Math.round(n) < 0 ? `\u2212${Math.abs(Math.round(n))}` : "0");
-    const unit = `days a year at ${data.thresholds[threshold]}\u00b0C or more`;
-    // Circles are sized by the increase. Towns closer than 40 px merge into one circle, biggest increase first.
+    // Towns closer than 40 px merge into one circle, biggest increase first, so the numbers never collide.
     const clusters: { seed: L.Point; towns: typeof towns }[] = [];
     for (const t of [...towns].sort((x, y) => y.increase - x.increase)) {
       const at = m.latLngToContainerPoint([t.lat, t.lng]);
       const home = clusters.find((c) => c.seed.distanceTo(at) < 40);
       if (home) home.towns.push(t); else clusters.push({ seed: at, towns: [t] });
     }
-    const radiusOf = (n: number) => 7 + 15 * (Math.max(0, n) / max);
     for (const c of clusters) {
       const top = c.towns[0]!, low = c.towns[c.towns.length - 1]!, many = c.towns.length > 1;
       const lat = c.towns.reduce((n, t) => n + t.lat, 0) / c.towns.length, lng = c.towns.reduce((n, t) => n + t.lng, 0) / c.towns.length;
       const chosen = c.towns.some((t) => t.id === selected?.id);
       const marker = L.circleMarker([lat, lng], {
-        pane: "increase", radius: many ? Math.max(18, radiusOf(top.increase)) : radiusOf(top.increase),
+        pane: "increase", radius: many ? 18 : 15,
         weight: chosen ? 4 : 2, color: chosen ? "#1b2a24" : "#ffffff", fillColor: increaseColor(top.increase, max), fillOpacity: showSeifa ? 0.85 : 0.95,
       });
       if (many) {
         marker.bindTooltip(`<span style="color:${top.increase / max >= 0.5 ? "#ffffff" : "#2b1a00"}">${sign(low.increase)}\u2013${sign(top.increase).replace("+", "")}</span>`, { permanent: true, direction: "center", className: "decade-map-label", pane: "increaseLabels", interactive: false });
         marker.on("click", () => m.fitBounds(L.latLngBounds(c.towns.map((t) => [t.lat, t.lng] as [number, number])), { padding: [60, 60], maxZoom: 11 }));
       } else {
-        marker.bindTooltip(`${top.name}: ${sign(top.increase)} ${unit}`);
+        marker.bindTooltip(`<span style="color:${top.increase / max >= 0.5 ? "#ffffff" : "#2b1a00"}">${sign(top.increase)}</span>`, { permanent: true, direction: "center", className: "decade-map-label", pane: "increaseLabels", interactive: false });
         marker.on("click", () => select.current(top.id, "map"));
       }
       marker.addTo(g);
