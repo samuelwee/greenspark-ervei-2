@@ -40,7 +40,7 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
       <div className="case-wx">
         {f.location ? (
           <Suspense fallback={<div className="case-wx-map" role="status">Loading the map…</div>}>
-            <CaseWeatherMap location={f.location} label={`${suburb} (suburb centre)`} alerts={nearAlerts} />
+            <CaseWeatherMap location={f.location} label={`${suburb} (suburb centre)`} alerts={nearAlerts} days={f.days} />
           </Suspense>
         ) : null}
         <div className="case-wx-info">

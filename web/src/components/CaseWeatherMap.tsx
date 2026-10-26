@@ -4,10 +4,10 @@ import "leaflet/dist/leaflet.css";
 import { addBaseTiles } from "./mapTiles";
 import type { EmergencyAlert } from "../data/api";
 import { alertPopup, triangle } from "./OutlookMap";
-import { alertColor } from "./outlookText";
+import { alertColor, dayName, tempColor } from "./outlookText";
 
 /** The customer's suburb and the Emergency WA warnings near it. Fits the suburb and the warnings, or zooms in on the suburb. */
-export function CaseWeatherMap({ location, label, alerts }: { location: [number, number]; label: string; alerts: EmergencyAlert[] }) {
+export function CaseWeatherMap({ location, label, alerts, days }: { location: [number, number]; label: string; alerts: EmergencyAlert[]; days: { date: string; max: number | null; precis: string }[] }) {
   const el = useRef<HTMLDivElement>(null);
   const [hint, setHint] = useState(false);
   useEffect(() => {
@@ -47,6 +47,11 @@ export function CaseWeatherMap({ location, label, alerts }: { location: [number,
   return (
     <div className="case-wx-map-wrap">
       <div ref={el} className="case-wx-map" role="region" aria-label={`Map of ${label} and nearby Emergency WA warnings`} />
+      {days.length ? (
+        <ol className="case-wx-map-days" aria-label="Forecast maximum for the next days">
+          {days.map((d) => <li key={d.date} title={d.precis}><span>{dayName(d.date)}</span><strong style={tempColor(d.max)}>{d.max ?? "–"}°</strong></li>)}
+        </ol>
+      ) : null}
       <div className={`map-wheel-hint${hint ? " is-on" : ""}`} aria-hidden="true">Use {key} + scroll to zoom the map</div>
     </div>
   );
