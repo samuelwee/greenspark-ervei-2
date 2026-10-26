@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { ApiClient, ClimateDecades, Outlook } from "../data/api";
-import { HotterYearsAhead } from "./HotterYearsAhead";
+import type { ApiClient, ClimateDecades } from "../data/api";
 
 /** Background and text colour for a count of very hot days a year: pale to deep red. */
 function daysColor(n: number | null, max: number): { background: string; color: string } {
@@ -12,23 +11,20 @@ function daysColor(n: number | null, max: number): { background: string; color: 
 }
 
 /**
- * The long view: how many very hot days a year each forecast town gets, now and around 2050, and decade by decade
+ * The long view: how many hot days a year each forecast town gets, decade by decade
  * from the 1960s to the 2090s, observed then projected.
  */
-export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "outlook" | "climateDecades"> }) {
-  const [outlook, setOutlook] = useState<Outlook | null>(null);
+export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climateDecades"> }) {
   const [decades, setDecades] = useState<ClimateDecades | null>(null);
   const [threshold, setThreshold] = useState<"hot" | "veryHot">("hot");
   const [error, setError] = useState<string | null>(null);
   useEffect(() => { document.title = "Climate outlook · ERVEI"; }, []);
   useEffect(() => {
     let live = true;
-    client.outlook?.().then((o) => { if (live) setOutlook(o); }, () => undefined);
     client.climateDecades?.().then((d) => { if (live) setDecades(d); }, (e: unknown) => { if (live) setError(e instanceof Error ? e.message : "Could not load the climate data."); });
     return () => { live = false; };
   }, [client]);
 
-  const ready = outlook?.available ? outlook : null;
   const d = decades?.available ? decades : null;
   // A town's increase: days a year in the last projected decade, minus the latest observed decade. Biggest first.
   const lastObserved = d?.observedDecades.at(-1), lastProjected = d?.projectedDecades.at(-1);
@@ -50,8 +46,6 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "outloo
           <p className="hint">Very hot days a year where our customers live: observed since the 1960s, and projected to the 2090s on a middle emissions path. For planning where support will matter most over the coming decades.</p>
         </div>
       </div>
-
-      {ready?.climate ? <HotterYearsAhead towns={ready.towns} climate={ready.climate} /> : null}
 
       <section className="panel" aria-labelledby="decades-title">
         <div className="panel-head">
