@@ -782,4 +782,4 @@ select:not([multiple]):disabled { opacity: .6; }
 .decade-map-legend { position: absolute; left: 14px; bottom: 26px; z-index: 500; display: grid; gap: 6px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; }
 .decade-map-legend > div { display: flex; align-items: center; gap: 8px; }
 .decade-map-canvas { height: 520px; z-index: 0; }
-.decade-map-n { display: grid; place-items: center; font-weight: 700; font-size: 11px; color: #1b2a24; text-shadow: 0 0 2px #fff; pointer-events: none; }
+.decade-map-n { display: grid; place-items: center; font-weight: 800; font-size: 16px; line-height: 1; pointer-events: none; }

@@ -50,6 +50,7 @@ export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold
     addBaseTiles(m);
     m.createPane("seifa").style.zIndex = "420";
     m.createPane("increase").style.zIndex = "450";
+    m.createPane("increaseLabels").style.zIndex = "460";
     seifaLayer.current = L.layerGroup().addTo(m);
     heatLayer.current = L.layerGroup().addTo(m);
     return () => { m.remove(); map.current = null; };
@@ -82,7 +83,9 @@ export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold
       const marker = L.circleMarker([t.lat, t.lng], { pane: "increase", radius: 16, weight: 2, color: "#ffffff", fillColor: increaseColor(t.increase, max), fillOpacity: showSeifa ? 0.8 : 0.95 });
       marker.bindTooltip(`${t.name}: ${t.increase >= 0 ? "+" : "−"}${Math.abs(Math.round(t.increase))} days a year at ${data.thresholds[threshold]}°C or more`);
       marker.addTo(g);
-      L.marker([t.lat, t.lng], { pane: "increase", interactive: false, icon: L.divIcon({ className: "decade-map-n", html: `+${Math.round(t.increase)}`, iconSize: [32, 24] }) }).addTo(g);
+      // The number goes in its own pane above the circle, in white on the deeper reds and dark on the pale ones.
+      const deep = t.increase / max >= 0.5;
+      L.marker([t.lat, t.lng], { pane: "increaseLabels", interactive: false, icon: L.divIcon({ className: "decade-map-n", html: `<span style="color:${deep ? "#ffffff" : "#2b1a00"}">+${Math.round(t.increase)}</span>`, iconSize: [40, 28] }) }).addTo(g);
     }
   }, [towns, max, showIncrease, showSeifa, data.thresholds, threshold]);
 
