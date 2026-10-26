@@ -788,7 +788,9 @@ select:not([multiple]):disabled { opacity: .6; }
 .decades-table tbody tr { cursor: pointer; }
 .decades-table tr.is-selected { outline: 3px solid #1f7a50; outline-offset: -3px; }
 
-.case-wx-map-days { position: absolute; left: 12px; right: 12px; bottom: 30px; z-index: 450; margin: 0; padding: 4px; list-style: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; background: rgba(255, 255, 255, .94); border: 1px solid var(--border); border-radius: 10px; text-align: center; }
+.case-wx-map-days { position: absolute; left: 12px; right: 12px; bottom: 30px; z-index: 450; margin: 0; padding: 4px; list-style: none; display: grid; grid-template-columns: 40px repeat(7, minmax(0, 1fr)); gap: 2px; background: rgba(255, 255, 255, .94); border: 1px solid var(--border); border-radius: 10px; text-align: center; }
 .case-wx-map-days button { display: grid; gap: 2px; justify-items: center; width: 100%; padding: 4px 2px; border: 2px solid transparent; border-radius: 8px; background: none; font-size: 11px; color: var(--muted); cursor: pointer; }
 .case-wx-map-days button[aria-pressed="true"] { border-color: #1b2a24; background: #fff; color: var(--fg); }
 .case-wx-map-days strong { font-size: 13px; font-weight: 700; border-radius: 99px; padding: 1px 7px; font-variant-numeric: tabular-nums; }
+.case-wx-map-days .case-wx-play { height: 100%; min-height: 40px; color: #fff; background: #006c50; border-color: #006c50; font-size: 14px; }
+.case-wx-map-days .case-wx-play:hover { background: #005a42; }

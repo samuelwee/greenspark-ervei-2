@@ -20,6 +20,13 @@ export function CaseWeatherMap({ location, label, alerts, days, towns }: {
   const hottest = useMemo(() => days.reduce<string | null>((best, d) => (d.max !== null && (best === null || d.max > (days.find((x) => x.date === best)?.max ?? -Infinity)) ? d.date : best), null) ?? days[0]?.date ?? "", [days]);
   const [date, setDate] = useState(hottest);
   useEffect(() => setDate(hottest), [hottest]);
+  // Play steps through the week one day a second and loops; choosing a day by hand stops it.
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => {
+    if (!playing || days.length < 2) return;
+    const t = window.setInterval(() => setDate((current) => days[(Math.max(0, days.findIndex((d) => d.date === current)) + 1) % days.length]!.date), 1000);
+    return () => window.clearInterval(t);
+  }, [playing, days]);
 
   useEffect(() => {
     if (!el.current) return;
@@ -71,9 +78,10 @@ export function CaseWeatherMap({ location, label, alerts, days, towns }: {
       <div ref={el} className="case-wx-map" role="region" aria-label={`Map of ${label} and nearby Emergency WA warnings, shaded by forecast temperature`} />
       {days.length ? (
         <ol className="case-wx-map-days" aria-label="Choose a day to shade the map by its forecast maximum">
+          <li><button type="button" className="case-wx-play" aria-label={playing ? "Pause the week" : "Play the week"} title={playing ? "Pause" : "Play through the week"} onClick={() => setPlaying((p) => !p)}>{playing ? "❚❚" : "▶"}</button></li>
           {days.map((d) => (
             <li key={d.date}>
-              <button type="button" aria-pressed={d.date === date} title={d.precis} onClick={() => setDate(d.date)}>
+              <button type="button" aria-pressed={d.date === date} title={d.precis} onClick={() => { setPlaying(false); setDate(d.date); }}>
                 <span>{dayName(d.date)}</span><strong style={tempColor(d.max)}>{d.max ?? "–"}°</strong>
               </button>
             </li>
