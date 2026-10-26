@@ -30,8 +30,16 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "outloo
 
   const ready = outlook?.available ? outlook : null;
   const d = decades?.available ? decades : null;
-  const towns = useMemo(() => (d ? [...d.towns].sort((a, b) => b.customers - a.customers || a.name.localeCompare(b.name)) : []), [d]);
-  const max = useMemo(() => Math.max(1, ...towns.flatMap((t) => [...Object.values(t.observed), ...Object.values(t.projected)].map((v) => v[threshold] ?? 0))), [towns, threshold]);
+  // A town's increase: days a year in the last projected decade, minus the latest observed decade. Biggest first.
+  const lastObserved = d?.observedDecades.at(-1), lastProjected = d?.projectedDecades.at(-1);
+  const towns = useMemo(() => {
+    if (!d || !lastObserved || !lastProjected) return [];
+    return d.towns.map((t) => {
+      const now = t.observed[lastObserved]?.[threshold] ?? null, then = t.projected[lastProjected]?.[threshold] ?? null;
+      return { t, increase: now === null || then === null ? null : then - now };
+    }).sort((a, b) => (b.increase ?? -Infinity) - (a.increase ?? -Infinity) || b.t.customers - a.t.customers || a.t.name.localeCompare(b.t.name));
+  }, [d, threshold, lastObserved, lastProjected]);
+  const max = useMemo(() => Math.max(1, ...towns.flatMap(({ t }) => [...Object.values(t.observed), ...Object.values(t.projected)].map((v) => v[threshold] ?? 0))), [towns, threshold]);
 
   return (
     <main id="queue" className="outlook climate-page" tabIndex={-1}>
@@ -57,12 +65,12 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "outloo
         </div>
         {error ? <p className="muted decades-note" role="alert">{error}</p> : !decades ? <p className="muted decades-note" role="status">Loading…</p> : !d ? <p className="muted decades-note">The decade-by-decade data isn’t on this server yet.</p> : (
           <>
-            <p className="hint decades-note">Average days a year at {d.thresholds[threshold]}°C or more in each decade, by forecast town, most customers first. Part decades are shown by their years. The models don’t cover 2026 to 2034 or 2065 to 2069.</p>
+            <p className="hint decades-note">Average days a year at {d.thresholds[threshold]}°C or more in each decade, by forecast town, biggest increase first. The increase is the {lastProjected?.replace("-", "–")} count minus the {lastObserved?.replace("-", "–")} count. Part decades are shown by their years. The models don’t cover 2026 to 2034 or 2065 to 2069.</p>
             <div className="table-wrap">
               <table className="town-table decades-table">
                 <thead>
                   <tr>
-                    <th scope="col" rowSpan={2}>Town</th><th scope="col" rowSpan={2} className="t-num">Customers</th>
+                    <th scope="col" rowSpan={2}>Town</th><th scope="col" rowSpan={2} className="t-num">Customers</th><th scope="col" rowSpan={2} className="t-num">Increase</th>
                     <th scope="colgroup" colSpan={d.observedDecades.length} className="t-group">Observed (SILO)</th>
                     <th scope="colgroup" colSpan={d.projectedDecades.length} className="t-group t-split">Projected ({d.projectedSource.scenario})</th>
                   </tr>
@@ -72,10 +80,11 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "outloo
                   </tr>
                 </thead>
                 <tbody>
-                  {towns.map((t) => (
+                  {towns.map(({ t, increase }) => (
                     <tr key={t.id}>
                       <th scope="row"><span className="town-name">{t.name}</span>{t.district ? <span className="sub">{t.district}</span> : null}</th>
                       <td className="t-num">{t.customers}</td>
+                      <td className="t-num"><span className="future-add">{increase === null ? "–" : `${increase >= 0 ? "+" : "−"}${Math.abs(Math.round(increase))}`}</span></td>
                       {d.observedDecades.map((dec) => { const v = t.observed[dec]?.[threshold] ?? null; return <td key={dec} className="t-num t-heat" style={daysColor(v, max)}>{v === null ? "–" : Math.round(v)}</td>; })}
                       {d.projectedDecades.map((dec, i) => { const v = t.projected[dec]?.[threshold] ?? null; return <td key={dec} className={`t-num t-heat t-proj${i === 0 ? " t-split" : ""}`} style={daysColor(v, max)}>{v === null ? "–" : Math.round(v)}</td>; })}
                     </tr>
