@@ -7,7 +7,7 @@ const QUESTIONS: Question[] = [
   {
     q: "How urgent is this?",
     answer: "A priority score out of 100 and a label (urgent, high, moderate, routine), worked out from what the case shows. A rising trend means something is getting worse: arrears growing, usage dropping, prepay credit running low or a disconnection warning. The line underneath names the circumstances that added the most.",
-    look: "How urgent; Priority and predicted risk",
+    look: "Contact by; Priority and predicted risk",
   },
   {
     q: "What is going on with the account?",

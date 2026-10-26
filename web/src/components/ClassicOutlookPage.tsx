@@ -3,7 +3,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { ApiClient, EmergencyFeed, HazardKind, Outlook, OutlookCustomer } from "../data/api";
 import { accountHref, isModifiedClick } from "../route";
-import { PRIORITY_TEXT } from "../domain/format";
 import { band, percent } from "./predictionText";
 import { ALERT_LEVELS, GROUP_LABEL, HAZARD_HINT, HAZARD_ICON, HAZARD_LABEL, alertColor, dayDate, isWarning, dayName, tempColor } from "./outlookText";
 
@@ -18,6 +17,9 @@ function storedLayers(): Layers {
 type Group = keyof typeof GROUP_LABEL;
 
 /** The home page: the next week's weather across WA and the customers it could put at risk, so staff can call first. */
+/** The priority label as when to contact the customer, so a column of "Urgent" still says something. */
+const CONTACT_BY: Record<string, string> = { urgent: "Today", high: "This week", moderate: "Soon", routine: "Monitor" };
+
 export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency">; navigate: (to: string) => void }) {
   const [data, setData] = useState<Outlook | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -230,7 +232,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
               <thead>
                 <tr>
                   <th scope="col">Outlook</th><th scope="col">Customer</th><th scope="col">Weather coming</th>
-                  <th scope="col">Why they’re vulnerable</th><th scope="col">Predicted risk <span className="sim">90 days</span></th><th scope="col">Priority</th>
+                  <th scope="col">Why they’re vulnerable</th><th scope="col">Predicted risk <span className="sim">90 days</span></th><th scope="col">Contact by</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,7 +263,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                       </td>
                       <td>{c.risk && b ? <span className={`pred-pill pred-${b.id}`} title={`${percent(c.risk.probability)} chance of any harm in 90 days`}>{b.text} · {percent(c.risk.probability)}</span> : <span className="sub">No score</span>}</td>
                       <td>
-                        {c.priority ? <span className={`badge badge-${c.priority.label}`}>{PRIORITY_TEXT[c.priority.label as keyof typeof PRIORITY_TEXT] ?? c.priority.label}</span> : <span className="badge badge-none">No priority</span>}
+                        {c.priority ? <span className={`badge badge-${c.priority.label}`}>{CONTACT_BY[c.priority.label] ?? c.priority.label}</span> : <span className="badge badge-none">No date</span>}
                       </td>
                     </tr>
                   );

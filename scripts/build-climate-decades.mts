@@ -91,10 +91,14 @@ async function siloYears([lat, lng]: [number, number]): Promise<Map<number, Coun
   return new Map([...out].filter(([, r]) => r.days >= 365).map(([y, r]) => [y, { hot: r.hot, veryHot: r.veryHot }]));
 }
 
-async function yearCounts(path: string, [lat, lng]: [number, number]): Promise<Counts> {
+const failed: string[] = [];
+/** One year's counts at one point, or null when the server keeps refusing that file: the year is then left out. */
+async function yearCounts(path: string, [lat, lng]: [number, number]): Promise<Counts | null> {
   const key = `${path}@${lat.toFixed(4)},${lng.toFixed(4)}`;
   if (cache[key]) return cache[key]!;
-  const csv = await text(`${THREDDS}/ncss/grid/${path}?var=tasmax&latitude=${lat}&longitude=${lng}&temporal=all&accept=csv`);
+  let csv: string;
+  try { csv = await text(`${THREDDS}/ncss/grid/${path}?var=tasmax&latitude=${lat}&longitude=${lng}&temporal=all&accept=csv`); }
+  catch (e) { failed.push(key); console.log(`  skipped ${key}: ${e instanceof Error ? e.message.slice(-40) : e}`); return null; }
   const vals = csv.trim().split("\n").slice(1).map((l) => Number(l.split(",")[3])).filter(Number.isFinite);
   const counts = { hot: vals.filter((v) => v >= HOT).length, veryHot: vals.filter((v) => v >= VERY_HOT).length };
   cache[key] = counts;
@@ -124,12 +128,13 @@ async function main() {
   let done = 0;
   const results = await pool(jobs.map((j) => async () => { const r = await j.run(); if (++done % 50 === 0) console.log(`  ${done}/${jobs.length}`); return r; }), CONCURRENCY);
   save();
+  if (failed.length) console.log(`Left out ${failed.length} year(s) the server would not serve.`);
   const change: Record<string, Record<string, Counts>> = {};
   for (const t of towns) {
     const of = (m: string) => jobs.map((j, i) => ({ j, r: results[i]! })).filter(({ j }) => j.t === t.id && j.m === m);
-    const obs = of("obs").map(({ r }) => r);
+    const obs = of("obs").flatMap(({ r }) => (r ? [r] : []));
     const base = { hot: mean(obs.map((o) => o.hot)), veryHot: mean(obs.map((o) => o.veryHot)) };
-    const perModel = MODELS.map((m) => byDecade(new Map(of(m).map(({ j, r }) => [j.y, r]))));
+    const perModel = MODELS.map((m) => byDecade(new Map(of(m).flatMap(({ j, r }) => (r ? [[j.y, r] as const] : [])))));
     change[t.id] = Object.fromEntries(perModel[0]!.map((d, i) => [d.decade, {
       hot: round1(median(perModel.map((pm) => pm[i]!.hot)) - base.hot), veryHot: round1(median(perModel.map((pm) => pm[i]!.veryHot)) - base.veryHot),
     }]));

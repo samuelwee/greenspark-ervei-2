@@ -9,6 +9,9 @@ const money = (n: number) => `$${n.toLocaleString("en-AU", { maximumFractionDigi
 const PRIORITY_COLOR: Record<string, string> = { urgent: "var(--urgent)", high: "var(--high)", moderate: "var(--moderate)", routine: "var(--routine)" };
 
 /** A half-circle gauge for a score out of 100. */
+/** The priority label as when to contact the customer. */
+const CONTACT_BY: Record<string, string> = { urgent: "Today", high: "This week", moderate: "Soon", routine: "Monitor" };
+
 function Gauge({ score, color, label }: { score: number; color: string; label: string }) {
   const r = 60, len = Math.PI * r;
   return (
@@ -63,12 +66,12 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
         </section>
       ) : null}
       <section className="case-card vis-card" aria-labelledby="vis-pri">
-        <h2 id="vis-pri">How urgent</h2>
-        <p className="vis-what">How serious their situation is now. Orders the case queue.</p>
+        <h2 id="vis-pri">Contact by</h2>
+        <p className="vis-what">When to reach them, from how serious their situation is now.</p>
         {priority ? (
           <>
             <Gauge score={priority.score} color={PRIORITY_COLOR[priority.label] ?? "var(--muted)"} label="Priority" />
-            <p className="vis-big" style={{ color: PRIORITY_COLOR[priority.label] }}>{priority.label[0]!.toUpperCase() + priority.label.slice(1)}</p>
+            <p className="vis-big" style={{ color: PRIORITY_COLOR[priority.label] }}>{CONTACT_BY[priority.label] ?? priority.label}</p>
             <p className="hint">{c.modelAssessment.trend === "rising" ? "↑ Getting worse" : "→ Steady"}</p>
           </>
         ) : <p className="muted">No priority yet.</p>}
