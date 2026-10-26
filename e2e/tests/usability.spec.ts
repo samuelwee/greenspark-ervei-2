@@ -142,6 +142,7 @@ test.describe("case pages", () => {
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole("heading", { name: "Who this week’s weather could hurt" })).toBeVisible();
     await expect(page.locator(".case-page")).toHaveCount(0);
+    await page.getByRole("navigation", { name: "Main" }).getByRole("button", { name: /WIP/ }).click();
     await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Case queue" }).click();
     await expect(page).toHaveURL(/\/queue$/);
     await expect(page.locator(".case-table")).toBeVisible();

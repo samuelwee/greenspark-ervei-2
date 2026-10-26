@@ -9,7 +9,7 @@ import { CaseTable } from "./components/CaseTable";
 import type { MapSummary } from "./data/api";
 // Leaflet only loads when the map view is first opened.
 const CaseMap = lazy(() => import("./components/CaseMap").then((m) => ({ default: m.CaseMap })));
-import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, CLASSIC_OUTLOOK_PATH, NEW_OUTLOOK_PATH, CLIMATE_PATH, isModifiedClick, useRoute, type Page } from "./route";
+import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, NEW_OUTLOOK_PATH, CLIMATE_PATH, isModifiedClick, useRoute, type Page } from "./route";
 import { DemoSettings } from "./components/DemoSettings";
 import { OutlookPage } from "./components/OutlookPage";
 import { ClassicOutlookPage } from "./components/ClassicOutlookPage";
@@ -416,10 +416,8 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav" aria-label="Main">
-          {([[CLASSIC_OUTLOOK_PATH, "Classic outlook", "classic"], [NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const).map(([href, label, page]) => (
-            <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
-          ))}
-          <BtsMenu page={props.page} navigate={navigate} />
+          <NavMenu label="WIP" id="wip-menu" items={WIP_ITEMS} page={props.page} navigate={navigate} />
+          <NavMenu label="BTS" id="bts-menu" items={BTS_ITEMS} page={props.page} navigate={navigate} />
         </nav>
         <DemoSettings client={client} users={catalog.users} user={user} onSwitchUser={props.onSwitchUser} />
       </header>
@@ -640,8 +638,12 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   );
 }
 
-/** "BTS" (behind the scenes): a menu of the pages about how the demo works. */
-function BtsMenu(props: { page: Page; navigate: (to: string) => void }) {
+const WIP_ITEMS = [[NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
+// In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
+const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Weather outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
+
+/** A dropdown of nav links: "BTS" (behind the scenes) and "WIP" (pages still being worked on). */
+function NavMenu(props: { label: string; id: string; items: readonly (readonly [string, string, Page])[]; page: Page; navigate: (to: string) => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -653,16 +655,15 @@ function BtsMenu(props: { page: Page; navigate: (to: string) => void }) {
     document.addEventListener("keydown", close);
     return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
   }, [open]);
-  // In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
-  const items = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Weather outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
+  const items = props.items;
   const inside = items.some(([, , page]) => page === props.page);
   return (
     <div className="bts" ref={ref}>
-      <button type="button" className={`bts-btn${inside ? " is-current" : ""}`} aria-expanded={open} aria-controls="bts-menu" onClick={() => setOpen(!open)}>
-        BTS <span aria-hidden="true">▾</span>
+      <button type="button" className={`bts-btn${inside ? " is-current" : ""}`} aria-expanded={open} aria-controls={props.id} onClick={() => setOpen(!open)}>
+        {props.label} <span aria-hidden="true">▾</span>
       </button>
       {open ? (
-        <ul id="bts-menu" className="bts-menu">
+        <ul id={props.id} className="bts-menu">
           {items.map(([href, label, page]) => (
             <li key={href}>
               <a
