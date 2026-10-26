@@ -17,8 +17,15 @@ function storedLayers(): Layers {
 type Group = keyof typeof GROUP_LABEL;
 
 /** The home page: the next week's weather across WA and the customers it could put at risk, so staff can call first. */
-/** The priority label as when to contact the customer, so a column of "Urgent" still says something. */
-const CONTACT_BY: Record<string, string> = { urgent: "Today", high: "This week", moderate: "Soon", routine: "Monitor" };
+/** When to contact a customer comes from the 7-day outlook, not from their current priority score: a warning in force or a hazard today is Today, then by how many days until the first hot or dangerous day. */
+const CONTACT_BY = ["Today", "This week", "Soon", "Monitor"] as const;
+const CONTACT_BADGE = ["urgent", "high", "moderate", "routine"] as const;
+function contactRank(c: { kinds: string[]; firstDate: string | null }, today: string): number {
+  if (c.kinds.includes("warning")) return 0;
+  if (!c.firstDate) return 3;
+  const days = Math.round((Date.parse(`${c.firstDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
+  return days <= 0 ? 0 : days <= 3 ? 1 : 2;
+}
 
 export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency">; navigate: (to: string) => void }) {
   const [data, setData] = useState<Outlook | null>(null);
@@ -57,9 +64,10 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
 
   const ready = data?.available ? data : null;
   const townsById = useMemo(() => new Map(ready?.towns.map((t) => [t.id, t]) ?? []), [ready]);
+  // The outlook comes first: by contact day, then the first hazard date; the server's order (act now, then score) breaks ties.
   const rows = useMemo(() => (ready?.customers ?? []).filter((c) =>
     (!tier || c.tier === tier) && (!hazard || c.kinds.includes(hazard)) && (!group || c.sensitivity.some((s) => s.group === group)) && (!town || c.townId === town),
-  ), [ready, tier, hazard, group, town]);
+  ).map((c) => ({ c, rank: contactRank(c, ready!.today) })).sort((x, y) => x.rank - y.rank || (x.c.firstDate ?? "9").localeCompare(y.c.firstDate ?? "9")).map((x) => x.c), [ready, tier, hazard, group, town]);
 
   if (error) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="alert"><h1>We couldn’t load the outlook</h1><p>{error}</p><button type="button" className="btn" onClick={() => setRetry((n) => n + 1)}>Try again</button></div></main>;
   if (!data) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="status"><p>Loading the forecast…</p></div></main>;
@@ -262,7 +270,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                         </span>
                       </td>
                       <td>
-                        {c.priority ? <span className={`badge badge-${c.priority.label}`}>{CONTACT_BY[c.priority.label] ?? c.priority.label}</span> : <span className="badge badge-none">No date</span>}
+                        {(() => { const r = contactRank(c, ready.today); return <span className={`badge badge-${CONTACT_BADGE[r]}`}>{CONTACT_BY[r]}</span>; })()}
                       </td>
                       <td>{c.risk && b ? <span className={`pred-pill pred-${b.id}`} title={`${percent(c.risk.probability)} chance of any harm in 90 days`}>{b.text} · {percent(c.risk.probability)}</span> : <span className="sub">No score</span>}</td>
                     </tr>
@@ -273,7 +281,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           </div>
         )}
         <div className="pager">
-          <span>{rows.length ? `Showing ${Math.min(shown, rows.length)} of ${rows.length}, act now first, then by weather × need × chance of hardship` : ""}</span>
+          <span>{rows.length ? `Showing ${Math.min(shown, rows.length)} of ${rows.length}, soonest weather first, then act now, then by weather × need × chance of hardship` : ""}</span>
           {shown < rows.length ? <button type="button" className="btn btn-small" onClick={() => setShown((n) => n + PAGE)}>Show {Math.min(PAGE, rows.length - shown)} more</button> : null}
         </div>
       </section>
