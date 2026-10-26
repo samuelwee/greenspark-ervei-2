@@ -23,11 +23,13 @@ export function isModifiedClick(e: { metaKey: boolean; ctrlKey: boolean; shiftKe
   return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
 }
 
-export type Page = "outlook" | "funnel" | "queue" | "case" | "admin" | "data" | "priority" | "casepage" | "riskmodel" | "outlookmodel" | "predictions";
+export type Page = "outlook" | "classic" | "funnel" | "queue" | "case" | "admin" | "data" | "priority" | "casepage" | "riskmodel" | "outlookmodel" | "predictions";
 
 /** The home page is the weather outlook; the case queue has its own page. */
 export const QUEUE_PATH = "/queue";
 export const FUNNEL_PATH = "/funnel";
+/** The weather outlook before the grouped support workspace: the act-now and watch list. */
+export const CLASSIC_OUTLOOK_PATH = "/outlook/classic";
 
 /** Behind-the-scenes pages, under the BTS menu. */
 export const FLOWCHART_PATH = "/bts/flowchart";
@@ -46,6 +48,7 @@ export function pageFromPath(path: string): Page {
   if (/^\/bts\/weather-outlook\/?$/.test(path)) return "outlookmodel";
   if (predictionsAccountFromPath(path)) return "predictions";
   if (/^\/funnel\/?$/.test(path)) return "funnel";
+  if (/^\/outlook\/classic\/?$/.test(path)) return "classic";
   if (accountFromPath(path)) return "case";
   return /^\/queue\/?$/.test(path) ? "queue" : "outlook";
 }

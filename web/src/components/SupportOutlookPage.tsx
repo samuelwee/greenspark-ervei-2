@@ -97,7 +97,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   return <main id="queue" className="outlook support-outlook" tabIndex={-1}>
     <header className="page-head">
       <div><p className="eyebrow">Weather outlook · support groups</p><h1>Support before the heat</h1><p className="hint">Find groups to contact before dangerous weather arrives.</p></div>
-      <div className="outlook-source"><span className={`demo-pill${ready.demo ? " sample-source" : ""}`}>{ready.demo ? "Sample heatwave · fictional forecast" : "Live Bureau forecast"}</span><span className="sub">{ready.issuedAt ? `Issued ${new Date(ready.issuedAt).toLocaleString("en-AU", { timeZone: "Australia/Perth", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}` : "Issue time not given"}</span></div>
+      <div className="outlook-source">{ready.demo ? null : <span className="demo-pill">Live Bureau forecast</span>}<span className="sub">{ready.issuedAt ? `Issued ${new Date(ready.issuedAt).toLocaleString("en-AU", { timeZone: "Australia/Perth", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}` : "Issue time not given"}</span></div>
     </header>
     {notice || ready.weather.error ? <p className="support-notice" role="status">{notice ?? `Weather refresh failed: ${ready.weather.error}. Showing the last available forecast.`}</p> : null}
 
@@ -122,7 +122,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
       <SupportWeatherKey feed={emergency} enabled={showAlerts && !!emergency?.available} />
       <div className="support-map-layout">
         <div className="support-map-column">
-          <Suspense fallback={<div className="outlook-map support-map" role="status">Loading the map…</div>}><SupportMap areas={mapped.areas} towns={ready.towns} activeGroups={groups} alerts={warnings} showHeat={showHeat} showAlerts={showAlerts && !!emergency?.available} chosen={picked?.id ?? null} onChoose={(id) => { setAreaId(id); setShown(PAGE); }} region={region} date={date} demo={ready.demo} /></Suspense>
+          <Suspense fallback={<div className="outlook-map support-map" role="status">Loading the map…</div>}><SupportMap areas={mapped.areas} towns={ready.towns} activeGroups={groups} alerts={warnings} showHeat={showHeat} showAlerts={showAlerts && !!emergency?.available} chosen={picked?.id ?? null} onChoose={(id) => { setAreaId(id); setShown(PAGE); }} region={region} date={date} /></Suspense>
           <div className="support-time" role="group" aria-label="Forecast period">
             <strong>Forecast period</strong><button type="button" aria-pressed={!date} className={!date ? "is-on" : ""} onClick={() => setDate("")}>Whole week</button>
             {ready.days.map((day) => <button key={day.date} type="button" className={day.date === date ? "is-on" : ""} aria-pressed={day.date === date} onClick={() => setDate(day.date)}><span>{dayName(day.date)}</span>{dayDate(day.date)}</button>)}
@@ -162,13 +162,12 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
     <details id="group-customers" className="panel support-customer-detail" open={showCustomers} onToggle={(event) => setShowCustomers(event.currentTarget.open)}>
       <summary>Customers in {selectedPostcode ? scopeLabel : "selected groups"} <span className="pill">{members.length}</span></summary>
       <p className="hint">Urgent customers first. Open a case to check the evidence and agree suitable support.</p>
-      <div className="table-wrap"><table className="case-table support-customer-table"><thead><tr><th scope="col">Attention</th><th scope="col">Customer</th><th scope="col">Recorded needs</th><th scope="col">90-day predicted risk</th><th scope="col">Case status</th></tr></thead><tbody>
+      <div className="table-wrap"><table className="case-table support-customer-table"><thead><tr><th scope="col">Attention</th><th scope="col">Customer</th><th scope="col">Recorded needs</th><th scope="col">90-day predicted risk</th></tr></thead><tbody>
         {members.slice(0, shown).map((customer) => { const urgency = SUPPORT_URGENCY[supportUrgency(customer.tier)], risk = customer.risk ? band(customer.risk.probability, customer.risk.baseRate) : null; return <tr key={customer.personId}>
           <td><span className="support-urgency-pill" style={{ background: urgency.color, color: urgency.text }}>{urgency.label}</span></td>
           <td>{customer.accountNumber ? <a className="name-link" href={accountHref(customer.accountNumber)} onClick={(event) => open(event, customer)}>{customer.displayName}</a> : customer.displayName}<span className="sub">{customer.accountNumber} · {customer.suburb}</span></td>
           <td>{customer.sensitivity.map((signal) => signal.label).join(" · ") || "No matching recorded sensitivity; review information"}</td>
-          <td>{customer.risk && risk ? `${risk.text} · ${percent(customer.risk.probability)}` : "No score"}</td>
-          <td>{customer.status?.replaceAll("_", " ") ?? "Not recorded"}</td>
+          <td>{customer.risk && risk ? <span className={`pred-pill pred-${risk.id}`} title={`${percent(customer.risk.probability)} chance of any harm in 90 days`}>{risk.text}</span> : <span className="sub">No score</span>}</td>
         </tr>; })}
       </tbody></table></div>
       <div className="pager"><span>Showing {Math.min(shown, members.length)} of {members.length}</span>{shown < members.length ? <button type="button" className="btn btn-small" onClick={() => setShown((value) => value + PAGE)}>Show {Math.min(PAGE, members.length - shown)} more</button> : null}</div>

@@ -16,10 +16,10 @@ const REGION_BOUNDS: Record<MapRegion, L.LatLngBoundsExpression> = {
 };
 
 /** Count markers and weather coverage deliberately use different visual encodings. */
-export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date, demo }: {
+export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date }: {
   areas: SupportArea[]; towns: OutlookTown[]; activeGroups: SupportGroupId[]; alerts: EmergencyAlert[];
   showHeat: boolean; showAlerts: boolean; chosen: string | null; onChoose: (id: string | null) => void;
-  region: MapRegion; date: string; demo: boolean;
+  region: MapRegion; date: string;
 }) {
   const el = useRef<HTMLDivElement>(null), wrap = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -163,7 +163,7 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
   return <div ref={wrap} className={`outlook-map-wrap support-map-wrap${full ? " is-full" : ""}`}>
     <div className="support-map-stage">
       <div ref={el} className="outlook-map support-map" role="region" aria-label="Customer support groups and estimated forecast temperatures" />
-      <div className="support-map-caption">{showHeat ? demo ? "Illustrative temperature forecast" : "Town forecast temperature estimate" : "Customer support groups"}<span>{showHeat ? `${date ? `Daily maximum · ${date}` : "Peak daily maximum · next 7 days"} · °C` : "Approximate postcode locations"}</span></div>
+      <div className="support-map-caption">{showHeat ? "Town forecast temperature estimate" : "Customer support groups"}<span>{showHeat ? `${date ? `Daily maximum · ${date}` : "Peak daily maximum · next 7 days"} · °C` : "Approximate postcode locations"}</span></div>
       <div className="support-map-key" aria-label="Map legend">
         <strong>Support groups</strong>
         <div className="support-group-key">{SUPPORT_GROUPS.filter((item) => activeGroups.includes(item.id)).map((item) => <span key={item.id}><i style={{ background: SUPPORT_GROUP_COLORS[item.id].strong }} />{item.letter} {item.label}</span>)}</div>
@@ -174,7 +174,7 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
       </div>
     </div>
     <div className="map-zoom outlook-zoom">
-      <span className="sub">{demo ? "Fictional sample values" : "BoM town forecast values"} · shading estimated · approximate postcode groups</span>
+      <span className="sub">Town forecast values · shading estimated · approximate postcode groups</span>
       <button type="button" className="link-btn" onClick={() => map.current?.fitBounds(REGION_BOUNDS[region], { padding: [22, 22] })}>Reset map</button>
       {region === "perth" ? <button type="button" className="link-btn" onClick={() => map.current?.setView([-32.53, 115.77], 11)}>Mandurah</button> : null}
       <button type="button" className="btn btn-small map-full" aria-pressed={full} onClick={toggleFull}>{full ? "Exit full screen" : "Full screen"}</button>

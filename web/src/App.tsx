@@ -9,9 +9,10 @@ import { CaseTable } from "./components/CaseTable";
 import type { MapSummary } from "./data/api";
 // Leaflet only loads when the map view is first opened.
 const CaseMap = lazy(() => import("./components/CaseMap").then((m) => ({ default: m.CaseMap })));
-import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, isModifiedClick, useRoute, type Page } from "./route";
+import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, CLASSIC_OUTLOOK_PATH, isModifiedClick, useRoute, type Page } from "./route";
 import { DemoSettings } from "./components/DemoSettings";
 import { OutlookPage } from "./components/OutlookPage";
+import { ClassicOutlookPage } from "./components/ClassicOutlookPage";
 // Pages other than the outlook load on first visit, which keeps the first download small.
 const CaseDetails = lazy(() => import("./components/CaseDetails").then((m) => ({ default: m.CaseDetails })));
 const DataSourcesPage = lazy(() => import("./components/DataSourcesPage").then((m) => ({ default: m.DataSourcesPage })));
@@ -414,7 +415,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav" aria-label="Main">
-          {([["/", "Weather outlook", "outlook"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const).map(([href, label, page]) => (
+          {([["/", "Weather outlook", "outlook"], [CLASSIC_OUTLOOK_PATH, "Classic outlook", "classic"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const).map(([href, label, page]) => (
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
           <BtsMenu page={props.page} navigate={navigate} />
@@ -425,6 +426,8 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
       <Suspense fallback={<div className="state-screen" role="status"><p>Loading…</p></div>}>
       {props.page === "outlook" ? (
         <OutlookPage client={client} navigate={navigate} />
+      ) : props.page === "classic" ? (
+        <ClassicOutlookPage client={client} navigate={navigate} />
       ) : props.page === "funnel" ? (
         <FunnelPage client={client} navigate={navigate} />
       ) : props.page === "admin" ? (
