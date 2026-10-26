@@ -104,12 +104,6 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
 
     <SupportWeek data={ready} region={region} groups={groups} date={date} onDate={setDate} />
 
-    <section className="support-toolbar" aria-label="Support group filters">
-      <div className="support-group-filters" role="group" aria-label="Primary support group">
-        <button type="button" className={`support-filter support-filter-all${groups.length === ALL_GROUPS.length ? " is-on" : ""}`} aria-pressed={groups.length === ALL_GROUPS.length} onClick={() => setGroups(ALL_GROUPS)}>All groups <span>{baseRows.length.toLocaleString("en-AU")}</span></button>
-        {SUPPORT_GROUPS.map((item) => <button key={item.id} type="button" style={groupStyle(item.id)} className={`support-filter${groups.includes(item.id) ? " is-on" : ""}`} aria-pressed={groups.includes(item.id)} onClick={() => setGroups((current) => current.includes(item.id) ? current.filter((id) => id !== item.id) : [...current, item.id])}><i>{item.letter}</i>{item.label}<span>{groupCounts[item.id].toLocaleString("en-AU")}</span></button>)}
-      </div>
-    </section>
 
     <section className="panel support-workspace" aria-label="Group map and support plan">
       <div className="support-map-toolbar">
@@ -133,6 +127,10 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
         </div>
 
         <aside className="support-detail support-solutions-panel" aria-label="Support plan for selected groups">
+          <div className="support-group-filters support-group-filters-panel" role="group" aria-label="Primary support group">
+            <button type="button" className={`support-filter support-filter-all${groups.length === ALL_GROUPS.length ? " is-on" : ""}`} aria-pressed={groups.length === ALL_GROUPS.length} onClick={() => setGroups(ALL_GROUPS)}>All groups <span>{baseRows.length.toLocaleString("en-AU")}</span></button>
+            {SUPPORT_GROUPS.map((item) => <button key={item.id} type="button" style={groupStyle(item.id)} className={`support-filter${groups.includes(item.id) ? " is-on" : ""}`} aria-pressed={groups.includes(item.id)} onClick={() => setGroups((current) => current.includes(item.id) ? current.filter((id) => id !== item.id) : [...current, item.id])}><i>{item.letter}</i>{item.label}<span>{groupCounts[item.id].toLocaleString("en-AU")}</span></button>)}
+          </div>
           <div className="support-detail-title"><div><p className="eyebrow">Support plan</p><h2>{supportTab === "solutions" ? "Solutions" : "Actions"}</h2><p className="sub">{scopeLabel}</p></div></div>
           <div className="support-panel-tabs" role="tablist" aria-label="Support plan view" onKeyDown={(event) => {
             if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
