@@ -5,6 +5,9 @@ import { addBaseTiles } from "./mapTiles";
 import type { EmergencyAlert, OutlookTown } from "../data/api";
 import { HAZARD_ICON, HAZARD_LABEL, alertColor, dayDate, dayName, hazardColor, tempColor } from "./outlookText";
 
+/** All of Western Australia, fitted to whatever size the map is. */
+const WA_BOUNDS: L.LatLngBoundsExpression = [[-35.2, 112.9], [-13.7, 129.1]];
+
 /** A popup's content, built as elements so the feed's text is never read as HTML. */
 export function alertPopup(a: EmergencyAlert): HTMLElement {
   const box = document.createElement("div");
@@ -45,7 +48,7 @@ export function OutlookMap({ towns, alerts, showTowns, showAlerts, chosen, onCho
 
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = (map.current = L.map(el.current, { scrollWheelZoom: true }).setView([-26.5, 121], 5));
+    const m = (map.current = L.map(el.current, { scrollWheelZoom: true }).fitBounds(WA_BOUNDS, { padding: [22, 22] }));
     addBaseTiles(m);
     // Warning areas sit under the town circles, so the towns stay clickable.
     m.createPane("alerts").style.zIndex = "390";
@@ -148,7 +151,7 @@ export function OutlookMap({ towns, alerts, showTowns, showAlerts, chosen, onCho
         {controls}
         <button type="button" className="link-btn" onClick={() => map.current?.setView([-31.95, 115.86], 9)}>Perth</button>
         <button type="button" className="link-btn" onClick={() => map.current?.setView([-33.2, 116.2], 7)}>South West</button>
-        <button type="button" className="link-btn" onClick={() => map.current?.setView([-26.5, 121], 5)}>All of WA</button>
+        <button type="button" className="link-btn" onClick={() => map.current?.fitBounds(WA_BOUNDS, { padding: [22, 22] })}>All of WA</button>
         <button type="button" className="btn btn-small map-full" aria-pressed={full} onClick={toggleFull}>{full ? "✕ Exit full screen" : "⛶ Full screen"}</button>
       </div>
     </div>
