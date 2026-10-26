@@ -586,6 +586,25 @@ export function createApp(store: Store, options: AppOptions = {}) {
     res.json(body);
   });
 
+  // How many customers each flowchart box applies to: signals found, circumstances flagged, solutions offered.
+  let flowCountsCache: { at: number; key: string; body: unknown } | null = null;
+  app.get("/api/flow/counts", async (_req, res) => {
+    const flowDoc = await currentFlow();
+    const key = `${store.casesSignature()}|${flowDoc ? docId(flowDoc) : "fixture"}`;
+    if (flowCountsCache && flowCountsCache.key === key && Date.now() - flowCountsCache.at < 60_000) return res.json(flowCountsCache.body);
+    const data = await dataset();
+    const signals: Record<string, number> = {}, circumstances: Record<string, number> = {}, solutions: Record<string, number> = {};
+    const add = (m: Record<string, number>, ids: Iterable<string>) => { for (const id of new Set(ids)) m[id] = (m[id] ?? 0) + 1; };
+    for (const c of data.cases) {
+      add(circumstances, c.circumstances.map((x) => x.circumstanceId));
+      add(signals, c.circumstances.flatMap((x) => (x.signals ?? []).map((s) => s.id)));
+      add(solutions, c.recommendations.map((x) => x.recommendationId));
+    }
+    const body = { total: data.people.length, signals, circumstances, solutions };
+    flowCountsCache = { at: Date.now(), key, body };
+    res.json(body);
+  });
+
   // The help chat: how the tool works, from a written description, with no customer data. Each visitor gets a few
   // questions every ten minutes, since every answer is a paid call.
   const asked = new Map<string, number[]>();

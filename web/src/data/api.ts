@@ -106,6 +106,8 @@ export interface ApiClient {
   assistantStatus?(): Promise<{ on: boolean; available: boolean }>;
   setAssistant?(on: boolean): Promise<{ on: boolean; available: boolean }>;
   insights?(): Promise<Insights>;
+  /** How many customers each flowchart box applies to. */
+  flowCounts?(): Promise<FlowCounts>;
   ask?(messages: { role: "user" | "assistant"; content: string }[]): Promise<{ answer: string; model: string }>;
   /** Every forecast town with its position and daily maximums, for shading the case page's map. */
   forecastTowns?(): Promise<{ available: boolean; towns: ForecastTown[] }>;
@@ -137,6 +139,8 @@ export interface MapPlace {
 export interface MapSummary { total: number; unplaced: number; places: MapPlace[] }
 
 export type HazardKind = "heat" | "hot" | "fire" | "warning";
+/** How many customers each flowchart box applies to, by box id. */
+export interface FlowCounts { total: number; signals: Record<string, number>; circumstances: Record<string, number>; solutions: Record<string, number> }
 /** Counts across every customer, for the insights page. */
 export interface Insights {
   total: number; rising: number; sensitive: number; safety: number; north: number;
@@ -278,6 +282,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     climateDecades: () => req("GET", "/api/climate/decades"),
     emergency: () => req("GET", "/api/emergency"),
     insights: () => req("GET", "/api/insights"),
+    flowCounts: () => req("GET", "/api/flow/counts"),
     ask: (messages) => req("POST", "/api/assistant", { messages }),
     assistantStatus: () => req("GET", "/api/assistant/status"),
     setAssistant: (on) => req("POST", "/api/assistant/status", { on }),

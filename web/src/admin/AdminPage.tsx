@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FlowKind } from "@greenspark/shared";
-import type { ApiClient } from "../data/api";
+import type { ApiClient, FlowCounts } from "../data/api";
 import { FLOW_COLUMNS, FlowBoard, type FlowColumn } from "./FlowBoard";
 import { FlowDetail } from "./FlowDetail";
 import { FlowSettings } from "./FlowSettings";
@@ -41,6 +41,14 @@ export function AdminPage({ client }: { client: ApiClient }) {
 
   const index = useMemo(() => (doc ? buildIndex(doc) : null), [doc]);
   const [howOpen, setHowOpen] = useState(false);
+  // The demo panel's big tile: how many customers the chosen box applies to.
+  const [counts, setCounts] = useState<FlowCounts | null>(null);
+  useEffect(() => {
+    if (!demo || !client.flowCounts) return;
+    let live = true;
+    client.flowCounts().then((c) => { if (live) setCounts(c); }, () => undefined);
+    return () => { live = false; };
+  }, [client, demo]);
   const tracing = useMemo(() => (index && selected && entityOf(index, selected) ? trace(index, selected) : null), [index, selected]);
   const hits = useMemo(() => (doc ? search(doc, query) : []), [doc, query]);
   const matches = useMemo(() => new Set(query.trim() ? hits.map((h) => nodeKey(h.ref.kind, h.ref.id)) : []), [hits, query]);
@@ -197,7 +205,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
           </div>
         </div>
         {demo && !selected ? null : <div className={demo ? "flow-float" : undefined}>{demo ? <button type="button" className="flow-float-close" aria-label="Close the panel" onClick={() => setSelected(null)}>✕</button> : null}<FlowDetail
-          doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} compact={demo} dispatch={flow.dispatch}
+          doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} compact={demo} counts={counts} dispatch={flow.dispatch}
           onSelect={select} onCloseCreate={() => setCreating(null)}
         /></div>}
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { FlowCounts } from "../data/api";
 import { signalHasData, slugId, type FlowCircumstance, type FlowDoc, type FlowKind, type FlowOp, type FlowSignal, type FlowSolution, type Strength } from "@greenspark/shared";
 import { KIND_LABEL, SOURCE_LABEL, UTILITY_LABEL, entityOf, type FlowIndex, type Ref } from "./flowModel";
 import type { DispatchResult } from "./useFlow";
@@ -13,6 +14,8 @@ interface Props {
   readOnly: boolean;
   /** The floating demo panel: just the box's name, kind and facts, without its id, links or notes. */
   compact?: boolean;
+  /** How many customers each box applies to; shown as a big tile on the compact panel. */
+  counts?: FlowCounts | null;
   dispatch: Dispatch;
   onSelect: (ref: Ref | null) => void;
   onCloseCreate: () => void;
@@ -289,7 +292,7 @@ function Facts({ doc, entity, kind, compact }: { doc: FlowDoc; entity: FlowSigna
   );
 }
 
-function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly: boolean; compact?: boolean; dispatch: Dispatch; onSelect: (ref: Ref | null) => void }) {
+function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly: boolean; compact?: boolean; counts?: FlowCounts | null; dispatch: Dispatch; onSelect: (ref: Ref | null) => void }) {
   const { doc, index, refr, readOnly, dispatch } = props;
   const entity = entityOf(index, refr);
   const [editing, setEditing] = useState(false);
@@ -317,6 +320,12 @@ function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly
         </div>
         <button type="button" className="icon-btn" aria-label="Close details" onClick={() => props.onSelect(null)}>✕</button>
       </div>
+      {props.compact && props.counts ? (() => {
+        const n = (refr.kind === "signal" ? props.counts.signals : refr.kind === "circumstance" ? props.counts.circumstances : props.counts.solutions)[entity.id] ?? 0;
+        const what = refr.kind === "signal" ? "customers this signal is found for" : refr.kind === "circumstance" ? "customers flagged with this circumstance" : "customers this solution is offered to";
+        const share = props.counts.total ? n / props.counts.total : 0;
+        return <div className="count-tile" role="group" aria-label="Customers this applies to"><strong>{n.toLocaleString("en-AU")}</strong><span>{what}</span><span className="sub">{props.counts.total ? `${share >= 0.1 ? Math.round(share * 100) : (share * 100).toFixed(1)}% of ${props.counts.total.toLocaleString("en-AU")} customers` : ""}</span></div>;
+      })() : null}
       <Facts doc={doc} entity={entity} kind={refr.kind} compact={props.compact} />
       {readOnly ? null : <div className="actions">
         <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button>
@@ -393,7 +402,7 @@ export function FlowDetail(props: Props) {
           onDone={(ref) => { props.onCloseCreate(); if (ref) props.onSelect(ref); }} onCancel={props.onCloseCreate}
         />
       ) : selected ? (
-        <EntityView key={`${selected.kind}:${selected.id}`} doc={doc} index={props.index} refr={selected} readOnly={props.readOnly} compact={props.compact} dispatch={props.dispatch} onSelect={props.onSelect} />
+        <EntityView key={`${selected.kind}:${selected.id}`} doc={doc} index={props.index} refr={selected} readOnly={props.readOnly} compact={props.compact} counts={props.counts} dispatch={props.dispatch} onSelect={props.onSelect} />
       ) : (
         <div className="frest">
           <h2>Details</h2>
