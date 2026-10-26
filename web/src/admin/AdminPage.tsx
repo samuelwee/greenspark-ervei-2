@@ -42,10 +42,13 @@ export function AdminPage({ client }: { client: ApiClient }) {
   // Demo mode shows one example path at a time: circumstances with several signals and a solution, busiest first.
   const examples = useMemo(() => (doc ? doc.circumstances.filter((c) => c.signals.length >= 2 && c.solutions.length >= 1).sort((a, b) => b.signals.length - a.signals.length).slice(0, 12) : []), [doc]);
   const [example, setExample] = useState(0);
+  // The side panel floats in the corner in demo mode and can be closed; choosing a box opens it again.
+  const [panelOpen, setPanelOpen] = useState(true);
   const tracing = useMemo(() => (index && selected && entityOf(index, selected) ? trace(index, selected) : null), [index, selected]);
   const hits = useMemo(() => (doc ? search(doc, query) : []), [doc, query]);
   const matches = useMemo(() => new Set(query.trim() ? hits.map((h) => nodeKey(h.ref.kind, h.ref.id)) : []), [hits, query]);
 
+  useEffect(() => { if (demo) setUtility("electricity"); }, [demo]);
   useEffect(() => { if (demo && examples.length) setSelected({ kind: "circumstance", id: examples[example % examples.length]!.id }); }, [demo, examples, example]);
   // If the selected item is deleted (by you or somebody else), clear the selection.
   useEffect(() => { if (index && selected && !entityOf(index, selected)) setSelected(null); }, [index, selected]);
@@ -64,6 +67,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
     setCreating(null);
     setUndoError(null);
     setSelected(ref);
+    if (ref) setPanelOpen(true);
     if (ref) scrollTo.current = nodeKey(ref.kind, ref.id);
   };
 
@@ -107,7 +111,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
           <p className="sub">{doc.meta.title} · last verified {doc.meta.last_verified} · {doc.meta.counts.signals} signals, {doc.meta.counts.circumstances} circumstances, {doc.meta.counts.solutions} solutions, {doc.meta.counts.links} links</p>
         </div>
         <div className="admin-actions">
-          <span className={`savestate ${flow.save.state}`} role="status" aria-live="polite">
+          <span hidden={demo} className={`savestate ${flow.save.state}`} role="status" aria-live="polite">
             {flow.save.state === "saving" ? "Saving to the file…" : flow.save.state === "saved" ? "All changes saved to the file" : flow.save.state === "error" ? `Couldn’t save: ${flow.save.message}. Showing the file as it is now.` : "Changes save to the file as you make them"}
           </span>
           <button type="button" className="btn" hidden={!editMode} disabled={!last || flow.readOnly} title={last ? `Undo ${last.label}` : "Nothing to undo"} onClick={() => { const r = flow.undo(); setUndoError(r.ok ? null : r.error); }}>
@@ -119,7 +123,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
       </header>
 
       {mode === "view" ? <div className="notice" role="note"><p><strong>View only.</strong> To change the flowchart, set Flowchart mode to Edit in the settings (the gear, top right).</p></div> : null}
-      {demo && examples.length ? <div className="demo-bar" role="note"><p><strong>Example:</strong> {examples[example % examples.length]!.name}. The highlighted boxes and lines show what raises it and what is offered. Click any box to trace its path.</p><button type="button" className="btn btn-small" onClick={() => setExample((e) => (e + 1) % examples.length)}>Another example</button></div> : null}
+      {demo && examples.length ? <div className="demo-bar" role="note"><p><strong>Example:</strong> {examples[example % examples.length]!.name}. The highlighted boxes and lines show what raises it and what is offered. Click any box to trace its path.</p><button type="button" className="btn btn-small" onClick={() => { setPanelOpen(true); setExample((e) => (e + 1) % examples.length); }}>Another example</button></div> : null}
       {flow.problems.length ? (
         <div className="notice notice-error" role="alert">
           <div><p>The JSON file has problems, so editing is switched off until they are fixed:</p><ul className="problems">{flow.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
@@ -177,7 +181,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
         <span><i className="mk area" aria-hidden="true" />From area statistics</span>
         <span><i className="dot sensitive" aria-hidden="true" />Sensitive</span>
         <span><i className="dot safety" aria-hidden="true" />Safety</span>
-        <span><span className="ut"><i className="y">E</i><i className="y">G</i><i className="y">W</i><i className="y">P</i></span>Electricity, gas, water, phone/internet</span>
+        <span hidden={demo}><span className="ut"><i className="y">E</i><i className="y">G</i><i className="y">W</i><i className="y">P</i></span>Electricity, gas, water, phone/internet</span>
       </div>
 
       <div className="flow-layout">
@@ -191,10 +195,10 @@ export function AdminPage({ client }: { client: ApiClient }) {
             />
           </div>
         </div>
-        {demo ? null : <FlowDetail
+        {demo && !panelOpen ? null : <div className={demo ? "flow-float" : undefined}>{demo ? <button type="button" className="flow-float-close" aria-label="Close the panel" onClick={() => setPanelOpen(false)}>✕</button> : null}<FlowDetail
           doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} dispatch={flow.dispatch}
           onSelect={select} onCloseCreate={() => setCreating(null)}
-        />}
+        /></div>}
       </div>
 
       {settingsOpen && editMode ? <FlowSettings doc={doc} dispatch={flow.dispatch} onClose={() => setSettingsOpen(false)} /> : null}

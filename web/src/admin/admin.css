@@ -253,3 +253,9 @@
 .demo-bar p { margin: 0; font-size: 14px; }
 .admin.is-demo .flow-layout { grid-template-columns: minmax(0, 1fr); }
 .admin-controls[hidden] { display: none; }
+
+.savestate[hidden], .legend span[hidden] { display: none; }
+.admin.is-demo .flow-float { position: fixed; right: 18px; bottom: 18px; z-index: 800; width: min(380px, calc(100vw - 36px)); max-height: min(62vh, 560px); overflow-y: auto; background: #fff; border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 10px 32px rgba(9, 30, 66, .28); }
+.admin.is-demo .flow-float aside, .admin.is-demo .flow-float > * { max-width: 100%; }
+.flow-float-close { position: sticky; top: 8px; float: right; z-index: 2; margin: 8px 8px 0 0; width: 28px; height: 28px; border: 0; border-radius: 50%; background: #eef1f4; font-size: 13px; cursor: pointer; }
+.flow-float-close:hover { background: #dfe3e8; }
