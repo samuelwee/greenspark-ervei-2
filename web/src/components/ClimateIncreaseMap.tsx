@@ -104,7 +104,7 @@ export function ClimateIncreaseMap({ data, threshold, selected, onSelect }: {
       const chosen = c.towns.some((t) => t.id === selected?.id);
       const marker = L.circleMarker([lat, lng], {
         pane: "increase", radius: many ? 18 : 15,
-        weight: chosen ? 4 : 2, color: chosen ? "#1b2a24" : "#ffffff", fillColor: increaseColor(top.increase, max), fillOpacity: showSeifa ? 0.85 : 0.95,
+        weight: 2, color: chosen ? "#1b2a24" : "#ffffff", fillColor: increaseColor(top.increase, max), fillOpacity: showSeifa ? 0.85 : 0.95,
       });
       if (many) {
         marker.bindTooltip(`<span style="color:${top.increase / max >= 0.5 ? "#ffffff" : "#2b1a00"}">${sign(low.increase)}\u2013${sign(top.increase).replace("+", "")}</span>`, { permanent: true, direction: "center", className: "decade-map-label", pane: "increaseLabels", interactive: false });
