@@ -24,7 +24,7 @@ const SEIFA_COLOR = ["#3b1a6b", "#53288f", "#6c3fb0", "#8660c4", "#a183d3", "#ba
 
 export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold: "hot" | "veryHot" }) {
   const [showIncrease, setShowIncrease] = useState(true);
-  const [showSeifa, setShowSeifa] = useState(true);
+  const [showSeifa, setShowSeifa] = useState(false);
   const [boundaries, setBoundaries] = useState<Boundaries | null>(null);
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
