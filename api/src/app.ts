@@ -15,6 +15,7 @@ import type { Store } from "./store";
 import type { Clock } from "./clock";
 import { FlowFile } from "./flow";
 import type { Predictions } from "./predictions";
+import { answerQuestion, MAX_HISTORY, MAX_MESSAGE_CHARS } from "./assistant";
 import { draftPlan, PLAN_KINDS, perthToday, planFacts, type AiConfig, type ContactRules, type PlanKind, type SupportPlan } from "./plan";
 import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, primarySupportGroup, supportGroupNeeds, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
 import type { ClimateDecades, ClimateHeat } from "./climate";
@@ -532,6 +533,19 @@ export function createApp(store: Store, options: AppOptions = {}) {
     if (!apiKey) throw new ApiError("validation_failed", `No ${choice.provider === "claude" ? "Anthropic" : "Gemini"} API key is set on the server.`);
     ai = { provider: choice.provider, apiKey, models: { support: model, signals: model } };
     res.json(aiStatus());
+  });
+
+  // The help chat: how the tool works, from a written description, with no customer data. Each visitor gets a few
+  // questions every ten minutes, since every answer is a paid call.
+  const asked = new Map<string, number[]>();
+  app.post("/api/assistant", async (req, res) => {
+    const { messages } = parse(z.object({ messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(MAX_MESSAGE_CHARS * 4) })).min(1).max(MAX_HISTORY) }), req.body);
+    const who = String(req.headers["fly-client-ip"] ?? req.ip ?? "unknown"), now = Date.now();
+    const recent = (asked.get(who) ?? []).filter((t) => now - t < 10 * 60_000);
+    if (recent.length >= 15) throw new ApiError("unavailable", "That's a lot of questions. Try again in a few minutes.");
+    asked.set(who, [...recent, now]);
+    const trimmed = messages.map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_CHARS) }));
+    res.json(await answerQuestion(ai, trimmed));
   });
 
   // Plans are kept per case version and flowchart version, so each case calls the AI once until it changes.

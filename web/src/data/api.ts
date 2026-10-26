@@ -102,6 +102,8 @@ export interface ApiClient {
   climateDecades?(): Promise<ClimateDecades>;
   /** Current Emergency WA warnings, for the outlook map. Optional so test clients can leave it out. */
   emergency?(): Promise<EmergencyFeed>;
+  /** The help chat: a visitor's questions so far, ending with theirs. */
+  ask?(messages: { role: "user" | "assistant"; content: string }[]): Promise<{ answer: string; model: string }>;
   /** Every forecast town with its position and daily maximums, for shading the case page's map. */
   forecastTowns?(): Promise<{ available: boolean; towns: ForecastTown[] }>;
   /** The risk model's card. Optional so test clients can leave it out. */
@@ -260,6 +262,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     outlook: () => req("GET", "/api/outlook"),
     climateDecades: () => req("GET", "/api/climate/decades"),
     emergency: () => req("GET", "/api/emergency"),
+    ask: (messages) => req("POST", "/api/assistant", { messages }),
     forecastTowns: () => req("GET", "/api/forecast/towns"),
     account: (accountNumber) => req("GET", `/api/accounts/${encodeURIComponent(accountNumber)}`),
     assign: (assigneeUserId, items) => req("POST", "/api/cases/bulk/assignment", { assigneeUserId, items }),

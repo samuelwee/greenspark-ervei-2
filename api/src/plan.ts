@@ -185,6 +185,14 @@ export async function draftPlan(
   return { text: parsed.summary.trim(), model, generatedAt, interpreter: contact.interpreter, ...(valid ? { order } : {}) };
 }
 
+/** One plain-text answer from the configured model, for the help chat. */
+export async function askModel(ai: AiConfig, system: string, prompt: string): Promise<string> {
+  if (!ai.apiKey) throw new ApiError("unavailable", "No AI key is set on the server.");
+  const text = await (ai.provider === "claude" ? askClaude : askGemini)("signals", system, prompt, ai.apiKey, ai.models.support);
+  if (!text) throw new ApiError("unavailable", "The AI returned no answer. Try again.");
+  return text;
+}
+
 type Ask = (kind: PlanKind, system: string, prompt: string, apiKey: string, model: string) => Promise<string | undefined>;
 
 /** Anthropic's Claude. The SDK retries a busy (429) or server error (5xx) once by itself. */

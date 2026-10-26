@@ -21,6 +21,7 @@ const CasePageGuide = lazy(() => import("./components/CasePageGuide").then((m) =
 const PredictionsPage = lazy(() => import("./components/PredictionsPage").then((m) => ({ default: m.PredictionsPage })));
 const RiskModelPage = lazy(() => import("./components/RiskModelPage").then((m) => ({ default: m.RiskModelPage })));
 const OutlookModelPage = lazy(() => import("./components/OutlookModelPage").then((m) => ({ default: m.OutlookModelPage })));
+const AssistantChat = lazy(() => import("./components/AssistantChat").then((m) => ({ default: m.AssistantChat })));
 const AreaMapPage = lazy(() => import("./components/AreaMapPage").then((m) => ({ default: m.AreaMapPage })));
 const ClimateOutlookPage = lazy(() => import("./components/ClimateOutlookPage").then((m) => ({ default: m.ClimateOutlookPage })));
 const FunnelPage = lazy(() => import("./components/FunnelPage").then((m) => ({ default: m.FunnelPage })));
@@ -600,6 +601,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
       </div>
       )}
       </Suspense>
+      <Suspense fallback={null}><AssistantChat client={client} /></Suspense>
     </div>
   );
 }
