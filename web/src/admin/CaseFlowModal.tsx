@@ -96,12 +96,12 @@ function Panel({ refr, path, index, onSelect }: { refr: Ref | null; path: Path; 
           {" "}{def?.sensitivity === "standard" ? "Needs 1 strong or 2 supporting." : "Needs a strong signal."}
         </p>
         <p className="block-label">Signals</p>
-        <ul className="plain cf-list">
-          {links.map((l) => {
-            const s = path.seen.get(l.id);
-            return <li key={l.id}>{pick("signal", l.id, signalName(l.id))} <span className="sub">{l.strength === "strong" ? "Strong" : "Supporting"} · {s ? readableDates(s.evidence) : "not seen"}</span></li>;
-          })}
-        </ul>
+        {/* Only the signals seen for this case: the ones that were not seen are left out. */}
+        {links.some((l) => path.seen.has(l.id)) ? (
+          <ul className="plain cf-list">
+            {links.filter((l) => path.seen.has(l.id)).map((l) => <li key={l.id}>{pick("signal", l.id, signalName(l.id))} <span className="sub">{l.strength === "strong" ? "Strong" : "Supporting"} · {readableDates(path.seen.get(l.id)!.evidence)}</span></li>)}
+          </ul>
+        ) : <p className="muted">None seen.</p>}
         <p className="block-label">Solutions</p>
         <ul className="plain cf-list">{(def?.solutions ?? []).map((id) => <li key={id}>{pick("solution", id, solName(id))}</li>)}</ul>
       </>
