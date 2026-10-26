@@ -4,14 +4,14 @@ import { HEAT_THRESHOLD, HOT_MARGIN, SENSITIVITY, SENSITIVITY_GROUPS, WEATHER_SI
 const GROUPS = Object.keys(SENSITIVITY_GROUPS) as SensitivityGroup[];
 const SIGNAL_LABEL: Record<string, string> = Object.fromEntries(Object.keys(SENSITIVITY).map((id) => [id, id.startsWith("ask_") ? "Customer told us" : "Account"]));
 
-/** How the Weather outlook and its funnel pick out the customers to contact before the weather hits. */
+/** How the Classic outlook and its funnel pick out the customers to contact before the weather hits. */
 export function OutlookModelPage() {
-  useEffect(() => { document.title = "Weather outlook model · ERVEI"; }, []);
+  useEffect(() => { document.title = "Classic outlook model · ERVEI"; }, []);
   return (
     <main id="queue" className="bts-page" tabIndex={-1}>
       <header className="bts-head">
-        <p className="eyebrow">BTS · Weather outlook</p>
-        <h1>Weather outlook</h1>
+        <p className="eyebrow">BTS · Classic outlook</p>
+        <h1>Classic outlook</h1>
         <p className="sub">
           The home page looks a week ahead. It matches the Bureau of Meteorology's forecast for each customer's area with what we know
           about them, to find the people the weather could hurt before it arrives. The Funnel page shows how that narrows everyone down
@@ -54,7 +54,7 @@ export function OutlookModelPage() {
         <ul className="plain history">
           <li><strong>Act now:</strong> dangerous weather (exposure 3 or more) and a health or supply need. Or any hot day for someone on life support, with a medical need for cooling or medical equipment, or whose supply has stopped or whose prepay credit is running out.</li>
           <li><strong>Watch:</strong> any hot or dangerous weather and a need that adds up: a weight of 3 or more, or any health or supply need. A concession card alone doesn't count. Or dangerous weather and a predicted 90-day risk at least 4× the average (see Risk model).</li>
-          <li><strong>Order:</strong> act now first, then by score: exposure × (1 + needs' weight, up to 15), plus 20 × the predicted chance of any harm. The list shows the weather coming and when, the top three needs, the predicted risk and the case's priority.</li>
+          <li><strong>Order:</strong> act now first, then by score: exposure × (1 + needs' weight, up to 15), plus 20 × the predicted chance of any harm. The list shows the weather coming and when, the top five needs, the chance of hardship and when to contact them (Today, This week, Soon or Monitor, from the case's priority).</li>
           <li><strong>Everyone else</strong> is counted on the page but not listed.</li>
         </ul>
       </section>
@@ -64,7 +64,7 @@ export function OutlookModelPage() {
         <ul className="plain history">
           <li><strong>All customers:</strong> everyone with a Bureau forecast for their area.</li>
           <li><strong>Hot or dangerous weather:</strong> exposure of 1 or more this week.</li>
-          <li><strong>…and a reason it could hurt them:</strong> any need in the table above, or a high predicted risk.</li>
+          <li><strong>…and a reason it could hurt them:</strong> any need in the table above, or a high chance of hardship.</li>
           <li><strong>On the outlook:</strong> act now or watch.</li>
           <li><strong>Act now.</strong> Each stage is part of the one above, so the funnel always narrows. "See the act-now list" opens the outlook filtered to them.</li>
         </ul>
@@ -92,11 +92,11 @@ export function OutlookModelPage() {
       </section>
 
       <section className="case-card bts-facts" aria-labelledby="om-other">
-        <h2 id="om-other">Not the same as priority or predicted risk</h2>
+        <h2 id="om-other">Not the same as priority or chance of hardship</h2>
         <ul className="plain history">
           <li><strong>Outlook:</strong> could this week's weather hurt them? The next 7 days.</li>
-          <li><strong>Predicted risk:</strong> how likely is harm to their account in the next 90 days, from account history? It ignores the weather.</li>
-          <li><strong>Priority:</strong> how serious is their situation right now? It orders the case queue, and weather can add to it.</li>
+          <li><strong>Chance of hardship:</strong> how likely is harm to their account in the next 90 days, from account history? It ignores the weather.</li>
+          <li><strong>Priority (shown as Contact by):</strong> how serious is their situation right now? It orders the case queue, and weather can add to it.</li>
           <li>So a customer can be urgent but not on the outlook (serious hardship, mild weather), or act now but routine priority (on life support, healthy finances, a heatwave coming).</li>
         </ul>
       </section>

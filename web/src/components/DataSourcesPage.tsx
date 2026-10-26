@@ -144,9 +144,9 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
               <tr><th scope="row">Account numbers (DEMO-7xxxxx) and case IDs</th><td>Numbered by the scripts.</td></tr>
               <tr><th scope="row">Workers, case status, assignments and starting notes</th><td>Invented for the demo; changes made in the app are real and saved.</td></tr>
               <tr><th scope="row">Signals, circumstances and solutions</th><td>Worked out by the app's rules and the Flowchart file from the data.</td></tr>
-              <tr><th scope="row">Priority</th><td>Worked out by the Priority model's points (see Priority model).</td></tr>
-              <tr><th scope="row">Predicted risk</th><td>A statistical model trained on the monthly panel (see Risk model). Not generative AI.</td></tr>
-              <tr><th scope="row">Weather outlook, act now and watch, and the funnel</th><td>Worked out by the app from the forecast and each customer's signals (see Weather outlook).</td></tr>
+              <tr><th scope="row">Priority (shown as Contact by: Today, This week, Soon, Monitor)</th><td>Worked out by the Priority model's points (see Priority model).</td></tr>
+              <tr><th scope="row">Chance of hardship</th><td>A statistical model trained on the monthly panel (see Risk model). Not generative AI.</td></tr>
+              <tr><th scope="row">Classic outlook, act now and watch, and the funnel</th><td>Worked out by the app from the forecast and each customer's signals (see Classic outlook).</td></tr>
               <tr><th scope="row">Sample heatwave</th><td>Built into the app, used when the weather source is set to Sample heatwave: a hand-written week for each forecast town, with a three-day heatwave over the Lower West.</td></tr>
               <tr><th scope="row">Map locations and groups</th><td>Approximate postcode centres; the dataset has no household coordinates. Each circle counts one primary support group in a postcode. Hue identifies the group; shade shows its highest weather-response urgency. Translucent fills and small symbol offsets reveal overlapping groups. No customer is counted in two primary groups.</td></tr>
               <tr><th scope="row">Temperature map shading</th><td>A fixed °C scale of town forecast daily maximums, estimated between up to four nearby towns within 120 km. Town labels show source values. Whole week shows each town’s peak; select a date for the same-day comparison. This is an estimated temperature surface, not the Bureau’s official heatwave-severity product. Values are fictional when Sample heatwave is selected. Public BoM district boundaries (IDM00001) mask out the ocean.</td></tr>
@@ -157,7 +157,7 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
 
       <section className="case-card" aria-labelledby="ds-weather">
         <h2 id="ds-weather">Live data: Bureau of Meteorology</h2>
-        <p className="hint">Fetched by the server every hour, matched to each customer's postcode, and used for the three weather signals and the Weather outlook. Free anonymous products, under the Bureau's copyright terms.</p>
+        <p className="hint">Fetched by the server every hour, matched to each customer's postcode, and used for the three weather signals and the Classic outlook. Free anonymous products, under the Bureau's copyright terms.</p>
         <p className="block-label">Weather source</p>
         <WeatherSource client={client} />
         <div className="table-scroll">
@@ -177,7 +177,7 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
         <h2 id="ds-ewa">Live data: Emergency WA</h2>
         <p className="hint">
           The Department of Fire and Emergency Services' public warnings feed (<code>api.emergency.wa.gov.au/v1/capau</code>), in the
-          CAP-AU format, fetched by the server every 5 minutes. Shown on the Weather outlook map as a layer that can be switched off;
+          CAP-AU format, fetched by the server every 5 minutes. Shown on the Classic outlook map as a layer that can be switched off;
           it doesn't change any signal, priority or outlook tier.
         </p>
         <div className="table-scroll">

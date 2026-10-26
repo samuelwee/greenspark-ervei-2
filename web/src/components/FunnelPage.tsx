@@ -9,7 +9,7 @@ function stages(t: Ready["totals"]) {
     // Customers in postcodes without a forecast town are left out, so "all" is everyone the forecast covers.
     { id: "all", label: "All customers", count: t.covered, note: "Every customer with a Bureau forecast for their area" },
     { id: "exposed", label: "Hot or dangerous weather", count: t.exposed, note: "A hot day, extreme heat, extreme fire danger or a warning this week" },
-    { id: "vulnerable", label: "…and a reason it could hurt them", count: t.vulnerable, note: "A health, supply, cost or isolation need, or a high predicted risk" },
+    { id: "vulnerable", label: "…and a reason it could hurt them", count: t.vulnerable, note: "A health, supply, cost or isolation need, or a high chance of hardship" },
     { id: "listed", label: "On the outlook", count: t.act + t.watch, note: "Act now or watch: needs that add up for the weather coming" },
     { id: "act", label: "Act now", count: t.act, note: "Dangerous weather and a health or supply need, or a critical need on any hot day" },
   ];

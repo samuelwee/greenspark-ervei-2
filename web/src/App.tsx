@@ -640,7 +640,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 
 const WIP_ITEMS = [[NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
 // In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
-const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Weather outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
+const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Classic outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
 
 /** A dropdown of nav links: "BTS" (behind the scenes) and "WIP" (pages still being worked on). */
 function NavMenu(props: { label: string; id: string; items: readonly (readonly [string, string, Page])[]; page: Page; navigate: (to: string) => void }) {

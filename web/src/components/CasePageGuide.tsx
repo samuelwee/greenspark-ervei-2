@@ -6,8 +6,8 @@ interface Question { q: string; answer: string; look: string }
 const QUESTIONS: Question[] = [
   {
     q: "How urgent is this?",
-    answer: "A priority score out of 100 and a label (urgent, high, moderate, routine), worked out from what the case shows. A rising trend means something is getting worse: arrears growing, usage dropping, prepay credit running low or a disconnection warning. The line underneath names the circumstances that added the most.",
-    look: "Contact by; Priority and predicted risk",
+    answer: "A priority score out of 100 and when to make contact (Today, This week, Soon or Monitor), worked out from what the case shows. A rising trend means something is getting worse: arrears growing, usage dropping, prepay credit running low or a disconnection warning. The line underneath names the circumstances that added the most.",
+    look: "Contact by; Priority and chance of hardship",
   },
   {
     q: "What is going on with the account?",
@@ -70,14 +70,14 @@ export function CasePageGuide() {
       </section>
 
       <section className="case-card" aria-labelledby="cp-three">
-        <h2 id="cp-three">Outlook, predicted risk and priority</h2>
-        <p className="hint">Three different measures, each answering its own question. In one line: the outlook is the next 7 days, predicted risk is the next 90 days, and priority is today.</p>
+        <h2 id="cp-three">Outlook, chance of hardship and priority</h2>
+        <p className="hint">Three different measures, each answering its own question. In one line: the outlook is the next 7 days, chance of hardship is the next 90 days, and priority is today.</p>
         <div className="table-scroll">
           <table className="mini-table ds-table">
             <thead><tr><th scope="col">Measure</th><th scope="col">The question</th><th scope="col">How it's worked out</th><th scope="col">Changes when</th></tr></thead>
             <tbody>
               <tr><th scope="row">Outlook (Act now, Watch)</th><td>Could this week's weather hurt them?</td><td>The Bureau's forecast for their area, combined with what makes them vulnerable, such as life support or a supply that could be cut off.</td><td>The forecast changes (hourly with live data)</td></tr>
-              <tr><th scope="row">Predicted risk (Low to Very high)</th><td>How likely is something bad to happen to their account in the next 90 days: being disconnected, debt passing $1,000, or a payment plan breaking?</td><td>A statistical model trained on account history. It ignores the weather.</td><td>The model is retrained</td></tr>
+              <tr><th scope="row">Chance of hardship (Low to Very high)</th><td>How likely is something bad to happen to their account in the next 90 days: being disconnected, debt passing $1,000, or a payment plan breaking?</td><td>A statistical model trained on account history. It ignores the weather.</td><td>The model is retrained</td></tr>
               <tr><th scope="row">Priority (Routine to Urgent, out of 100)</th><td>How serious is their situation right now?</td><td>Points for each problem the flowchart finds, such as job loss, growing debt or illness, and the evidence behind each. Weather can add to it.</td><td>The case, its signals or the forecast change</td></tr>
             </tbody>
           </table>
@@ -87,7 +87,7 @@ export function CasePageGuide() {
       <section className="case-card bts-facts" aria-labelledby="cp-before">
         <h2 id="cp-before">Before you get in touch</h2>
         <ul className="plain history">
-          <li><strong>Pick the case.</strong> The Weather outlook lists customers this week's forecast could hurt, act now first. The case queue puts the most urgent first: search by name, account number or suburb, or filter by priority, support need or status. Cases with a follow-up date show when it's due or overdue.</li>
+          <li><strong>Pick the case.</strong> The Classic outlook (the home page) lists customers this week's forecast could hurt, act now first. The case queue puts the most urgent first: search by name, account number or suburb, or filter by priority, support need or status. Cases with a follow-up date show when it's due or overdue.</li>
           <li><strong>Get the picture in a minute.</strong> The summary cards say how urgent it is, what seems to be going on and what to do first, with the AI's plan and the top three solutions.</li>
           <li><strong>Check the evidence.</strong> Don't take the plan on trust. Look at the signals behind each circumstance: what was seen, when, and whether it is strong or supporting. Older evidence may no longer be true.</li>
           <li><strong>Check what's been tried.</strong> Support history shows a plan that broke or a program the customer left, which changes what to offer and how. Contact history shows what was said last time and whether anything was promised.</li>

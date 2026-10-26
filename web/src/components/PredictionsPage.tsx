@@ -94,7 +94,7 @@ export function RiskCard({ item, accountNumber, navigate }: { item: CaseItem; ac
   const href = `${accountHref(accountNumber)}/predictions`;
   return (
     <section className="case-card" aria-labelledby="ov-risk">
-      <h3 id="ov-risk">Predicted risk <span className="sim">next {p.horizonDays} days · model</span></h3>
+      <h3 id="ov-risk">Chance of hardship <span className="sim">next {p.horizonDays} days · model</span></h3>
       <ul className="pred-mini">
         {OUTCOME_ORDER.map((id) => {
           const o = p.outcomes[id];

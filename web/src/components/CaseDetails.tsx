@@ -89,7 +89,7 @@ export function CaseDetails(props: { data: Catalog; item: CaseItem; user: StaffU
           {acct ? <UtilityAccount account={acct} accountNumber={person?.accountNumber ?? null} /> : null}
       </>
     ) },
-    { id: "priority", title: fromSignals ? "Priority and predicted risk" : "Model assessment and predicted risk", hint: "How the priority is worked out, and the 90-day risk model", body: (
+    { id: "priority", title: fromSignals ? "Priority and chance of hardship" : "Model assessment and chance of hardship", hint: "How the priority is worked out, and the 90-day risk model", body: (
       <>
           <section className="case-card model" aria-labelledby="ov-model">
             {fromSignals ? (
