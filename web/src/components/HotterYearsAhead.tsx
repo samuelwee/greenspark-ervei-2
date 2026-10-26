@@ -46,7 +46,10 @@ export function HotterYearsAhead({ towns, climate }: { towns: OutlookTown[]; cli
       ) : (
         <div className="table-wrap">
           <table className="town-table future-table">
-            <thead><tr><th scope="col">Town</th><th scope="col" className="t-num">Customers</th><th scope="col" className="t-num">Now</th><th scope="col" className="t-num">~2050</th><th scope="col" className="t-num">Added</th><th scope="col" className="t-num">{climate.thresholds.veryHot}°C+ now → 2050</th></tr></thead>
+            <thead>
+              <tr><th scope="col" rowSpan={2}>Town</th><th scope="col" rowSpan={2} className="t-num">Customers</th><th scope="colgroup" colSpan={3} className="t-group">{climate.thresholds.hot}°C or more</th><th scope="colgroup" colSpan={3} className="t-group">{climate.thresholds.veryHot}°C or more</th></tr>
+              <tr>{[0, 1].map((g) => ["Now", "~2050", "Added"].map((h) => <th key={`${g}${h}`} scope="col" className={`t-num${g === 1 && h === "Now" ? " t-split" : ""}`}>{h}</th>))}</tr>
+            </thead>
             <tbody>
               {rows.map(({ t, now, then, added }) => (
                 <tr key={t.id}>
@@ -55,7 +58,9 @@ export function HotterYearsAhead({ towns, climate }: { towns: OutlookTown[]; cli
                   <td className="t-num">{r0(now)}</td>
                   <td className="t-num"><strong>{r0(then)}</strong></td>
                   <td className="t-num future-add">+{r0(added)}</td>
-                  <td className="t-num">{r0(t.climate!.veryHot ?? 0)} → {r0(t.climate!.veryHot2050 ?? 0)}</td>
+                  <td className="t-num t-split">{r0(t.climate!.veryHot ?? 0)}</td>
+                  <td className="t-num"><strong>{r0(t.climate!.veryHot2050 ?? 0)}</strong></td>
+                  <td className="t-num future-add">+{r0(Math.max(0, (t.climate!.veryHot2050 ?? 0) - (t.climate!.veryHot ?? 0)))}</td>
                 </tr>
               ))}
             </tbody>

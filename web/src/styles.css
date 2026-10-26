@@ -727,3 +727,5 @@ select:not([multiple]):disabled { opacity: .6; }
 .fb-nums { display: grid; justify-items: end; font-variant-numeric: tabular-nums; }
 .fb-nums .future-add { font-size: 12px; }
 @media (max-width: 640px) { .future-bars li { grid-template-columns: 110px minmax(0, 1fr) 72px; gap: 8px; } }
+.future-table .t-group { text-align: center; border-bottom: 1px solid var(--border); }
+.future-table .t-split { border-left: 1px solid var(--border); }
