@@ -885,3 +885,4 @@ select:not([multiple]):disabled { opacity: .6; }
 .tier-btn:hover { background: #eef1f4; }
 .tier-btn.n-act { color: #ae2e24; }
 .tier-btn.n-watch { color: #a8670a; }
+.btn[hidden] { display: none; }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AiStatus, ApiClient } from "../data/api";
 import { ASSISTANT_EVENT } from "./AssistantChat";
+import { setEditMode, useEditMode } from "../admin/editMode";
 import type { StaffUser } from "../domain/types";
 import { WeatherSource } from "./DataSourcesPage";
 
@@ -51,6 +52,12 @@ function AssistantSwitch({ client }: { client: Pick<ApiClient, "assistantStatus"
   );
 }
 
+/** Flowchart edit mode: the flowchart page is view only until this is on. A per-browser setting. */
+function FlowEditSwitch() {
+  const on = useEditMode();
+  return <label className="switch"><input type="checkbox" role="switch" checked={on} onChange={(e) => setEditMode(e.target.checked)} /><span>{on ? "On" : "Off"}</span></label>;
+}
+
 /** A gear in the top right of the header that opens the demo's settings: who you are, the AI model and the weather. */
 export function DemoSettings({ client, users, user, onSwitchUser }: { client: ApiClient; users: StaffUser[]; user: StaffUser; onSwitchUser: (id: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -84,6 +91,11 @@ export function DemoSettings({ client, users, user, onSwitchUser }: { client: Ap
           <div className="field">
             <span>AI model</span>
             <AiModel client={client} />
+          </div>
+          <div className="field">
+            <span>Flowchart edit mode</span>
+            <FlowEditSwitch />
+            <span className="hint">Off means the flowchart is view only. This browser only.</span>
           </div>
           <div className="field">
             <span>Help assistant</span>

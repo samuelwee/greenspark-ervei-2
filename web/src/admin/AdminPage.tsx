@@ -7,11 +7,15 @@ import { FlowSettings } from "./FlowSettings";
 import { DATA_SOURCE_GROUPS } from "./dataSources";
 import { UTILITY_LABEL, buildIndex, entityOf, nodeKey, search, trace, type Ref } from "./flowModel";
 import { useFlow } from "./useFlow";
+import { useEditMode } from "./editMode";
 import "./admin.css";
 
 export function AdminPage({ client }: { client: ApiClient }) {
   const flow = useFlow(client);
   const { doc } = flow;
+  // View only unless edit mode is on in the settings; the file's own problems also switch editing off.
+  const editMode = useEditMode();
+  const readOnly = flow.readOnly || !editMode;
   const [selected, setSelected] = useState<Ref | null>(null);
   const [creating, setCreating] = useState<FlowKind | null>(null);
   const [utility, setUtility] = useState("all");
@@ -101,14 +105,15 @@ export function AdminPage({ client }: { client: ApiClient }) {
           <span className={`savestate ${flow.save.state}`} role="status" aria-live="polite">
             {flow.save.state === "saving" ? "Saving to the file…" : flow.save.state === "saved" ? "All changes saved to the file" : flow.save.state === "error" ? `Couldn’t save: ${flow.save.message}. Showing the file as it is now.` : "Changes save to the file as you make them"}
           </span>
-          <button type="button" className="btn" disabled={!last || flow.readOnly} title={last ? `Undo ${last.label}` : "Nothing to undo"} onClick={() => { const r = flow.undo(); setUndoError(r.ok ? null : r.error); }}>
+          <button type="button" className="btn" hidden={!editMode} disabled={!last || flow.readOnly} title={last ? `Undo ${last.label}` : "Nothing to undo"} onClick={() => { const r = flow.undo(); setUndoError(r.ok ? null : r.error); }}>
             Undo{last ? `: ${last.label}` : ""}
           </button>
-          <button type="button" className="btn" onClick={() => setSettingsOpen(true)}>Settings</button>
+          {editMode ? <button type="button" className="btn" onClick={() => setSettingsOpen(true)}>Settings</button> : null}
           <button type="button" className="btn" onClick={download}>Download JSON</button>
         </div>
       </header>
 
+      {!editMode ? <div className="notice" role="note"><p><strong>View only.</strong> To change the flowchart, switch on Flowchart edit mode in the settings (the gear, top right).</p></div> : null}
       {flow.problems.length ? (
         <div className="notice notice-error" role="alert">
           <div><p>The JSON file has problems, so editing is switched off until they are fixed:</p><ul className="problems">{flow.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
@@ -175,18 +180,18 @@ export function AdminPage({ client }: { client: ApiClient }) {
           <div className="board-scroll">
             <FlowBoard
               doc={doc} index={index} selected={selected} trace={tracing} utility={utility} showAllLinks={showAllLinks} strongOnly={strongOnly}
-              matches={matches} readOnly={flow.readOnly} onSelect={select} onAdd={(kind) => { setSelected(null); setCreating(kind); }}
+              matches={matches} readOnly={readOnly} hideAdd={!editMode} onSelect={select} onAdd={(kind) => { setSelected(null); setCreating(kind); }}
               sources={DATA_SOURCE_GROUPS} onSourceSelect={() => select(null)} hidden={hiddenColumns}
             />
           </div>
         </div>
         <FlowDetail
-          doc={doc} index={index} selected={selected} creating={creating} readOnly={flow.readOnly} dispatch={flow.dispatch}
+          doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} dispatch={flow.dispatch}
           onSelect={select} onCloseCreate={() => setCreating(null)}
         />
       </div>
 
-      {settingsOpen ? <FlowSettings doc={doc} dispatch={flow.dispatch} onClose={() => setSettingsOpen(false)} /> : null}
+      {settingsOpen && editMode ? <FlowSettings doc={doc} dispatch={flow.dispatch} onClose={() => setSettingsOpen(false)} /> : null}
     </main>
   );
 }

@@ -73,7 +73,7 @@ function LinkSection(props: {
                   <option value="supporting">Supporting</option>
                 </select>
               ) : null}
-              <button type="button" className="lx" disabled={props.readOnly} aria-label={`Remove link to ${it.name}`} onClick={() => run(props.onRemove(it))}>✕</button>
+              {props.readOnly ? null : <button type="button" className="lx" aria-label={`Remove link to ${it.name}`} onClick={() => run(props.onRemove(it))}>✕</button>}
             </li>
           ))}
         </ul>
@@ -316,10 +316,10 @@ function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly
         <button type="button" className="icon-btn" aria-label="Close details" onClick={() => props.onSelect(null)}>✕</button>
       </div>
       <Facts doc={doc} entity={entity} kind={refr.kind} />
-      <div className="actions">
-        <button type="button" className="btn" disabled={readOnly} onClick={() => setEditing(true)}>Edit</button>
-        {!confirming ? <button type="button" className="btn btn-danger" disabled={readOnly} onClick={() => setConfirming(true)}>Delete</button> : null}
-      </div>
+      {readOnly ? null : <div className="actions">
+        <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button>
+        {!confirming ? <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>Delete</button> : null}
+      </div>}
       {confirming ? (
         <div className="confirm" role="alertdialog" aria-label="Confirm delete">
           <p>Delete “{entity.name}”? {linkCount ? `This also removes its ${linkCount} link${linkCount === 1 ? "" : "s"}.` : ""} You can undo this straight afterwards.</p>
