@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import type { ApiClient, CaseItem, EmergencyFeed } from "../data/api";
+import type { ApiClient, CaseItem, EmergencyFeed, ForecastTown } from "../data/api";
 import { readableDates } from "../domain/format";
 import { HAZARD_ICON, alertColor, dayDate, dayName, isWarning, km, tempColor } from "./outlookText";
 
@@ -11,9 +11,16 @@ const NEAR_KM = 150;
 const SIGNAL_ICON: Record<string, string> = { wx_extreme_heat: HAZARD_ICON.heat, wx_fire_danger: HAZARD_ICON.fire, wx_warning: HAZARD_ICON.warning };
 
 /** The customer's week of weather: the Bureau's forecast for their area, its weather signals, and Emergency WA warnings nearby. */
-export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<ApiClient, "emergency"> }) {
+export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<ApiClient, "emergency" | "forecastTowns"> }) {
   const f = item.forecast ?? null;
   const [feed, setFeed] = useState<EmergencyFeed | null>(null);
+  const [towns, setTowns] = useState<ForecastTown[]>([]);
+  useEffect(() => {
+    if (!client?.forecastTowns || !f?.location) return;
+    let live = true;
+    client.forecastTowns().then((x) => { if (live && x.available) setTowns(x.towns); }, () => undefined);
+    return () => { live = false; };
+  }, [client, f?.location]);
   useEffect(() => {
     if (!client?.emergency || !f?.location) return;
     let live = true;
@@ -40,7 +47,7 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
       <div className="case-wx">
         {f.location ? (
           <Suspense fallback={<div className="case-wx-map" role="status">Loading the map…</div>}>
-            <CaseWeatherMap location={f.location} label={`${suburb} (suburb centre)`} alerts={nearAlerts} days={f.days} />
+            <CaseWeatherMap location={f.location} label={`${suburb} (suburb centre)`} alerts={nearAlerts} days={f.days} towns={towns} />
           </Suspense>
         ) : null}
         <div className="case-wx-info">

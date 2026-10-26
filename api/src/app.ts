@@ -489,6 +489,17 @@ export function createApp(store: Store, options: AppOptions = {}) {
     }));
     res.json({ available: true, thresholds: d.thresholds, observedDecades: d.observedDecades, projectedDecades: d.projectedDecades, observedSource: d.observed, projectedSource: d.projected, towns });
   });
+  // The forecast for every town (where it sits and its daily maximums), for shading the case page's weather map.
+  app.get("/api/forecast/towns", (_req, res) => {
+    const w = options.weather?.current() ?? null;
+    if (!w) return res.json({ available: false, towns: [] });
+    const towns = Object.entries(w.towns).flatMap(([id, t]) => {
+      const spots = Object.entries(POSTCODE_TOWN).filter(([, town]) => town === id).flatMap(([pc]) => (POSTCODE_LOCATION[pc] ? [POSTCODE_LOCATION[pc]!] : []));
+      if (!spots.length) return [];
+      return [{ id, name: t.name, lat: spots.reduce((n, s) => n + s[0], 0) / spots.length, lng: spots.reduce((n, s) => n + s[1], 0) / spots.length, days: t.days.map((d) => ({ date: d.date, max: d.max })) }];
+    });
+    res.json({ available: true, towns });
+  });
   app.get("/api/emergency", (_req, res) => { res.json(options.emergency?.current() ?? { available: false, fetchedAt: null, error: null, alerts: [] }); });
   app.get("/api/weather", (_req, res) => { res.json(options.weather?.status() ?? { mode: "off", available: false }); });
   // Anyone can switch the weather source for everyone: the sample heatwave, the Bureau's live data, or off.

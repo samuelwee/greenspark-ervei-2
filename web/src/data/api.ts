@@ -102,6 +102,8 @@ export interface ApiClient {
   climateDecades?(): Promise<ClimateDecades>;
   /** Current Emergency WA warnings, for the outlook map. Optional so test clients can leave it out. */
   emergency?(): Promise<EmergencyFeed>;
+  /** Every forecast town with its position and daily maximums, for shading the case page's map. */
+  forecastTowns?(): Promise<{ available: boolean; towns: ForecastTown[] }>;
   /** The risk model's card. Optional so test clients can leave it out. */
   riskModel?(): Promise<RiskModelCard>;
   assign(assigneeUserId: string, items: VersionedId[]): Promise<MutationResult>;
@@ -130,6 +132,7 @@ export interface MapPlace {
 export interface MapSummary { total: number; unplaced: number; places: MapPlace[] }
 
 export type HazardKind = "heat" | "hot" | "fire" | "warning";
+export interface ForecastTown { id: string; name: string; lat: number; lng: number; days: { date: string; max: number | null }[] }
 export interface OutlookHazard { kind: HazardKind; date: string; severity: number; text: string }
 export interface OutlookTown {
   id: string; name: string; district: string; districtName: string; lat: number; lng: number;
@@ -257,6 +260,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     outlook: () => req("GET", "/api/outlook"),
     climateDecades: () => req("GET", "/api/climate/decades"),
     emergency: () => req("GET", "/api/emergency"),
+    forecastTowns: () => req("GET", "/api/forecast/towns"),
     account: (accountNumber) => req("GET", `/api/accounts/${encodeURIComponent(accountNumber)}`),
     assign: (assigneeUserId, items) => req("POST", "/api/cases/bulk/assignment", { assigneeUserId, items }),
     setStatus: (status, items) =>

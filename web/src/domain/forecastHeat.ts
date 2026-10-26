@@ -1,9 +1,9 @@
-import type { OutlookTown } from "../data/api";
+import type { ForecastTown } from "../data/api";
 
 export interface ForecastTemperature { id: string; name: string; lat: number; lng: number; max: number }
 
 /** An empty date means each town's peak daily maximum over the displayed forecast week. */
-export function forecastTemperatures(towns: OutlookTown[], date: string): ForecastTemperature[] {
+export function forecastTemperatures(towns: ForecastTown[], date: string): ForecastTemperature[] {
   return towns.flatMap((town) => {
     const values = town.days.filter((day) => !date || day.date === date).map((day) => day.max).filter((max): max is number => max !== null && Number.isFinite(max));
     return values.length && Number.isFinite(town.lat) && Number.isFinite(town.lng)
