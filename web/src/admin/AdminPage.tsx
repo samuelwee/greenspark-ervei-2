@@ -188,8 +188,8 @@ export function AdminPage({ client }: { client: ApiClient }) {
         <span><i className="mk ask" aria-hidden="true" />Asked of the customer</span>
         <span><i className="mk wx" aria-hidden="true" />From weather forecasts</span>
         <span><i className="mk area" aria-hidden="true" />From area statistics</span>
-        <span><i className="dot sensitive" aria-hidden="true" />Sensitive</span>
-        <span><i className="dot safety" aria-hidden="true" />Safety</span>
+        <span hidden={demo}><i className="dot sensitive" aria-hidden="true" />Sensitive</span>
+        <span hidden={demo}><i className="dot safety" aria-hidden="true" />Safety</span>
         <span hidden={demo}><span className="ut"><i className="y">E</i><i className="y">G</i><i className="y">W</i><i className="y">P</i></span>Electricity, gas, water, phone/internet</span>
       </div>
 

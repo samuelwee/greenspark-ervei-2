@@ -271,3 +271,4 @@
 .admin.is-demo .flow-float .fdetail { position: static; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; left: auto; right: auto; bottom: auto; top: auto; width: auto; }
 .admin.is-demo .flow-float .fdetail:not(.rest) { position: static; }
 .admin.is-demo .flane .ut { display: none; }
+.admin.is-demo .flane .dot.sensitive, .admin.is-demo .flane .dot.safety { display: none; }
