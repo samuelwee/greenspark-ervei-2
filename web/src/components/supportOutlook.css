@@ -255,6 +255,9 @@
 .support-group-filters-panel .support-filter { justify-content: flex-start; min-width: 0; }
 .support-group-filters-panel .support-filter > span { margin-left: auto; }
 .support-group-filters-panel .support-filter-all { grid-column: 1 / -1; }
+.support-group-filters-panel { position: sticky; top: -18px; z-index: 4; background: #fff; padding-top: 18px; margin-top: -18px; }
+.support-solutions-panel .support-panel-tabs { top: 113px; }
+@media (max-width: 850px) { .support-group-filters-panel, .support-solutions-panel .support-panel-tabs { position: static; } }
 
 /* One legend under the map: support groups and temperature, weather hazards and Emergency WA side by side */
 .support-legend { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 12px 16px; border-top: 1px solid var(--border); background: #fbfcfe; }
