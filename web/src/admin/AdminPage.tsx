@@ -4,6 +4,7 @@ import type { ApiClient } from "../data/api";
 import { FLOW_COLUMNS, FlowBoard, type FlowColumn } from "./FlowBoard";
 import { FlowDetail } from "./FlowDetail";
 import { FlowSettings } from "./FlowSettings";
+import { FlowHowTo } from "./FlowHowTo";
 import { DATA_SOURCE_GROUPS } from "./dataSources";
 import { UTILITY_LABEL, buildIndex, entityOf, nodeKey, search, trace, type Ref } from "./flowModel";
 import { useFlow } from "./useFlow";
@@ -39,17 +40,19 @@ export function AdminPage({ client }: { client: ApiClient }) {
   const scrollTo = useRef<string | null>(null);
 
   const index = useMemo(() => (doc ? buildIndex(doc) : null), [doc]);
-  // Demo mode shows one example path at a time: circumstances with several signals and a solution, busiest first.
-  const examples = useMemo(() => (doc ? doc.circumstances.filter((c) => c.signals.length >= 2 && c.solutions.length >= 1).sort((a, b) => b.signals.length - a.signals.length).slice(0, 12) : []), [doc]);
-  const [example, setExample] = useState(0);
-  // The side panel floats in the corner in demo mode and can be closed; choosing a box opens it again.
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [howOpen, setHowOpen] = useState(false);
   const tracing = useMemo(() => (index && selected && entityOf(index, selected) ? trace(index, selected) : null), [index, selected]);
   const hits = useMemo(() => (doc ? search(doc, query) : []), [doc, query]);
   const matches = useMemo(() => new Set(query.trim() ? hits.map((h) => nodeKey(h.ref.kind, h.ref.id)) : []), [hits, query]);
 
   useEffect(() => { if (demo) setUtility("electricity"); }, [demo]);
-  useEffect(() => { if (demo && examples.length) setSelected({ kind: "circumstance", id: examples[example % examples.length]!.id }); }, [demo, examples, example]);
+  // In demo mode Escape clears the selection and shows every box again.
+  useEffect(() => {
+    if (!demo) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [demo]);
   // If the selected item is deleted (by you or somebody else), clear the selection.
   useEffect(() => { if (index && selected && !entityOf(index, selected)) setSelected(null); }, [index, selected]);
 
@@ -67,7 +70,6 @@ export function AdminPage({ client }: { client: ApiClient }) {
     setCreating(null);
     setUndoError(null);
     setSelected(ref);
-    if (ref) setPanelOpen(true);
     if (ref) scrollTo.current = nodeKey(ref.kind, ref.id);
   };
 
@@ -123,24 +125,6 @@ export function AdminPage({ client }: { client: ApiClient }) {
       </header>
 
       {mode === "view" ? <div className="notice" role="note"><p><strong>View only.</strong> To change the flowchart, set Flowchart mode to Edit in the settings (the gear, top right).</p></div> : null}
-      {demo && examples.length ? (
-        <div className="demo-bar" role="note">
-          {selected && entityOf(index, selected) ? (
-            <>
-              <p><strong>{entityOf(index, selected)!.name}.</strong> Only the boxes linked to it are shown. Click a box to trace from there.</p>
-              <span className="demo-bar-actions">
-                <button type="button" className="btn btn-small" onClick={() => { setPanelOpen(true); setExample((e) => (e + 1) % examples.length); }}>Another example</button>
-                <button type="button" className="btn btn-small" onClick={() => setSelected(null)}>Show all boxes</button>
-              </span>
-            </>
-          ) : (
-            <>
-              <p>Everything is shown. Click a box to trace its path, or start from an example.</p>
-              <span className="demo-bar-actions"><button type="button" className="btn btn-small" onClick={() => { setPanelOpen(true); setSelected({ kind: "circumstance", id: examples[example % examples.length]!.id }); }}>Show an example</button></span>
-            </>
-          )}
-        </div>
-      ) : null}
       {flow.problems.length ? (
         <div className="notice notice-error" role="alert">
           <div><p>The JSON file has problems, so editing is switched off until they are fixed:</p><ul className="problems">{flow.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
@@ -212,12 +196,14 @@ export function AdminPage({ client }: { client: ApiClient }) {
             />
           </div>
         </div>
-        {demo && !panelOpen ? null : <div className={demo ? "flow-float" : undefined}>{demo ? <button type="button" className="flow-float-close" aria-label="Close the panel" onClick={() => setPanelOpen(false)}>✕</button> : null}<FlowDetail
+        {demo && !selected ? null : <div className={demo ? "flow-float" : undefined}>{demo ? <button type="button" className="flow-float-close" aria-label="Close the panel" onClick={() => setSelected(null)}>✕</button> : null}<FlowDetail
           doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} dispatch={flow.dispatch}
           onSelect={select} onCloseCreate={() => setCreating(null)}
         /></div>}
       </div>
 
+      <p className="flow-foot"><button type="button" className="link-btn" onClick={() => setHowOpen(true)}>How to read this flowchart</button></p>
+      {howOpen ? <FlowHowTo doc={doc} onClose={() => setHowOpen(false)} /> : null}
       {settingsOpen && editMode ? <FlowSettings doc={doc} dispatch={flow.dispatch} onClose={() => setSettingsOpen(false)} /> : null}
     </main>
   );

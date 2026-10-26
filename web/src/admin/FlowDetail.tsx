@@ -392,21 +392,8 @@ export function FlowDetail(props: Props) {
         <EntityView key={`${selected.kind}:${selected.id}`} doc={doc} index={props.index} refr={selected} readOnly={props.readOnly} dispatch={props.dispatch} onSelect={props.onSelect} />
       ) : (
         <div className="frest">
-          <h2>How to read this</h2>
-          <p>{doc.meta.how_it_works}</p>
-          <p className="hint">Select any box to trace its path and see its details. You can edit anything here, and every change is saved to the JSON file.</p>
-          <h3>When a circumstance is flagged</h3>
-          <dl className="facts">
-            <dt>Flag when</dt><dd>{doc.meta.scoring.flag_when}</dd>
-            <dt>Strong</dt><dd>{doc.meta.scoring.strong}</dd>
-            <dt>Supporting</dt><dd>{doc.meta.scoring.supporting}</dd>
-            <dt>Sensitive</dt><dd>{doc.meta.scoring.sensitive_rule}</dd>
-            <dt>Safety</dt><dd>{doc.meta.scoring.safety_rule}</dd>
-          </dl>
-          <details>
-            <summary>Guardrails ({doc.meta.guardrails.length})</summary>
-            <ul className="rest-list">{doc.meta.guardrails.map((g, i) => <li key={i}>{g}</li>)}</ul>
-          </details>
+          <h2>Details</h2>
+          <p className="hint">Select any box to trace its path and see its details.{props.readOnly ? "" : " Every change is saved to the JSON file."}</p>
         </div>
       )}
     </aside>
