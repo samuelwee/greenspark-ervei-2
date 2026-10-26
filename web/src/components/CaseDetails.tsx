@@ -356,9 +356,9 @@ function AiPlan(props: { kind: PlanKind; caseId: string; version: number; load: 
 function AiPlanView({ kind, state }: { kind: PlanKind; state: AiState }) {
   return (
     <div className="ai-plan" aria-live="polite">
-      <p className="block-label">{AI_TITLE[kind]} <span className="sim">AI draft · check before acting</span></p>
+      <p className="block-label">{AI_TITLE[kind]} <span className="sim">AI summary · check before acting</span></p>
       {state.loading ? <p className="muted">{AI_LOADING[kind]}</p> : state.error ? <p className="muted">{state.error}</p> : <>{paragraphs(state.plan!.text).map((t, i) => <p key={i}>{t}</p>)}</>}
-      {state.plan ? <p className="hint">Drafted by {state.plan.model} from the {AI_SOURCE[kind]}. No name or contact details were sent.</p> : null}
+      {state.plan ? <p className="hint">Summarised by {state.plan.model} from the {AI_SOURCE[kind]}. No name or contact details were sent.</p> : null}
     </div>
   );
 }
@@ -369,7 +369,7 @@ function SolutionTimeline({ steps, names, interpreter }: { steps: PlanStep[]; na
   const days = [...new Set(dated.map((s) => s.due!))];
   return (
     <div className="timeline">
-      <p className="block-label">Timeline <span className="sim">AI draft · check before acting</span></p>
+      <p className="block-label">Timeline <span className="sim">AI summary · check before acting</span></p>
       <ol className="tl-days">
         {days.map((day) => (
           <li key={day} className="tl-day">

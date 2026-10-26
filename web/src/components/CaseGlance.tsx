@@ -144,7 +144,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
             ))}
           </ol>
         ) : <p className="muted">No solutions suggested.</p>}
-        {plan ? <p className="hint">AI draft · check before acting.</p> : null}
+        {plan ? <p className="hint">AI summary · check before acting.</p> : null}
         {c.recommendations.length ? <More label={`All ${c.recommendations.length} solutions to offer`} onClick={() => onOpen("solutions")} /> : null}
       </section>
 

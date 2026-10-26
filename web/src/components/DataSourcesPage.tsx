@@ -117,7 +117,7 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
 
       <section className="case-card" aria-labelledby="ds-ai">
         <h2 id="ds-ai">Written by AI</h2>
-        <p className="hint">Drafted by Claude or Gemini (whichever the server is set to) when a case or its section is opened, from the case's facts only. Each is labelled "AI draft · check before acting" on the page.</p>
+        <p className="hint">Summarised by Claude or Gemini (whichever the server is set to) when a case or its section is opened, from the case's facts only. Each is labelled "AI summary · check before acting" on the page.</p>
         <div className="table-scroll">
           <table className="mini-table ds-table">
             <thead><tr><th scope="col">What</th><th scope="col">Where it appears</th><th scope="col">Made from</th></tr></thead>
