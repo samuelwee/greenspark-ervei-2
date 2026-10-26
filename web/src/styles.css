@@ -710,3 +710,20 @@ select:not([multiple]):disabled { opacity: .6; }
 .vis-top .ob-head { flex-direction: column; align-items: flex-start; }
 .vis-top .vis-bars li { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 68px; }
 @media (max-width: 1099px) { .vis-top { grid-template-columns: minmax(0, 1fr); } }
+
+/* Hotter years ahead: bar chart of days at 35°C+ now and the days added by around 2050 */
+.future-head { padding: 0 16px; margin: 6px 0 0; }
+.future-chart { padding: 8px 16px 0; border-top: 1px solid var(--border); margin-top: 10px; }
+.future-key { display: flex; gap: 16px; margin: 4px 0 8px; font-size: 12px; color: var(--muted); }
+.future-key span { display: inline-flex; align-items: center; gap: 6px; }
+.future-key i { width: 12px; height: 10px; border-radius: 2px; display: inline-block; }
+.fk-now, .fb-now { background: #f29d52; }
+.fk-added, .fb-added { background: #ae2e24; }
+.future-bars { display: grid; gap: 6px; margin: 0; }
+.future-bars li { display: grid; grid-template-columns: 170px minmax(0, 1fr) 96px; align-items: center; gap: 12px; font-size: 13px; }
+.fb-town { display: grid; } .fb-town .sub { font-size: 11px; }
+.fb-track { display: flex; height: 14px; background: #f1f2f4; border-radius: 3px; overflow: hidden; }
+.fb-track i { display: block; height: 100%; }
+.fb-nums { display: grid; justify-items: end; font-variant-numeric: tabular-nums; }
+.fb-nums .future-add { font-size: 12px; }
+@media (max-width: 640px) { .future-bars li { grid-template-columns: 110px minmax(0, 1fr) 72px; gap: 8px; } }

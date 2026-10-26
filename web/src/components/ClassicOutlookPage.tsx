@@ -1,4 +1,5 @@
 // The weather outlook as it was before the grouped support workspace became the home page: the act-now and
+import { HotterYearsAhead } from "./HotterYearsAhead";
 // watch list, the week ahead and the town table. Kept as its own page under "Classic outlook".
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { ApiClient, EmergencyFeed, HazardKind, Outlook, OutlookCustomer } from "../data/api";
@@ -276,34 +277,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
         </div>
       </section>
 
-      {ready.climate ? (
-        <section className="panel" aria-labelledby="future-title">
-          <div className="panel-head">
-            <h2 id="future-title">Hotter years ahead</h2>
-            <span className="hint">Days a year at {ready.climate.thresholds.hot}°C or more: now ({ready.climate.baselineYears[0]}–{ready.climate.baselineYears[1]}) and around 2050 ({ready.climate.period}, {ready.climate.scenario}), most added first</span>
-          </div>
-          <div className="table-wrap">
-            <table className="town-table future-table">
-              <thead><tr><th scope="col">Town</th><th scope="col" className="t-num">Customers</th><th scope="col" className="t-num">Now</th><th scope="col" className="t-num">~2050</th><th scope="col" className="t-num">Added</th><th scope="col" className="t-num">{ready.climate.thresholds.veryHot}°C+ now → 2050</th></tr></thead>
-              <tbody>
-                {[...ready.towns].filter((t) => t.climate?.hot !== null && t.climate?.hot2050 != null)
-                  .sort((a, b) => (b.climate!.hot2050! - b.climate!.hot!) - (a.climate!.hot2050! - a.climate!.hot!))
-                  .map((t) => (
-                    <tr key={t.id}>
-                      <th scope="row"><span className="town-name">{t.name}</span><span className="sub">{t.districtName}</span></th>
-                      <td className="t-num">{t.customers}</td>
-                      <td className="t-num">{Math.round(t.climate!.hot!)}</td>
-                      <td className="t-num"><strong>{Math.round(t.climate!.hot2050!)}</strong></td>
-                      <td className="t-num future-add">+{Math.round(t.climate!.hot2050! - t.climate!.hot!)}</td>
-                      <td className="t-num">{Math.round(t.climate!.veryHot ?? 0)} → {Math.round(t.climate!.veryHot2050 ?? 0)}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="hint future-note">Now: SILO (Queensland Government, from Bureau of Meteorology observations). Around 2050: the median of three CMIP6 climate models from Climate Change in Australia (CSIRO, Bureau of Meteorology, Australian Climate Service), on a middle emissions path. Both CC BY 4.0. A guide to long-term exposure for planning, not a forecast.</p>
-        </section>
-      ) : null}
+      {ready.climate ? <HotterYearsAhead towns={ready.towns} climate={ready.climate} /> : null}
 
       <details className="panel outlook-how">
         <summary>How the outlook works</summary>

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { HotterYearsAhead } from "./HotterYearsAhead";
 import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, emptySupportCounts, supportUrgency, type SupportGroupId } from "@greenspark/shared";
 import { SupportWeek } from "./SupportWeek";
 import { SupportWeatherKey } from "./SupportWeatherKey";
@@ -175,34 +176,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
 
     <details className="panel support-forecast-detail"><summary>Weather forecast by town</summary><p className="hint">Daily maximum temperatures. The map estimates the colour between these town forecasts; the labels show the town values.</p><div className="table-wrap"><table className="town-table"><thead><tr><th scope="col">Forecast town</th>{ready.days.map((day) => <th key={day.date} scope="col">{dayName(day.date)} {dayDate(day.date)}</th>)}</tr></thead><tbody>{ready.towns.map((town) => <tr key={town.id}><th scope="row">{town.name}<span className="sub">{town.districtName}</span></th>{ready.days.map((day) => { const value = town.days.find((item) => item.date === day.date); return <td key={day.date} style={tempColor(value?.max ?? null)}>{value?.max === null || value?.max === undefined ? "–" : `${value.max}°C`}</td>; })}</tr>)}</tbody></table></div></details>
 
-      {ready.climate ? (
-        <section className="panel" aria-labelledby="future-title">
-          <div className="panel-head">
-            <h2 id="future-title">Hotter years ahead</h2>
-            <span className="hint">Days a year at {ready.climate.thresholds.hot}°C or more: now ({ready.climate.baselineYears[0]}–{ready.climate.baselineYears[1]}) and around 2050 ({ready.climate.period}, {ready.climate.scenario}), most added first</span>
-          </div>
-          <div className="table-wrap">
-            <table className="town-table future-table">
-              <thead><tr><th scope="col">Town</th><th scope="col" className="t-num">Customers</th><th scope="col" className="t-num">Now</th><th scope="col" className="t-num">~2050</th><th scope="col" className="t-num">Added</th><th scope="col" className="t-num">{ready.climate.thresholds.veryHot}°C+ now → 2050</th></tr></thead>
-              <tbody>
-                {[...ready.towns].filter((t) => t.climate?.hot !== null && t.climate?.hot2050 != null)
-                  .sort((a, b) => (b.climate!.hot2050! - b.climate!.hot!) - (a.climate!.hot2050! - a.climate!.hot!))
-                  .map((t) => (
-                    <tr key={t.id}>
-                      <th scope="row"><span className="town-name">{t.name}</span><span className="sub">{t.districtName}</span></th>
-                      <td className="t-num">{t.customers}</td>
-                      <td className="t-num">{Math.round(t.climate!.hot!)}</td>
-                      <td className="t-num"><strong>{Math.round(t.climate!.hot2050!)}</strong></td>
-                      <td className="t-num future-add">+{Math.round(t.climate!.hot2050! - t.climate!.hot!)}</td>
-                      <td className="t-num">{Math.round(t.climate!.veryHot ?? 0)} → {Math.round(t.climate!.veryHot2050 ?? 0)}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="hint future-note">Now: SILO (Queensland Government, from Bureau of Meteorology observations). Around 2050: the median of three CMIP6 climate models from Climate Change in Australia (CSIRO, Bureau of Meteorology, Australian Climate Service), on a middle emissions path. Both CC BY 4.0. A guide to long-term exposure for planning, not a forecast.</p>
-        </section>
-      ) : null}
+      {ready.climate ? <HotterYearsAhead towns={ready.towns} climate={ready.climate} /> : null}
 
 
     <details className="panel outlook-how"><summary>How the grouping and map work</summary><ul>
