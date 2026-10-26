@@ -8,6 +8,7 @@ export * from "./caseFlow";
 export * from "./priority";
 export * from "./weather";
 export * from "./area";
+export * from "./signalRules";
 export * from "./postcodes";
 export * from "./outlook";
 export * from "./supportGroups";

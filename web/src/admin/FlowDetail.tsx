@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FlowCounts } from "../data/api";
-import { signalHasData, slugId, type FlowCircumstance, type FlowDoc, type FlowKind, type FlowOp, type FlowSignal, type FlowSolution, type Strength } from "@greenspark/shared";
+import { actualRule, signalHasData, slugId, type FlowCircumstance, type FlowDoc, type FlowKind, type FlowOp, type FlowSignal, type FlowSolution, type Strength } from "@greenspark/shared";
 import { KIND_LABEL, SOURCE_LABEL, UTILITY_LABEL, entityOf, type FlowIndex, type Ref } from "./flowModel";
 import type { DispatchResult } from "./useFlow";
 
@@ -241,7 +241,7 @@ function Facts({ doc, entity, kind, compact }: { doc: FlowDoc; entity: FlowSigna
         <dl className="facts">
           <dt>Source</dt><dd>{SOURCE_LABEL[s.source] ?? s.source}</dd>
           {compact ? null : <><dt>Applies to</dt><dd><Utilities doc={doc} list={s.utilities} /></dd></>}
-          {s.example_rule ? (<><dt>Example rule</dt><dd><code className="code">{s.example_rule}</code></dd></>) : null}
+          {actualRule(s) ? (<><dt>Rule used</dt><dd>{actualRule(s)}</dd></>) : null}
         </dl>
         {s.sensitive ? <p className="note sensitive">Sensitive. Use only to prompt a trained staff member, and only with the customer's consent.</p> : null}
         {signalHasData(s) ? null : (

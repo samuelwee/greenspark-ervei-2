@@ -57,6 +57,9 @@ const ACCOUNT_FACT_SIGNALS: { signalId: string; holds: (p: Person) => string | n
   { signalId: "ask_temperature_need", holds: (p) => (p.account?.medicalCoolingSubsidy ? "Account: receives the medical cooling subsidy (TDES)" : null) },
 ];
 
+/** In words, for the Flowchart page: the account facts above that mean the same as a self-report signal. */
+export const ACCOUNT_FACT_SIGNAL_TEXT: Record<string, string> = { ask_temperature_need: "The account records the medical cooling subsidy (TDES)" };
+
 const applies = (utilities: string[]) => utilities.includes(CASE_UTILITY);
 
 /**
