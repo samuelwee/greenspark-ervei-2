@@ -103,7 +103,7 @@ export function RiskCard({ item, accountNumber, navigate }: { item: CaseItem; ac
           return <li key={id}><span>{OUTCOME_LABEL[id]}</span><span className={`pred-pill pred-${b.id}`}>{b.text} · {percent(o.probability)}</span></li>;
         })}
       </ul>
-      <a href={href} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>See the predictions and what drives them</a>
+      <a className="link-btn vis-more" href={href} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>See the predictions and what drives them →</a>
     </section>
   );
 }
