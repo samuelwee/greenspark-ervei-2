@@ -65,8 +65,7 @@ export function OutlookWeekList({ rows, towns, dates, today, navigate }: {
                 return <span key={d} role="cell" className={`week-cell${d === firstDay ? " is-first" : ""}${warned && d === today ? " is-warned" : ""}`} style={{ background: hazards.length ? hazardColor(worst) : "#eef1f4" }} title={`${dayName(d)} ${dayDate(d)}: ${label}${warned && d === today ? " · warning in force" : ""}`} aria-label={`${dayName(d)}: ${label}`} />;
               })}</div>
               <div role="cell" className="week-risk">
-                {c.risk && b ? <><strong>{b.text} · {percent(c.risk.probability)}</strong><span className="week-bar"><i style={{ width: `${Math.max(3, Math.min(100, c.risk.probability * 100))}%`, background: RISK_COLOR[b.id] ?? "#888780" }} /></span></> : <span className="sub">No score</span>}
-                {c.priority ? <span className="sub">score {c.priority.score}</span> : null}
+                {c.risk && b ? <><strong>{b.text} · {percent(c.risk.probability)}</strong><span className="week-bar"><i style={{ width: `${Math.max(3, Math.min(100, c.risk.probability * 100))}%`, background: RISK_COLOR[b.id] ?? "#888780" }} /></span></> : <span className="sub">No prediction</span>}
               </div>
             </div>
           </div>

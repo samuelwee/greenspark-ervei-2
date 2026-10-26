@@ -274,7 +274,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                       <td>
                         {(() => { const r = contactRank(c, ready.today); return <span className={`badge badge-${CONTACT_BADGE[r]}`}>{CONTACT_BY[r]}</span>; })()}
                       </td>
-                      <td>{c.risk && b ? <span className={`pred-pill pred-${b.id}`} title={`${percent(c.risk.probability)} chance of any harm in 90 days`}>{b.text} · {percent(c.risk.probability)}</span> : <span className="sub">No score</span>}</td>
+                      <td>{c.risk && b ? <span className={`pred-pill pred-${b.id}`} title={`${percent(c.risk.probability)} chance of any harm in 90 days`}>{b.text} · {percent(c.risk.probability)}</span> : <span className="sub">No prediction</span>}</td>
                     </tr>
                   );
                 })}
