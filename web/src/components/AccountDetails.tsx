@@ -131,8 +131,8 @@ export function ContactHistory({ account: a }: { account: CustomerAccount }) {
               <dl className="contact-facts">
                 <div><dt>Channel</dt><dd>{human(c.channel)} ({c.direction})</dd></div>
                 <div><dt>Outcome</dt><dd>{human(c.outcome)}</dd></div>
-                {c.sentiment !== null ? <div><dt>Sentiment</dt><dd>{sentimentLabel(c.sentiment)} ({c.sentiment.toFixed(2)})</dd></div> : null}
-                {n.balance ? <div><dt>Balance</dt><dd>{n.balance}</dd></div> : null}
+                {c.sentiment !== null ? <div><dt>Sentiment</dt><dd>{sentimentLabel(c.sentiment)} ({c.sentiment.toFixed(2)})</dd></div> : <div aria-hidden="true" />}
+                {n.balance ? <div><dt>Balance</dt><dd>{n.balance}</dd></div> : <div aria-hidden="true" />}
               </dl>
               {n.said ? <blockquote className="contact-said">“{n.said}”</blockquote> : null}
               {n.rest ? <span className="sub">{n.rest}</span> : null}
