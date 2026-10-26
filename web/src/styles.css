@@ -839,9 +839,9 @@ select:not([multiple]):disabled { opacity: .6; }
 
 .insights { display: grid; gap: 16px; }
 .ins-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
-.ins-hero > div { display: grid; gap: 4px; padding: 18px; border-radius: 14px; background: #0f3d2e; color: #f4f7f2; }
-.ins-hero strong { font-size: 40px; line-height: 1; font-weight: 700; color: #e2b04a; }
-.ins-hero span { font-size: 14px; color: #bfd8cc; }
+.ins-hero > div { display: grid; gap: 4px; padding: 18px; border-radius: 14px; background: var(--selected); border: 1px solid #b7e8cf; color: var(--fg); }
+.ins-hero strong { font-size: 40px; line-height: 1; font-weight: 700; color: var(--brand-hover); }
+.ins-hero span { font-size: 14px; color: var(--muted); }
 .ins-panel { padding: 22px; }
 .ins-panel h2 { margin: 0 0 4px; }
 .ins-sub { margin: 20px 0 8px; font-size: 14px; color: var(--muted); font-weight: 600; }

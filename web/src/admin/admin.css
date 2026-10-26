@@ -262,10 +262,10 @@
 .demo-bar-actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
 .flow-foot { margin: 18px 0 8px; text-align: center; font-size: 14px; }
 
-.count-tile { display: grid; gap: 2px; margin: 4px 0 14px; padding: 16px 18px; border-radius: 12px; background: #0f3d2e; color: #f4f7f2; }
-.count-tile strong { font-size: 44px; line-height: 1; font-weight: 700; color: #e2b04a; }
-.count-tile span { font-size: 14px; color: #dcebe3; }
-.count-tile .sub { font-size: 12px; color: #bfd8cc; }
+.count-tile { display: grid; gap: 2px; margin: 4px 0 14px; padding: 16px 18px; border-radius: 12px; background: var(--selected, #e3fcef); border: 1px solid #b7e8cf; color: var(--fg); }
+.count-tile strong { font-size: 44px; line-height: 1; font-weight: 700; color: var(--brand-hover, #006b47); }
+.count-tile span { font-size: 14px; color: var(--fg); }
+.count-tile .sub { font-size: 12px; color: var(--muted); }
 
 /* In the floating demo panel the wrapper draws the card, so the detail inside just fills it, on any screen size. */
 .admin.is-demo .flow-float .fdetail { position: static; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; left: auto; right: auto; bottom: auto; top: auto; width: auto; }
