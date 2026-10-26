@@ -1,33 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { addBaseTiles } from "./mapTiles";
 import type { EmergencyAlert, ForecastTown } from "../data/api";
 import { forecastTemperatures } from "../domain/forecastHeat";
 import { alertPopup, triangle } from "./OutlookMap";
-import { alertColor, dayName, tempColor } from "./outlookText";
+import { alertColor } from "./outlookText";
 import { temperatureLayer } from "./temperatureLayer";
 
-/** The customer's suburb and the Emergency WA warnings near it, under the week's forecast shaded across the state: pick a day to see that day's temperatures. Fits the suburb and the warnings, or zooms in on the suburb. */
-export function CaseWeatherMap({ location, label, alerts, days, towns }: {
+/** The customer's suburb and the Emergency WA warnings near it, under the week's forecast shaded across the state. The day comes from the forecast beside it. Fits the suburb and the warnings, or zooms in on the suburb. */
+export function CaseWeatherMap({ location, label, alerts, days, towns, date, playing, onTogglePlay }: {
   location: [number, number]; label: string; alerts: EmergencyAlert[];
-  days: { date: string; max: number | null; precis: string }[]; towns: ForecastTown[];
+  days: { date: string }[]; towns: ForecastTown[]; date: string; playing: boolean; onTogglePlay: () => void;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<L.Map | null>(null);
   const [hint, setHint] = useState(false);
-  // The day shown starts on the customer's hottest day.
-  const hottest = useMemo(() => days.reduce<string | null>((best, d) => (d.max !== null && (best === null || d.max > (days.find((x) => x.date === best)?.max ?? -Infinity)) ? d.date : best), null) ?? days[0]?.date ?? "", [days]);
-  const [date, setDate] = useState(hottest);
-  useEffect(() => setDate(hottest), [hottest]);
-  // Play steps through the week one day a second and loops; choosing a day by hand stops it.
-  const [playing, setPlaying] = useState(false);
-  useEffect(() => {
-    if (!playing || days.length < 2) return;
-    const t = window.setInterval(() => setDate((current) => days[(Math.max(0, days.findIndex((d) => d.date === current)) + 1) % days.length]!.date), 1000);
-    return () => window.clearInterval(t);
-  }, [playing, days]);
-
   useEffect(() => {
     if (!el.current) return;
     const m = L.map(el.current, { scrollWheelZoom: false });
@@ -76,17 +64,8 @@ export function CaseWeatherMap({ location, label, alerts, days, towns }: {
   return (
     <div className="case-wx-map-wrap">
       <div ref={el} className="case-wx-map" role="region" aria-label={`Map of ${label} and nearby Emergency WA warnings, shaded by forecast temperature`} />
-      {days.length ? (
-        <ol className="case-wx-map-days" aria-label="Choose a day to shade the map by its forecast maximum">
-          <li><button type="button" className="case-wx-play" aria-label={playing ? "Pause the week" : "Play the week"} title={playing ? "Pause" : "Play through the week"} onClick={() => setPlaying((p) => !p)}>{playing ? "❚❚" : "▶"}</button></li>
-          {days.map((d) => (
-            <li key={d.date}>
-              <button type="button" aria-pressed={d.date === date} title={d.precis} onClick={() => { setPlaying(false); setDate(d.date); }}>
-                <span>{dayName(d.date)}</span><strong style={tempColor(d.max)}>{d.max ?? "–"}°</strong>
-              </button>
-            </li>
-          ))}
-        </ol>
+      {days.length > 1 ? (
+        <button type="button" className="case-wx-play" aria-label={playing ? "Pause the week" : "Play the week"} title={playing ? "Pause" : "Play through the week"} onClick={onTogglePlay}>{playing ? "❚❚" : "▶"}</button>
       ) : null}
       <div className={`map-wheel-hint${hint ? " is-on" : ""}`} aria-hidden="true">Use {key} + scroll to zoom the map</div>
     </div>

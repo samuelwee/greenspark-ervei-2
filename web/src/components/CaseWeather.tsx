@@ -15,6 +15,17 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
   const f = item.forecast ?? null;
   const [feed, setFeed] = useState<EmergencyFeed | null>(null);
   const [towns, setTowns] = useState<ForecastTown[]>([]);
+  // The forecast row picks the day the map is shaded for; it starts on the hottest day. Play steps through the week and loops.
+  const days = f?.days ?? [];
+  const hottest = useMemo(() => days.reduce<{ date: string; max: number } | null>((best, d) => (d.max !== null && (!best || d.max > best.max) ? { date: d.date, max: d.max } : best), null)?.date ?? days[0]?.date ?? "", [days]);
+  const [date, setDate] = useState(hottest);
+  useEffect(() => setDate(hottest), [hottest]);
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => {
+    if (!playing || days.length < 2) return;
+    const t = window.setInterval(() => setDate((current) => days[(Math.max(0, days.findIndex((d) => d.date === current)) + 1) % days.length]!.date), 450);
+    return () => window.clearInterval(t);
+  }, [playing, days]);
   useEffect(() => {
     if (!client?.forecastTowns || !f?.location) return;
     let live = true;
@@ -47,7 +58,7 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
       <div className="case-wx">
         {f.location ? (
           <Suspense fallback={<div className="case-wx-map" role="status">Loading the map…</div>}>
-            <CaseWeatherMap location={f.location} label={`${suburb} (suburb centre)`} alerts={nearAlerts} days={f.days} towns={towns} />
+            <CaseWeatherMap location={f.location} label={`${suburb} (suburb centre)`} alerts={nearAlerts} days={f.days} towns={towns} date={date} playing={playing} onTogglePlay={() => setPlaying((p) => !p)} />
           </Suspense>
         ) : null}
         <div className="case-wx-info">
@@ -56,9 +67,11 @@ export function CaseWeather({ item, client }: { item: CaseItem; client?: Pick<Ap
             <ol className="case-wx-days">
               {f.days.map((d) => (
                 <li key={d.date} title={d.precis}>
-                  <span className="wx-day">{dayName(d.date)}<span className="sub"> {dayDate(d.date)}</span></span>
-                  <span className="case-wx-max" style={tempColor(d.max)}>{d.max ?? "–"}°</span>
-                  <span className="sub">{d.min ?? "–"}°</span>
+                  <button type="button" aria-pressed={d.date === date} aria-label={`Shade the map for ${dayName(d.date)} ${dayDate(d.date)}`} onClick={() => { setPlaying(false); setDate(d.date); }}>
+                    <span className="wx-day">{dayName(d.date)}<span className="sub"> {dayDate(d.date)}</span></span>
+                    <span className="case-wx-max" style={tempColor(d.max)}>{d.max ?? "–"}°</span>
+                    <span className="sub">{d.min ?? "–"}°</span>
+                  </button>
                 </li>
               ))}
             </ol>
