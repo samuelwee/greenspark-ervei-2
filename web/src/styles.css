@@ -472,7 +472,7 @@ button.kpi:hover { border-color: #b3bac5; }
 .outlook-filters label { display: grid; gap: 2px; width: 190px; }
 .outlook-table { min-width: 960px; }
 .wx-kinds { letter-spacing: 2px; }
-.need-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.need-chips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 330px; }
 .need { font-size: 12px; border-radius: 99px; padding: 1px 8px; white-space: nowrap; background: #f1f2f4; }
 .need-health { background: var(--urgent-bg); color: var(--urgent); }
 .need-supply { background: var(--high-bg); color: var(--high); }

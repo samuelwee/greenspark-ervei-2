@@ -254,8 +254,8 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                       </td>
                       <td>
                         <span className="need-chips">
-                          {c.sensitivity.slice(0, 3).map((s) => <span key={s.id} className={`need need-${s.group}`} title={GROUP_LABEL[s.group]}>{s.label}</span>)}
-                          {c.sensitivity.length > 3 ? <span className="need need-more">+{c.sensitivity.length - 3}</span> : null}
+                          {c.sensitivity.slice(0, 5).map((s) => <span key={s.id} className={`need need-${s.group}`} title={GROUP_LABEL[s.group]}>{s.label}</span>)}
+                          {c.sensitivity.length > 5 ? <span className="need need-more">+{c.sensitivity.length - 5}</span> : null}
                           {!c.sensitivity.length ? <span className="sub">High predicted risk</span> : null}
                         </span>
                       </td>
