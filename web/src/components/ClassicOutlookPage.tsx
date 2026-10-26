@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { ApiClient, EmergencyFeed, HazardKind, Outlook, OutlookCustomer } from "../data/api";
 import { accountHref, isModifiedClick } from "../route";
 import { band, percent } from "./predictionText";
+import { CONTACT_BADGE, CONTACT_BY, OutlookWeekList, contactRank } from "./OutlookWeekList";
 import { ALERT_LEVELS, GROUP_LABEL, HAZARD_HINT, HAZARD_ICON, HAZARD_LABEL, alertColor, dayDate, isWarning, dayName, tempColor } from "./outlookText";
 
 // Leaflet only loads with this page.
@@ -17,15 +18,8 @@ function storedLayers(): Layers {
 type Group = keyof typeof GROUP_LABEL;
 
 /** The home page: the next week's weather across WA and the customers it could put at risk, so staff can call first. */
-/** When to contact a customer comes from the 7-day outlook, not from their current priority score: a warning in force or a hazard today is Today, then by how many days until the first hot or dangerous day. */
-const CONTACT_BY = ["Today", "This week", "Soon", "Monitor"] as const;
-const CONTACT_BADGE = ["urgent", "high", "moderate", "routine"] as const;
-function contactRank(c: { kinds: string[]; firstDate: string | null }, today: string): number {
-  if (c.kinds.includes("warning")) return 0;
-  if (!c.firstDate) return 3;
-  const days = Math.round((Date.parse(`${c.firstDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
-  return days <= 0 ? 0 : days <= 3 ? 1 : 2;
-}
+const VIEW_KEY = "outlook-list-view";
+const storedView = (): "week" | "table" => { try { return localStorage.getItem(VIEW_KEY) === "table" ? "table" : "week"; } catch { return "week"; } };
 
 export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency">; navigate: (to: string) => void }) {
   const [data, setData] = useState<Outlook | null>(null);
@@ -40,6 +34,8 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const [emergency, setEmergency] = useState<EmergencyFeed | null>(null);
   // Which map layers are on is a per-browser preference.
   const [layers, setLayers] = useState<Layers>(storedLayers);
+  const [view, setView] = useState<"week" | "table">(storedView);
+  const chooseView = (v: "week" | "table") => { setView(v); try { localStorage.setItem(VIEW_KEY, v); } catch { /* optional */ } };
   const toggle = (k: keyof Layers) => setLayers((l) => { const n = { ...l, [k]: !l[k] }; try { localStorage.setItem(LAYERS_KEY, JSON.stringify(n)); } catch { /* optional */ } return n; });
 
   // Emergency WA warnings load on their own, and again every 5 minutes, so they never hold up the outlook.
@@ -235,6 +231,12 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
         {rows.length === 0 ? (
           <div className="empty"><h3>No one to contact{filtered ? " with these filters" : ""}</h3><p>{filtered ? "Try clearing a filter." : "The forecast has no hot or dangerous weather where our customers live this week."}</p></div>
         ) : (
+          <>
+          <div className="view-toggle" role="group" aria-label="List view">
+            <button type="button" className="btn btn-small" aria-pressed={view === "week"} onClick={() => chooseView("week")}>Week view</button>
+            <button type="button" className="btn btn-small" aria-pressed={view === "table"} onClick={() => chooseView("table")}>Table</button>
+          </div>
+          {view === "week" ? <div className="table-wrap"><OutlookWeekList rows={rows.slice(0, shown)} towns={townsById} dates={ready.days.map((d) => d.date)} today={ready.today} navigate={navigate} /></div> : (
           <div className="table-wrap">
             <table className="case-table outlook-table">
               <thead>
@@ -279,6 +281,8 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
               </tbody>
             </table>
           </div>
+          )}
+          </>
         )}
         <div className="pager">
           <span>{rows.length ? `Showing ${Math.min(shown, rows.length)} of ${rows.length}, soonest weather first, then act now, then by weather × need × chance of hardship` : ""}</span>

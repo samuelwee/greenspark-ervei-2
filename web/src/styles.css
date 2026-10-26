@@ -741,3 +741,23 @@ select:not([multiple]):disabled { opacity: .6; }
 .decades-table .t-heat { text-align: center; font-weight: 600; min-width: 52px; }
 .decades-table .t-proj { background-image: repeating-linear-gradient(135deg, transparent 0 6px, #ffffff33 6px 8px); }
 .decades-table .town-name { font-weight: 600; display: block; }
+
+.view-toggle { display: flex; gap: 6px; margin: 0 0 10px; }
+.view-toggle .btn[aria-pressed="true"] { background: var(--brand, #006c50); border-color: var(--brand, #006c50); color: #fff; }
+.week-list { min-width: 720px; font-size: 14px; }
+.week-key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+.week-key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.week-key .week-key-first { background: transparent; border: 2px solid #1b2a24; box-sizing: border-box; }
+.week-row { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(7, 36px) 130px; gap: 4px; align-items: center; }
+.week-head { font-size: 12px; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.week-day { text-align: center; }
+.week-group { margin: 16px 0 4px; font-size: 14px; }
+.week-person { padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.week-person:hover { background: var(--surface-hover, #f6f8f4); }
+.week-person > div:first-child { display: grid; gap: 2px; }
+.week-cell { display: block; height: 28px; border-radius: 4px; position: relative; }
+.week-cell.is-first { outline: 2px solid #1b2a24; outline-offset: 1px; }
+.week-cell.is-warned::before { content: "!"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: #fff; }
+.week-risk { display: grid; gap: 3px; font-size: 13px; }
+.week-bar { display: block; height: 6px; border-radius: 3px; background: #eef1f4; overflow: hidden; }
+.week-bar i { display: block; height: 100%; }
