@@ -265,3 +265,19 @@
 .support-legend .support-map-key > strong { font-size: 11px; }
 .support-legend .support-weather-key { display: contents; }
 .support-legend .support-weather-key > div { flex: 1 1 260px; }
+
+/* One tidy legend under the map: equal columns, each a heading over its items, all lined up at the top. */
+.support-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px 36px; align-items: start; padding: 18px 20px; }
+.support-legend .support-map-key, .support-legend .support-weather-key > div { display: grid; gap: 10px; align-content: start; min-width: 0; padding: 0; flex: none; }
+.support-legend .support-map-key > strong, .support-legend .support-weather-key strong { font-size: 13px; font-weight: 700; color: #253858; padding-bottom: 6px; border-bottom: 1px solid #e0e5ec; }
+.support-legend .support-group-key, .support-legend .support-urgency-key, .support-legend .weather-key-items { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: flex-start; font-size: 12px; }
+.support-legend .support-urgency-key i, .support-legend .weather-key-items i { width: 11px; height: 11px; }
+.support-legend .support-size-key { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; font-size: 12px; color: #526176; }
+.support-size-dots { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.support-size-dots i { display: inline-block; border-radius: 50%; width: 8px; height: 8px; }
+.support-size-dots i:nth-child(2) { width: 12px; height: 12px; }
+.support-size-dots i:nth-child(3) { width: 17px; height: 17px; margin-right: 0; }
+.support-legend .support-map-key > span, .support-legend .support-weather-key small { font-size: 12px; color: #526176; line-height: 1.4; }
+.support-legend .support-temperature-scale { gap: 5px; }
+.support-legend .support-temperature-scale > i { height: 10px; }
+.support-legend .support-temperature-scale b { font-size: 11px; color: #526176; }

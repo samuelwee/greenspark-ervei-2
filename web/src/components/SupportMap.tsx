@@ -173,10 +173,10 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
           <strong>Support groups</strong>
           <div className="support-group-key">{SUPPORT_GROUPS.filter((item) => activeGroups.includes(item.id)).map((item) => <span key={item.id}><i style={{ background: SUPPORT_GROUP_COLORS[item.id].strong }} />{item.letter} {item.label}</span>)}</div>
           <div className="support-urgency-key">{Object.entries(SUPPORT_URGENCY).map(([id, item]) => <span key={id}><i style={{ background: legendColors[id as keyof typeof SUPPORT_URGENCY] }} />{item.label}</span>)}</div>
-          <span className="support-size-key"><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /> Size = count · darker = more attention</span>
+          <span className="support-size-key"><span className="support-size-dots"><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /></span>Size = count · darker = more attention</span>
           {zoom < 8.5 ? <span>Regional totals · select a circle to zoom in</span> : null}
-          {showHeat ? <><strong>{date ? "Daily maximum temperature" : "Peak daily maximum this week"}</strong><div className="support-temperature-scale"><i /><span><b>28°</b><b>32°</b><b>36°</b><b>40°</b><b>44°+</b></span></div><span>{temperatures.length ? "Estimated between town forecasts" : "No temperature forecast for this period"}</span></> : null}
-        </div>
+          </div>
+        {showHeat ? <div className="support-map-key support-legend-temp"><strong>{date ? "Daily maximum temperature" : "Peak daily maximum this week"}</strong><div className="support-temperature-scale"><i /><span><b>28°</b><b>32°</b><b>36°</b><b>40°</b><b>44°+</b></span></div><span>{temperatures.length ? "Estimated between town forecasts" : "No temperature forecast for this period"}</span></div> : null}
       {legend}
     </div>
     <div className="map-zoom outlook-zoom">
