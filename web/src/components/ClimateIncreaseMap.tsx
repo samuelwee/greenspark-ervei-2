@@ -1,5 +1,7 @@
 // How much hotter each forecast town gets (hot days a year in the last projected decade minus the latest observed
-// decade) over the postcode areas shaded by how disadvantaged they are (ABS SEIFA 2021, IRSD; ABS postal area boundaries). Either layer can be switched off.
+// decade), as circles sized and coloured by the increase. Towns that would overlap merge into one circle showing the
+// range, and split as you zoom in. Clicking a town selects it in the table below. Postcode areas shaded by how
+// disadvantaged they are (ABS SEIFA 2021, IRSD; ABS postal area boundaries) can be switched on as a second layer.
 // The SEIFA layer describes areas, never people.
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
@@ -22,7 +24,9 @@ function increaseColor(n: number, max: number): string {
 /** SEIFA decile 1 (most disadvantaged) deep purple to decile 10 pale lilac, a different hue from the heat. */
 const SEIFA_COLOR = ["#3b1a6b", "#53288f", "#6c3fb0", "#8660c4", "#a183d3", "#baa3de", "#d0c1e8", "#e1d8f0", "#eee8f6", "#f7f4fb"];
 
-export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold: "hot" | "veryHot" }) {
+export function ClimateIncreaseMap({ data, threshold, selected, onSelect }: {
+  data: Ready; threshold: "hot" | "veryHot"; selected: { id: string; from: "map" | "table" } | null; onSelect: (id: string, from: "map" | "table") => void;
+}) {
   const [showIncrease, setShowIncrease] = useState(true);
   const [showSeifa, setShowSeifa] = useState(false);
   const [boundaries, setBoundaries] = useState<Boundaries | null>(null);
@@ -31,6 +35,8 @@ export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold
   const map = useRef<L.Map | null>(null);
   const seifaLayer = useRef<L.LayerGroup | null>(null);
   const heatLayer = useRef<L.LayerGroup | null>(null);
+  const select = useRef(onSelect);
+  select.current = onSelect;
   const lastObserved = data.observedDecades.at(-1)!, lastProjected = data.projectedDecades.at(-1)!;
 
   const towns = useMemo(() => data.towns.flatMap((t) => {
@@ -83,25 +89,41 @@ export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold
     g.clearLayers();
     if (!showIncrease) return;
     const m = map.current;
-    // The number is centred on its circle. Biggest increases are labelled first, and a label is skipped when it would
-    // land on one already placed (the Perth towns sit close together), so zooming in reveals the rest.
-    const placed: L.Point[] = [];
-    const label = (n: number) => (Math.round(n) > 0 ? `+${Math.round(n)}` : Math.round(n) < 0 ? `\u2212${Math.abs(Math.round(n))}` : "0");
+    if (!m) return;
+    const sign = (n: number) => (Math.round(n) > 0 ? `+${Math.round(n)}` : Math.round(n) < 0 ? `\u2212${Math.abs(Math.round(n))}` : "0");
+    const unit = `days a year at ${data.thresholds[threshold]}\u00b0C or more`;
+    // Circles are sized by the increase. Towns closer than 40 px merge into one circle, biggest increase first.
+    const clusters: { seed: L.Point; towns: typeof towns }[] = [];
     for (const t of [...towns].sort((x, y) => y.increase - x.increase)) {
-      const days = `${label(t.increase)} days a year at ${data.thresholds[threshold]}\u00b0C or more`;
-      const marker = L.circleMarker([t.lat, t.lng], { pane: "increase", radius: 15, weight: 2, color: "#ffffff", fillColor: increaseColor(t.increase, max), fillOpacity: showSeifa ? 0.85 : 0.95 });
-      const at = m?.latLngToContainerPoint([t.lat, t.lng]);
-      const room = !at || placed.every((p) => p.distanceTo(at) >= 34);
-      if (at && room) placed.push(at);
-      if (room) {
-        const deep = t.increase / max >= 0.5;
-        marker.bindTooltip(`<span style="color:${deep ? "#ffffff" : "#2b1a00"}">${label(t.increase)}</span>`, { permanent: true, direction: "center", className: "decade-map-label", pane: "increaseLabels", interactive: false });
+      const at = m.latLngToContainerPoint([t.lat, t.lng]);
+      const home = clusters.find((c) => c.seed.distanceTo(at) < 40);
+      if (home) home.towns.push(t); else clusters.push({ seed: at, towns: [t] });
+    }
+    const radiusOf = (n: number) => 7 + 15 * (Math.max(0, n) / max);
+    for (const c of clusters) {
+      const top = c.towns[0]!, low = c.towns[c.towns.length - 1]!, many = c.towns.length > 1;
+      const lat = c.towns.reduce((n, t) => n + t.lat, 0) / c.towns.length, lng = c.towns.reduce((n, t) => n + t.lng, 0) / c.towns.length;
+      const chosen = c.towns.some((t) => t.id === selected?.id);
+      const marker = L.circleMarker([lat, lng], {
+        pane: "increase", radius: many ? Math.max(18, radiusOf(top.increase)) : radiusOf(top.increase),
+        weight: chosen ? 4 : 2, color: chosen ? "#1b2a24" : "#ffffff", fillColor: increaseColor(top.increase, max), fillOpacity: showSeifa ? 0.85 : 0.95,
+      });
+      if (many) {
+        marker.bindTooltip(`<span style="color:${top.increase / max >= 0.5 ? "#ffffff" : "#2b1a00"}">${sign(low.increase)}\u2013${sign(top.increase).replace("+", "")}</span>`, { permanent: true, direction: "center", className: "decade-map-label", pane: "increaseLabels", interactive: false });
+        marker.on("click", () => m.fitBounds(L.latLngBounds(c.towns.map((t) => [t.lat, t.lng] as [number, number])), { padding: [60, 60], maxZoom: 11 }));
       } else {
-        marker.bindTooltip(`${t.name}: ${days}`);
+        marker.bindTooltip(`${top.name}: ${sign(top.increase)} ${unit}`);
+        marker.on("click", () => select.current(top.id, "map"));
       }
       marker.addTo(g);
     }
-  }, [towns, max, showIncrease, showSeifa, data.thresholds, threshold, zoom]);
+  }, [towns, max, showIncrease, showSeifa, data.thresholds, threshold, zoom, selected]);
+  // Choosing a town in the table brings it into view on the map.
+  useEffect(() => {
+    if (selected?.from !== "table") return;
+    const t = towns.find((x) => x.id === selected.id);
+    if (t && map.current) map.current.flyTo([t.lat, t.lng], Math.max(map.current.getZoom(), 9), { duration: 0.8 });
+  }, [selected, towns]);
 
   return (
     <div className="decade-map">

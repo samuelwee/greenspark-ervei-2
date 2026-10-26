@@ -21,6 +21,12 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
   const [decades, setDecades] = useState<ClimateDecades | null>(null);
   const [threshold, setThreshold] = useState<"hot" | "veryHot">("hot");
   const [error, setError] = useState<string | null>(null);
+  // A town picked on the map or in the table, and where it was picked, so only a map click scrolls the table.
+  const [selected, setSelected] = useState<{ id: string; from: "map" | "table" } | null>(null);
+  const pick = (id: string, from: "map" | "table") => {
+    setSelected({ id, from });
+    if (from === "map") requestAnimationFrame(() => document.getElementById(`decade-row-${id}`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  };
   useEffect(() => { document.title = "Climate outlook · ERVEI"; }, []);
   useEffect(() => {
     let live = true;
@@ -63,7 +69,7 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
         {error ? <p className="muted decades-note" role="alert">{error}</p> : !decades ? <p className="muted decades-note" role="status">Loading…</p> : !d ? <p className="muted decades-note">The decade-by-decade data isn’t on this server yet.</p> : (
           <>
             <p className="hint decades-note">Average days a year at {d.thresholds[threshold]}°C or more in each decade, by forecast town, biggest increase first. The increase is the {lastProjected?.replace("-", "–")} count minus the {lastObserved?.replace("-", "–")} count. Part decades are shown by their years. The models don’t cover 2026 to 2034 or 2065 to 2069.</p>
-            <Suspense fallback={<p className="muted decades-note" role="status">Loading the map…</p>}><ClimateIncreaseMap data={d} threshold={threshold} /></Suspense>
+            <Suspense fallback={<p className="muted decades-note" role="status">Loading the map…</p>}><ClimateIncreaseMap data={d} threshold={threshold} selected={selected} onSelect={pick} /></Suspense>
             <div className="table-wrap">
               <table className="town-table decades-table">
                 <thead>
@@ -79,7 +85,7 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
                 </thead>
                 <tbody>
                   {towns.map(({ t, increase }) => (
-                    <tr key={t.id}>
+                    <tr key={t.id} id={`decade-row-${t.id}`} className={selected?.id === t.id ? "is-selected" : undefined} onClick={() => pick(t.id, "table")}>
                       <th scope="row"><span className="town-name">{t.name}</span>{t.district ? <span className="sub">{t.district}</span> : null}</th>
                       <td className="t-num">{t.customers}</td>
                       <td className="t-num"><span className="future-add">{increase === null ? "–" : `${increase >= 0 ? "+" : "−"}${Math.abs(Math.round(increase))}`}</span></td>
