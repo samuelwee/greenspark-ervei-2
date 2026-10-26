@@ -266,3 +266,7 @@
 .count-tile strong { font-size: 44px; line-height: 1; font-weight: 700; color: #e2b04a; }
 .count-tile span { font-size: 14px; color: #dcebe3; }
 .count-tile .sub { font-size: 12px; color: #bfd8cc; }
+
+/* In the floating demo panel the wrapper draws the card, so the detail inside just fills it, on any screen size. */
+.admin.is-demo .flow-float .fdetail { position: static; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; left: auto; right: auto; bottom: auto; top: auto; width: auto; }
+.admin.is-demo .flow-float .fdetail:not(.rest) { position: static; }

@@ -204,7 +204,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
             />
           </div>
         </div>
-        {demo && !selected ? null : <div className={demo ? "flow-float" : undefined}>{demo ? <button type="button" className="flow-float-close" aria-label="Close the panel" onClick={() => setSelected(null)}>✕</button> : null}<FlowDetail
+        {demo && !selected ? null : <div className={demo ? "flow-float" : undefined}><FlowDetail
           doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} compact={demo} counts={counts} dispatch={flow.dispatch}
           onSelect={select} onCloseCreate={() => setCreating(null)}
         /></div>}
