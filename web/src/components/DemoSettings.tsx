@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AiStatus, ApiClient } from "../data/api";
+import { ASSISTANT_EVENT } from "./AssistantChat";
 import type { StaffUser } from "../domain/types";
 import { WeatherSource } from "./DataSourcesPage";
 
@@ -24,6 +25,28 @@ function AiModel({ client }: { client: ApiClient }) {
       </select>
       <p className="hint">Writes the Suggested plan, the signals summary and the order of solutions. Switching applies to everyone and drafts fresh summaries.</p>
       {error ? <p className="muted" role="alert">{error}</p> : null}
+    </>
+  );
+}
+
+/** The help chat's on/off switch; like the AI model, it is for everyone until the server restarts. */
+function AssistantSwitch({ client }: { client: Pick<ApiClient, "assistantStatus" | "setAssistant"> }) {
+  const [on, setOn] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { client.assistantStatus?.().then((s) => setOn(s.on), () => setError("Couldn't load the assistant setting.")); }, [client]);
+  if (!client.assistantStatus || !client.setAssistant) return null;
+  const change = async (next: boolean) => {
+    setError(null);
+    try {
+      const s = await client.setAssistant!(next);
+      setOn(s.on);
+      window.dispatchEvent(new CustomEvent(ASSISTANT_EVENT, { detail: s.on }));
+    } catch (e) { setError(e instanceof Error ? e.message : "Couldn't change the assistant."); }
+  };
+  return (
+    <>
+      <label className="switch"><input type="checkbox" role="switch" checked={on ?? true} disabled={on === null} onChange={(e) => void change(e.target.checked)} /><span>{on === false ? "Off" : "On"}</span></label>
+      {error ? <span className="hint" role="alert">{error}</span> : null}
     </>
   );
 }
@@ -61,6 +84,10 @@ export function DemoSettings({ client, users, user, onSwitchUser }: { client: Ap
           <div className="field">
             <span>AI model</span>
             <AiModel client={client} />
+          </div>
+          <div className="field">
+            <span>Help assistant</span>
+            <AssistantSwitch client={client} />
           </div>
           <div className="field">
             <span>Weather source</span>

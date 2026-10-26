@@ -7,7 +7,17 @@ interface Turn { role: "user" | "assistant"; content: string }
 const SUGGESTIONS = ["What does Contact by mean?", "How is Chance of hardship worked out?", "What is the difference between priority and the outlook?", "Is this real customer data?"];
 const MAX = 600;
 
-export function AssistantChat({ client }: { client: Pick<ApiClient, "ask"> }) {
+/** The settings switch tells the chat to show or hide itself straight away. */
+export const ASSISTANT_EVENT = "assistant-change";
+
+export function AssistantChat({ client }: { client: Pick<ApiClient, "ask" | "assistantStatus"> }) {
+  const [on, setOn] = useState(true);
+  useEffect(() => {
+    client.assistantStatus?.().then((s) => setOn(s.on), () => undefined);
+    const onChange = (e: Event) => setOn((e as CustomEvent<boolean>).detail);
+    window.addEventListener(ASSISTANT_EVENT, onChange);
+    return () => window.removeEventListener(ASSISTANT_EVENT, onChange);
+  }, [client]);
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
@@ -25,7 +35,7 @@ export function AssistantChat({ client }: { client: Pick<ApiClient, "ask"> }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  if (!client.ask) return null;
+  if (!client.ask || !on) return null;
   const send = async (question: string) => {
     const q = question.trim().slice(0, MAX);
     if (!q || busy) return;

@@ -538,7 +538,15 @@ export function createApp(store: Store, options: AppOptions = {}) {
   // The help chat: how the tool works, from a written description, with no customer data. Each visitor gets a few
   // questions every ten minutes, since every answer is a paid call.
   const asked = new Map<string, number[]>();
+  // Anyone can switch the help chat on or off in the demo settings, for everyone, until the server restarts.
+  let assistantOn = true;
+  app.get("/api/assistant/status", (_req, res) => { res.json({ on: assistantOn, available: !!ai?.apiKey }); });
+  app.post("/api/assistant/status", (req, res) => {
+    assistantOn = parse(z.object({ on: z.boolean() }), req.body).on;
+    res.json({ on: assistantOn, available: !!ai?.apiKey });
+  });
   app.post("/api/assistant", async (req, res) => {
+    if (!assistantOn) throw new ApiError("unavailable", "The help assistant is switched off.");
     const { messages } = parse(z.object({ messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(MAX_MESSAGE_CHARS * 4) })).min(1).max(MAX_HISTORY) }), req.body);
     const who = String(req.headers["fly-client-ip"] ?? req.ip ?? "unknown"), now = Date.now();
     const recent = (asked.get(who) ?? []).filter((t) => now - t < 10 * 60_000);
