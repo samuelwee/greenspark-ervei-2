@@ -772,3 +772,10 @@ select:not([multiple]):disabled { opacity: .6; }
 .area-legend { position: absolute; left: 14px; bottom: 26px; z-index: 500; display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px; }
 .area-ramp { display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
 .area-ramp i { display: block; width: 18px; height: 12px; }
+
+.decade-map { border-top: 1px solid var(--border); }
+.decade-map-bar { display: grid; gap: 4px; padding: 14px 22px 10px; }
+.decade-map-bar input[type="range"] { width: 100%; }
+.decade-map-ends { display: flex; justify-content: space-between; font-size: 12px; }
+.decade-map-canvas { height: 520px; z-index: 0; }
+.decade-map-n { display: grid; place-items: center; font-weight: 700; font-size: 11px; color: #1b2a24; text-shadow: 0 0 2px #fff; pointer-events: none; }

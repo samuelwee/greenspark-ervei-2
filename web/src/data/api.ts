@@ -144,7 +144,7 @@ export type ClimateDecades =
     available: true; thresholds: { hot: number; veryHot: number }; observedDecades: string[]; projectedDecades: string[];
     observedSource: { source: string; years: [number, number]; licence: string };
     projectedSource: { source: string; scenario: string; models: string[]; coverage: string; sampled: string; method: string; licence: string };
-    towns: { id: string; name: string; district: string | null; customers: number; observed: Record<string, { hot: number | null; veryHot: number | null }>; projected: Record<string, { hot: number | null; veryHot: number | null }> }[];
+    towns: { id: string; name: string; lat?: number; lng?: number; district: string | null; customers: number; observed: Record<string, { hot: number | null; veryHot: number | null }>; projected: Record<string, { hot: number | null; veryHot: number | null }> }[];
   };
 export interface ClimateInfo { thresholds: { hot: number; veryHot: number }; baselineYears: [number, number]; scenario: string; period: string }
 export interface OutlookCustomer {

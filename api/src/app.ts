@@ -471,6 +471,11 @@ export function createApp(store: Store, options: AppOptions = {}) {
     const w = options.weather?.current() ?? null;
     const customers = new Map<string, number>();
     for (const p of store.allPeople()) { const t = p.address?.postcode ? POSTCODE_TOWN[p.address.postcode] : undefined; if (t) customers.set(t, (customers.get(t) ?? 0) + 1); }
+    // Each town sits at the average of its postcodes.
+    const townSpot = (id: string) => {
+      const spots = Object.entries(POSTCODE_TOWN).filter(([, town]) => town === id).flatMap(([pc]) => (POSTCODE_LOCATION[pc] ? [POSTCODE_LOCATION[pc]!] : []));
+      return spots.length ? { lat: spots.reduce((n, s) => n + s[0], 0) / spots.length, lng: spots.reduce((n, s) => n + s[1], 0) / spots.length } : {};
+    };
     const byTown = new Map<string, (typeof d.postcodes)[string][]>();
     for (const h of Object.values(d.postcodes)) if (h.town) byTown.set(h.town, [...(byTown.get(h.town) ?? []), h]);
     const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null);
@@ -478,7 +483,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
       hot: avg(hs.flatMap((h) => (h[kind][decade] ? [h[kind][decade]!.hot] : []))), veryHot: avg(hs.flatMap((h) => (h[kind][decade] ? [h[kind][decade]!.veryHot] : []))),
     });
     const towns = [...byTown].map(([id, hs]) => ({
-      id, name: w?.towns[id]?.name ?? id, district: w ? (w.districts[w.towns[id]?.district ?? ""] ?? null) : null, customers: customers.get(id) ?? 0,
+      id, name: w?.towns[id]?.name ?? id, ...townSpot(id), district: w ? (w.districts[w.towns[id]?.district ?? ""] ?? null) : null, customers: customers.get(id) ?? 0,
       observed: Object.fromEntries(d.observedDecades.map((dec) => [dec, pick(hs, "observed", dec)])),
       projected: Object.fromEntries(d.projectedDecades.map((dec) => [dec, pick(hs, "projected", dec)])),
     }));
