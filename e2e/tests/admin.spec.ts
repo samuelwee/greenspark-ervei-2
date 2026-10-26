@@ -11,7 +11,7 @@ const onDisk = () => JSON.parse(readFileSync(FILE, "utf8"));
 async function openAdmin(page: Page, user = "staff-manager", editMode = true) {
   await page.addInitScript((u) => localStorage.setItem("greenspark.demoUser", u), user);
   // The flowchart opens view only; most of these tests edit it, so they switch edit mode on first.
-  if (editMode) await page.addInitScript(() => localStorage.setItem("flow-edit-mode", "on"));
+  if (editMode) await page.addInitScript(() => localStorage.setItem("flow-mode", "edit"));
   await page.goto("/flowchart");
   await expect(page.getByTestId("count-signals")).toHaveText(/\d+/);
 }
@@ -42,9 +42,10 @@ test("Flowchart and Data sources are in the BTS menu", async ({ page }) => {
   await expect(page.locator(".case-table")).toBeVisible();
 });
 
-test("the flowchart opens view only, with no way to edit", async ({ page }) => {
+test("the flowchart opens in demo mode, view only, with no way to edit", async ({ page }) => {
   await openAdmin(page, "staff-manager", false);
-  await expect(page.getByText("View only.")).toBeVisible();
+  await expect(page.getByText("Example:")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Another example" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Add a signal" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Settings" })).toHaveCount(0);
 });

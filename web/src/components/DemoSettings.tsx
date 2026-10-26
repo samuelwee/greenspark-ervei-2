@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AiStatus, ApiClient } from "../data/api";
 import { ASSISTANT_EVENT } from "./AssistantChat";
-import { setEditMode, useEditMode } from "../admin/editMode";
+import { FLOW_MODES, setFlowMode, useFlowMode } from "../admin/editMode";
 import type { StaffUser } from "../domain/types";
 import { WeatherSource } from "./DataSourcesPage";
 
@@ -52,10 +52,17 @@ function AssistantSwitch({ client }: { client: Pick<ApiClient, "assistantStatus"
   );
 }
 
-/** Flowchart edit mode: the flowchart page is view only until this is on. A per-browser setting. */
-function FlowEditSwitch() {
-  const on = useEditMode();
-  return <label className="switch"><input type="checkbox" role="switch" checked={on} onChange={(e) => setEditMode(e.target.checked)} /><span>{on ? "On" : "Off"}</span></label>;
+/** Flowchart mode: Demo (the default), View only or Edit. A per-browser setting. */
+function FlowModeSelect() {
+  const mode = useFlowMode();
+  return (
+    <>
+      <select value={mode} onChange={(e) => setFlowMode(e.target.value as typeof mode)} aria-label="Flowchart mode">
+        {FLOW_MODES.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+      </select>
+      <span className="hint">Demo is a clean view-only presentation. Edit lets you change the flowchart. This browser only.</span>
+    </>
+  );
 }
 
 /** A gear in the top right of the header that opens the demo's settings: who you are, the AI model and the weather. */
@@ -93,9 +100,8 @@ export function DemoSettings({ client, users, user, onSwitchUser }: { client: Ap
             <AiModel client={client} />
           </div>
           <div className="field">
-            <span>Flowchart edit mode</span>
-            <FlowEditSwitch />
-            <span className="hint">Off means the flowchart is view only. This browser only.</span>
+            <span>Flowchart mode</span>
+            <FlowModeSelect />
           </div>
           <div className="field">
             <span>Help assistant</span>

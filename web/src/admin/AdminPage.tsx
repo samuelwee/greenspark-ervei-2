@@ -7,14 +7,15 @@ import { FlowSettings } from "./FlowSettings";
 import { DATA_SOURCE_GROUPS } from "./dataSources";
 import { UTILITY_LABEL, buildIndex, entityOf, nodeKey, search, trace, type Ref } from "./flowModel";
 import { useFlow } from "./useFlow";
-import { useEditMode } from "./editMode";
+import { useFlowMode } from "./editMode";
 import "./admin.css";
 
 export function AdminPage({ client }: { client: ApiClient }) {
   const flow = useFlow(client);
   const { doc } = flow;
-  // View only unless edit mode is on in the settings; the file's own problems also switch editing off.
-  const editMode = useEditMode();
+  // Demo (the default) and View only never edit; Edit is chosen in the settings. The file's own problems also switch editing off.
+  const mode = useFlowMode();
+  const editMode = mode === "edit", demo = mode === "demo";
   const readOnly = flow.readOnly || !editMode;
   const [selected, setSelected] = useState<Ref | null>(null);
   const [creating, setCreating] = useState<FlowKind | null>(null);
@@ -38,10 +39,14 @@ export function AdminPage({ client }: { client: ApiClient }) {
   const scrollTo = useRef<string | null>(null);
 
   const index = useMemo(() => (doc ? buildIndex(doc) : null), [doc]);
+  // Demo mode shows one example path at a time: circumstances with several signals and a solution, busiest first.
+  const examples = useMemo(() => (doc ? doc.circumstances.filter((c) => c.signals.length >= 2 && c.solutions.length >= 1).sort((a, b) => b.signals.length - a.signals.length).slice(0, 12) : []), [doc]);
+  const [example, setExample] = useState(0);
   const tracing = useMemo(() => (index && selected && entityOf(index, selected) ? trace(index, selected) : null), [index, selected]);
   const hits = useMemo(() => (doc ? search(doc, query) : []), [doc, query]);
   const matches = useMemo(() => new Set(query.trim() ? hits.map((h) => nodeKey(h.ref.kind, h.ref.id)) : []), [hits, query]);
 
+  useEffect(() => { if (demo && examples.length) setSelected({ kind: "circumstance", id: examples[example % examples.length]!.id }); }, [demo, examples, example]);
   // If the selected item is deleted (by you or somebody else), clear the selection.
   useEffect(() => { if (index && selected && !entityOf(index, selected)) setSelected(null); }, [index, selected]);
 
@@ -91,10 +96,10 @@ export function AdminPage({ client }: { client: ApiClient }) {
   }
 
   const last = flow.undoStack[flow.undoStack.length - 1];
-  const sheet = selected !== null || creating !== null;
+  const sheet = !demo && (selected !== null || creating !== null);
 
   return (
-    <main id="queue" className={`admin${sheet ? " sheet-open" : ""}`} tabIndex={-1}>
+    <main id="queue" className={`admin${sheet ? " sheet-open" : ""}${demo ? " is-demo" : ""}`} tabIndex={-1}>
       <header className="admin-head">
         <div>
           <p className="eyebrow">Flowchart · {doc.meta.region}</p>
@@ -109,11 +114,12 @@ export function AdminPage({ client }: { client: ApiClient }) {
             Undo{last ? `: ${last.label}` : ""}
           </button>
           {editMode ? <button type="button" className="btn" onClick={() => setSettingsOpen(true)}>Settings</button> : null}
-          <button type="button" className="btn" onClick={download}>Download JSON</button>
+          {demo ? null : <button type="button" className="btn" onClick={download}>Download JSON</button>}
         </div>
       </header>
 
-      {!editMode ? <div className="notice" role="note"><p><strong>View only.</strong> To change the flowchart, switch on Flowchart edit mode in the settings (the gear, top right).</p></div> : null}
+      {mode === "view" ? <div className="notice" role="note"><p><strong>View only.</strong> To change the flowchart, set Flowchart mode to Edit in the settings (the gear, top right).</p></div> : null}
+      {demo && examples.length ? <div className="demo-bar" role="note"><p><strong>Example:</strong> {examples[example % examples.length]!.name}. The highlighted boxes and lines show what raises it and what is offered. Click any box to trace its path.</p><button type="button" className="btn btn-small" onClick={() => setExample((e) => (e + 1) % examples.length)}>Another example</button></div> : null}
       {flow.problems.length ? (
         <div className="notice notice-error" role="alert">
           <div><p>The JSON file has problems, so editing is switched off until they are fixed:</p><ul className="problems">{flow.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
@@ -122,7 +128,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
       ) : null}
       {undoError ? <div className="notice notice-error" role="alert"><p>{undoError}</p></div> : null}
 
-      <div className="admin-controls">
+      <div className="admin-controls" hidden={demo}>
         <div className="search flow-search">
           <label className="sr-only" htmlFor="flow-q">Find a signal, circumstance or solution</label>
           <input
@@ -185,10 +191,10 @@ export function AdminPage({ client }: { client: ApiClient }) {
             />
           </div>
         </div>
-        <FlowDetail
+        {demo ? null : <FlowDetail
           doc={doc} index={index} selected={selected} creating={creating} readOnly={readOnly} dispatch={flow.dispatch}
           onSelect={select} onCloseCreate={() => setCreating(null)}
-        />
+        />}
       </div>
 
       {settingsOpen && editMode ? <FlowSettings doc={doc} dispatch={flow.dispatch} onClose={() => setSettingsOpen(false)} /> : null}

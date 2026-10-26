@@ -248,3 +248,8 @@
 .col-toggles label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .col-toggles input { accent-color: var(--brand); width: 16px; height: 16px; }
 .col-toggles .seg-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+.demo-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 0 0 12px; padding: 12px 16px; border: 1px solid #b9cfc2; border-radius: 12px; background: #f1f7f3; }
+.demo-bar p { margin: 0; font-size: 14px; }
+.admin.is-demo .flow-layout { grid-template-columns: minmax(0, 1fr); }
+.admin-controls[hidden] { display: none; }
