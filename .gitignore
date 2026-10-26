@@ -23,3 +23,6 @@ e2e/test-results/
 data/synthetic/utility-accounts.all.jsonl
 data/synthetic/case-queue.all.json
 data/synthetic/accounts.all.jsonl
+
+# Resumable download cache for scripts/build-climate-decades.mts
+.climate-cache.json

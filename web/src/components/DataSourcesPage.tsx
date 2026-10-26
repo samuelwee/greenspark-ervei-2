@@ -195,7 +195,7 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
         <p className="hint">
           Downloaded once by <code>scripts/build-climate-heat.mts</code> into <code>data/climate/heat-by-postcode.v1.json</code>, a small
           table of very hot days a year for each postcode, now and around 2050. Shown on the case page's weather card and the outlook's
-          "Hotter years ahead" table. It doesn't change any signal, priority or outlook tier. ERVEI is a non-commercial project.
+          Climate outlook page, with a decade-by-decade table from <code>data/climate/heat-decades.v1.json</code> (<code>scripts/build-climate-decades.mts</code>: SILO from 1960, projections to the 2090s). It doesn't change any signal, priority or outlook tier. ERVEI is a non-commercial project.
         </p>
         <div className="table-scroll">
           <table className="mini-table ds-table">

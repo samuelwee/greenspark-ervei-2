@@ -9,7 +9,7 @@ import { CaseTable } from "./components/CaseTable";
 import type { MapSummary } from "./data/api";
 // Leaflet only loads when the map view is first opened.
 const CaseMap = lazy(() => import("./components/CaseMap").then((m) => ({ default: m.CaseMap })));
-import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, CLASSIC_OUTLOOK_PATH, isModifiedClick, useRoute, type Page } from "./route";
+import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, CLASSIC_OUTLOOK_PATH, NEW_OUTLOOK_PATH, CLIMATE_PATH, isModifiedClick, useRoute, type Page } from "./route";
 import { DemoSettings } from "./components/DemoSettings";
 import { OutlookPage } from "./components/OutlookPage";
 import { ClassicOutlookPage } from "./components/ClassicOutlookPage";
@@ -21,6 +21,7 @@ const CasePageGuide = lazy(() => import("./components/CasePageGuide").then((m) =
 const PredictionsPage = lazy(() => import("./components/PredictionsPage").then((m) => ({ default: m.PredictionsPage })));
 const RiskModelPage = lazy(() => import("./components/RiskModelPage").then((m) => ({ default: m.RiskModelPage })));
 const OutlookModelPage = lazy(() => import("./components/OutlookModelPage").then((m) => ({ default: m.OutlookModelPage })));
+const ClimateOutlookPage = lazy(() => import("./components/ClimateOutlookPage").then((m) => ({ default: m.ClimateOutlookPage })));
 const FunnelPage = lazy(() => import("./components/FunnelPage").then((m) => ({ default: m.FunnelPage })));
 const AdminPage = lazy(() => import("./admin/AdminPage").then((m) => ({ default: m.AdminPage })));
 
@@ -415,7 +416,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav" aria-label="Main">
-          {([["/", "Weather outlook", "outlook"], [CLASSIC_OUTLOOK_PATH, "Classic outlook", "classic"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const).map(([href, label, page]) => (
+          {([[CLASSIC_OUTLOOK_PATH, "Classic outlook", "classic"], [NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const).map(([href, label, page]) => (
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
           <BtsMenu page={props.page} navigate={navigate} />
@@ -428,6 +429,8 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
         <OutlookPage client={client} navigate={navigate} />
       ) : props.page === "classic" ? (
         <ClassicOutlookPage client={client} navigate={navigate} />
+      ) : props.page === "climate" ? (
+        <ClimateOutlookPage client={client} />
       ) : props.page === "funnel" ? (
         <FunnelPage client={client} navigate={navigate} />
       ) : props.page === "admin" ? (

@@ -98,6 +98,8 @@ export interface ApiClient {
   account(accountNumber: string): Promise<CaseItem>;
   /** The weather outlook: the week's forecast and the customers it puts at risk. Optional so test clients can leave it out. */
   outlook?(): Promise<Outlook>;
+  /** Very hot days a year by decade, observed and projected, for the Climate outlook page. */
+  climateDecades?(): Promise<ClimateDecades>;
   /** Current Emergency WA warnings, for the outlook map. Optional so test clients can leave it out. */
   emergency?(): Promise<EmergencyFeed>;
   /** The risk model's card. Optional so test clients can leave it out. */
@@ -136,6 +138,14 @@ export interface OutlookTown {
   /** Very hot days a year now (SILO) and around 2050 (CMIP6), averaged over the town's postcodes. */
   climate: { hot: number | null; hot2050: number | null; veryHot: number | null; veryHot2050: number | null } | null;
 }
+export type ClimateDecades =
+  | { available: false }
+  | {
+    available: true; thresholds: { hot: number; veryHot: number }; observedDecades: string[]; projectedDecades: string[];
+    observedSource: { source: string; years: [number, number]; licence: string };
+    projectedSource: { source: string; scenario: string; models: string[]; coverage: string; sampled: string; method: string; licence: string };
+    towns: { id: string; name: string; district: string | null; customers: number; observed: Record<string, { hot: number | null; veryHot: number | null }>; projected: Record<string, { hot: number | null; veryHot: number | null }> }[];
+  };
 export interface ClimateInfo { thresholds: { hot: number; veryHot: number }; baselineYears: [number, number]; scenario: string; period: string }
 export interface OutlookCustomer {
   personId: string; townId: string; tier: "act" | "watch" | null; score: number; exposure: number;
@@ -245,6 +255,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     overview: (id) => req("GET", `/api/cases/${encodeURIComponent(id)}/overview`),
     riskModel: () => req("GET", "/api/model/risk"),
     outlook: () => req("GET", "/api/outlook"),
+    climateDecades: () => req("GET", "/api/climate/decades"),
     emergency: () => req("GET", "/api/emergency"),
     account: (accountNumber) => req("GET", `/api/accounts/${encodeURIComponent(accountNumber)}`),
     assign: (assigneeUserId, items) => req("POST", "/api/cases/bulk/assignment", { assigneeUserId, items }),

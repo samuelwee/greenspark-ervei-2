@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { HotterYearsAhead } from "./HotterYearsAhead";
 import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, emptySupportCounts, supportUrgency, type SupportGroupId } from "@greenspark/shared";
 import { SupportWeek } from "./SupportWeek";
 import { SupportWeatherKey } from "./SupportWeatherKey";
@@ -23,7 +22,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const [error, setError] = useState<string | null>(null), [notice, setNotice] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [tier, setTier] = useState<"" | "act" | "watch">(() => { const value = new URLSearchParams(window.location.search).get("tier"); return value === "act" || value === "watch" ? value : ""; });
-  const [groups, setGroups] = useState<SupportGroupId[]>(() => new URLSearchParams(window.location.search).has("tier") ? ALL_GROUPS : ["health"]);
+  const [groups, setGroups] = useState<SupportGroupId[]>(() => new URLSearchParams(window.location.search).has("tier") ? ALL_GROUPS : ALL_GROUPS.filter((id) => id !== "monitor"));
   const group = groups.length === 1 ? groups[0]! : "all";
   const [region, setRegion] = useState<MapRegion>("perth"), [date, setDate] = useState("");
   const [areaId, setAreaId] = useState<string | null>(null);
@@ -55,7 +54,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
     const timer = window.setInterval(load, 5 * 60 * 1000);
     return () => { current = false; window.clearInterval(timer); };
   }, [client]);
-  useEffect(() => { document.title = "Weather outlook · ERVEI"; }, []);
+  useEffect(() => { document.title = "New outlook · ERVEI"; }, []);
   useEffect(() => { setAreaId(null); }, [region]);
   useEffect(() => { setShown(PAGE); setShowCustomers(false); }, [groups, region, date, tier, onlyExposed]);
 
@@ -175,7 +174,6 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
 
     <details className="panel support-forecast-detail"><summary>Weather forecast by town</summary><p className="hint">Daily maximum temperatures. The map estimates the colour between these town forecasts; the labels show the town values.</p><div className="table-wrap"><table className="town-table"><thead><tr><th scope="col">Forecast town</th>{ready.days.map((day) => <th key={day.date} scope="col">{dayName(day.date)} {dayDate(day.date)}</th>)}</tr></thead><tbody>{ready.towns.map((town) => <tr key={town.id}><th scope="row">{town.name}<span className="sub">{town.districtName}</span></th>{ready.days.map((day) => { const value = town.days.find((item) => item.date === day.date); return <td key={day.date} style={tempColor(value?.max ?? null)}>{value?.max === null || value?.max === undefined ? "–" : `${value.max}°C`}</td>; })}</tr>)}</tbody></table></div></details>
 
-      {ready.climate ? <HotterYearsAhead towns={ready.towns} climate={ready.climate} /> : null}
 
 
     <details className="panel outlook-how"><summary>How the grouping and map work</summary><ul>

@@ -1,5 +1,4 @@
 // The weather outlook as it was before the grouped support workspace became the home page: the act-now and
-import { HotterYearsAhead } from "./HotterYearsAhead";
 // watch list, the week ahead and the town table. Kept as its own page under "Classic outlook".
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { ApiClient, EmergencyFeed, HazardKind, Outlook, OutlookCustomer } from "../data/api";
@@ -277,7 +276,6 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
         </div>
       </section>
 
-      {ready.climate ? <HotterYearsAhead towns={ready.towns} climate={ready.climate} /> : null}
 
       <details className="panel outlook-how">
         <summary>How the outlook works</summary>

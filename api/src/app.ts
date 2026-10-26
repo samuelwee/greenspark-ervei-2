@@ -17,7 +17,7 @@ import { FlowFile } from "./flow";
 import type { Predictions } from "./predictions";
 import { draftPlan, PLAN_KINDS, perthToday, planFacts, type AiConfig, type ContactRules, type PlanKind, type SupportPlan } from "./plan";
 import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, primarySupportGroup, supportGroupNeeds, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
-import type { ClimateHeat } from "./climate";
+import type { ClimateDecades, ClimateHeat } from "./climate";
 import { SyntheticModelAdapter, withAssessments, type ModelAdapter } from "./adapters";
 
 const STATUSES = ["new", "in_progress", "waiting", "resolved"] as const;
@@ -85,6 +85,8 @@ export interface AppOptions {
   predictions?: Predictions | null;
   /** Very hot days a year now and around 2050, per postcode. Without it there is no long-term heat. */
   climate?: ClimateHeat | null;
+  /** Very hot days a year per decade, observed and projected, for the Climate outlook page. */
+  decades?: ClimateDecades | null;
   /** Emergency WA warnings (DFES) for the outlook map. Without it the map has none. */
   emergency?: { current(): { available: boolean; fetchedAt: string | null; error: string | null; alerts: unknown[] } };
 }
@@ -462,6 +464,26 @@ export function createApp(store: Store, options: AppOptions = {}) {
     res.json({ model: m, scoredCustomers: options.predictions!.byCustomer.size });
   });
 
+  // The Climate outlook: very hot days a year in every decade, observed and projected, by forecast town.
+  app.get("/api/climate/decades", (_req, res) => {
+    const d = options.decades;
+    if (!d) return res.json({ available: false });
+    const w = options.weather?.current() ?? null;
+    const customers = new Map<string, number>();
+    for (const p of store.allPeople()) { const t = p.address?.postcode ? POSTCODE_TOWN[p.address.postcode] : undefined; if (t) customers.set(t, (customers.get(t) ?? 0) + 1); }
+    const byTown = new Map<string, (typeof d.postcodes)[string][]>();
+    for (const h of Object.values(d.postcodes)) if (h.town) byTown.set(h.town, [...(byTown.get(h.town) ?? []), h]);
+    const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null);
+    const pick = (hs: (typeof d.postcodes)[string][], kind: "observed" | "projected", decade: string) => ({
+      hot: avg(hs.flatMap((h) => (h[kind][decade] ? [h[kind][decade]!.hot] : []))), veryHot: avg(hs.flatMap((h) => (h[kind][decade] ? [h[kind][decade]!.veryHot] : []))),
+    });
+    const towns = [...byTown].map(([id, hs]) => ({
+      id, name: w?.towns[id]?.name ?? id, district: w ? (w.districts[w.towns[id]?.district ?? ""] ?? null) : null, customers: customers.get(id) ?? 0,
+      observed: Object.fromEntries(d.observedDecades.map((dec) => [dec, pick(hs, "observed", dec)])),
+      projected: Object.fromEntries(d.projectedDecades.map((dec) => [dec, pick(hs, "projected", dec)])),
+    }));
+    res.json({ available: true, thresholds: d.thresholds, observedDecades: d.observedDecades, projectedDecades: d.projectedDecades, observedSource: d.observed, projectedSource: d.projected, towns });
+  });
   app.get("/api/emergency", (_req, res) => { res.json(options.emergency?.current() ?? { available: false, fetchedAt: null, error: null, alerts: [] }); });
   app.get("/api/weather", (_req, res) => { res.json(options.weather?.status() ?? { mode: "off", available: false }); });
   // Anyone can switch the weather source for everyone: the sample heatwave, the Bureau's live data, or off.

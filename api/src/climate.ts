@@ -16,3 +16,18 @@ export function loadClimate(path: string): ClimateHeat | null {
   if (!existsSync(path)) return null;
   return JSON.parse(readFileSync(path, "utf8")) as ClimateHeat;
 }
+
+/** Very hot days a year per decade, observed and projected (data/climate/heat-decades.v1.json, from scripts/build-climate-decades.mts). */
+export interface ClimateDecades {
+  id: string;
+  thresholds: { hot: number; veryHot: number };
+  observedDecades: string[]; projectedDecades: string[];
+  observed: { source: string; years: [number, number]; licence: string };
+  projected: { source: string; scenario: string; models: string[]; coverage: string; sampled: string; method: string; licence: string };
+  postcodes: Record<string, { town: string | null; observed: Record<string, { hot: number; veryHot: number }>; projected: Record<string, { hot: number; veryHot: number }> }>;
+}
+
+export function loadDecades(path: string): ClimateDecades | null {
+  if (!existsSync(path)) return null;
+  return JSON.parse(readFileSync(path, "utf8")) as ClimateDecades;
+}

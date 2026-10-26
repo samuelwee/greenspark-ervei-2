@@ -85,7 +85,7 @@ export function OutlookModelPage() {
         <h2 id="om-future">Hotter years ahead</h2>
         <ul className="plain history">
           <li><strong>A longer view:</strong> very hot days a year (35°C or more) at each postcode now, from SILO's 1995–2024 record, and around 2050, from Climate Change in Australia's CMIP6 projections on a middle emissions path (SSP2-4.5).</li>
-          <li><strong>Where it shows:</strong> the outlook's "Hotter years ahead" table, by forecast town with its customers, and the "Long-term heat" block on each case's weather card.</li>
+          <li><strong>Where it shows:</strong> the Climate outlook page (now and around 2050 by forecast town, then every decade from the 1960s to the 2090s, observed then projected), and the "Long-term heat" block on each case's weather card.</li>
           <li><strong>What it's for:</strong> planning, such as where efficiency programs, solar or cooling support would matter most over the next decades. It doesn't change who is on this week's outlook or anyone's priority.</li>
           <li><strong>How sure:</strong> it's the median of three models, and the change is worked out at each forecast town, so nearby postcodes share it. A guide to exposure, not a forecast for any year.</li>
         </ul>
