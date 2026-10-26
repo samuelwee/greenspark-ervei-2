@@ -11,6 +11,8 @@ interface Props {
   selected: Ref | null;
   creating: FlowKind | null;
   readOnly: boolean;
+  /** The floating demo panel: just the box's name, kind and facts, without its id, links or notes. */
+  compact?: boolean;
   dispatch: Dispatch;
   onSelect: (ref: Ref | null) => void;
   onCloseCreate: () => void;
@@ -227,7 +229,7 @@ function Utilities({ doc, list }: { doc: FlowDoc; list: string[] }) {
   return <span className="uchips">{doc.meta.utilities.map((u) => <span key={u} className={`uchip${list.includes(u) ? " y" : ""}`}>{UTILITY_LABEL[u] ?? u}</span>)}</span>;
 }
 
-function Facts({ doc, entity, kind }: { doc: FlowDoc; entity: FlowSignal | FlowCircumstance | FlowSolution; kind: FlowKind }) {
+function Facts({ doc, entity, kind, compact }: { doc: FlowDoc; entity: FlowSignal | FlowCircumstance | FlowSolution; kind: FlowKind; compact?: boolean }) {
   if (kind === "signal") {
     const s = entity as FlowSignal;
     return (
@@ -235,7 +237,7 @@ function Facts({ doc, entity, kind }: { doc: FlowDoc; entity: FlowSignal | FlowC
         <p className="q">{s.detect || <span className="muted">No description yet.</span>}</p>
         <dl className="facts">
           <dt>Source</dt><dd>{SOURCE_LABEL[s.source] ?? s.source}</dd>
-          <dt>Applies to</dt><dd><Utilities doc={doc} list={s.utilities} /></dd>
+          {compact ? null : <><dt>Applies to</dt><dd><Utilities doc={doc} list={s.utilities} /></dd></>}
           {s.example_rule ? (<><dt>Example rule</dt><dd><code className="code">{s.example_rule}</code></dd></>) : null}
         </dl>
         {s.sensitive ? <p className="note sensitive">Sensitive. Use only to prompt a trained staff member, and only with the customer's consent.</p> : null}
@@ -262,9 +264,9 @@ function Facts({ doc, entity, kind }: { doc: FlowDoc; entity: FlowSignal | FlowC
           {type?.who_acts ? (<><dt>Who acts</dt><dd>{type.who_acts}</dd></>) : null}
           <dt>Category</dt><dd>{category?.name ?? c.category}</dd>
           <dt>Sensitivity</dt><dd><span className={`pill ${c.sensitivity}`}>{c.sensitivity}</span></dd>
-          <dt>Applies to</dt><dd><Utilities doc={doc} list={c.utilities} /></dd>
+          {compact ? null : <><dt>Applies to</dt><dd><Utilities doc={doc} list={c.utilities} /></dd></>}
         </dl>
-        {c.handling ? <p className={`note ${c.sensitivity}`}>{c.handling}</p> : null}
+        {c.handling && !compact ? <p className={`note ${c.sensitivity}`}>{c.handling}</p> : null}
         {c.sensitivity === "safety" ? <p className="note safety">Safety circumstance: never actioned automatically. It creates a task for trained staff.</p> : null}
       </>
     );
@@ -279,7 +281,7 @@ function Facts({ doc, entity, kind }: { doc: FlowDoc; entity: FlowSignal | FlowC
         <dt>Provider</dt><dd>{s.provider}</dd>
         {s.how_to_access ? (<><dt>How to access</dt><dd>{s.how_to_access}</dd></>) : null}
         {s.contact ? (<><dt>Contact</dt><dd>{s.contact}</dd></>) : null}
-        <dt>Applies to</dt><dd><Utilities doc={doc} list={s.utilities} /></dd>
+        {compact ? null : <><dt>Applies to</dt><dd><Utilities doc={doc} list={s.utilities} /></dd></>}
         <dt>Source</dt><dd>{safeUrl ? <a href={safeUrl} target="_blank" rel="noreferrer">{safeUrl.replace(/^https?:\/\//, "").slice(0, 60)}</a> : <span className="muted">No link</span>}</dd>
         <dt>Checked</dt><dd>{s.verified ? <>Verified{s.last_verified ? ` ${s.last_verified}` : ""}</> : <span className="pill sensitive">Not re-checked</span>}</dd>
       </dl>
@@ -287,7 +289,7 @@ function Facts({ doc, entity, kind }: { doc: FlowDoc; entity: FlowSignal | FlowC
   );
 }
 
-function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly: boolean; dispatch: Dispatch; onSelect: (ref: Ref | null) => void }) {
+function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly: boolean; compact?: boolean; dispatch: Dispatch; onSelect: (ref: Ref | null) => void }) {
   const { doc, index, refr, readOnly, dispatch } = props;
   const entity = entityOf(index, refr);
   const [editing, setEditing] = useState(false);
@@ -311,11 +313,11 @@ function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly
         <div>
           <p className={`kind kind-${refr.kind}`}>{KIND_LABEL[refr.kind]}</p>
           <h2 tabIndex={-1} ref={heading}>{entity.name}</h2>
-          <p className="idline"><code className="code">{entity.id}</code></p>
+          {props.compact ? null : <p className="idline"><code className="code">{entity.id}</code></p>}
         </div>
         <button type="button" className="icon-btn" aria-label="Close details" onClick={() => props.onSelect(null)}>✕</button>
       </div>
-      <Facts doc={doc} entity={entity} kind={refr.kind} />
+      <Facts doc={doc} entity={entity} kind={refr.kind} compact={props.compact} />
       {readOnly ? null : <div className="actions">
         <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button>
         {!confirming ? <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>Delete</button> : null}
@@ -330,6 +332,7 @@ function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly
         </div>
       ) : null}
 
+      {props.compact ? null : <>
       {refr.kind === "signal" ? (
         <LinkSection
           title="Points to circumstances" readOnly={readOnly} pickLabel="Add a circumstance…"
@@ -372,6 +375,7 @@ function EntityView(props: { doc: FlowDoc; index: FlowIndex; refr: Ref; readOnly
           onRemove={(it) => dispatch({ type: "removeSolutionLink", circumstanceId: it.ref.id, solutionId: entity.id }, { label: "remove a link" })}
         />
       ) : null}
+      </>}
     </div>
   );
 }
@@ -389,7 +393,7 @@ export function FlowDetail(props: Props) {
           onDone={(ref) => { props.onCloseCreate(); if (ref) props.onSelect(ref); }} onCancel={props.onCloseCreate}
         />
       ) : selected ? (
-        <EntityView key={`${selected.kind}:${selected.id}`} doc={doc} index={props.index} refr={selected} readOnly={props.readOnly} dispatch={props.dispatch} onSelect={props.onSelect} />
+        <EntityView key={`${selected.kind}:${selected.id}`} doc={doc} index={props.index} refr={selected} readOnly={props.readOnly} compact={props.compact} dispatch={props.dispatch} onSelect={props.onSelect} />
       ) : (
         <div className="frest">
           <h2>Details</h2>
