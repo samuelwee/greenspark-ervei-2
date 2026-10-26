@@ -232,7 +232,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
               <thead>
                 <tr>
                   <th scope="col">Outlook</th><th scope="col">Customer</th><th scope="col">Weather coming</th>
-                  <th scope="col">Why they’re vulnerable</th><th scope="col">Predicted risk <span className="sim">90 days</span></th><th scope="col">Contact by</th>
+                  <th scope="col">Why they’re vulnerable</th><th scope="col">Contact by</th><th scope="col">Predicted risk <span className="sim">90 days</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -261,10 +261,10 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
                           {!c.sensitivity.length ? <span className="sub">High predicted risk</span> : null}
                         </span>
                       </td>
-                      <td>{c.risk && b ? <span className={`pred-pill pred-${b.id}`} title={`${percent(c.risk.probability)} chance of any harm in 90 days`}>{b.text} · {percent(c.risk.probability)}</span> : <span className="sub">No score</span>}</td>
                       <td>
                         {c.priority ? <span className={`badge badge-${c.priority.label}`}>{CONTACT_BY[c.priority.label] ?? c.priority.label}</span> : <span className="badge badge-none">No date</span>}
                       </td>
+                      <td>{c.risk && b ? <span className={`pred-pill pred-${b.id}`} title={`${percent(c.risk.probability)} chance of any harm in 90 days`}>{b.text} · {percent(c.risk.probability)}</span> : <span className="sub">No score</span>}</td>
                     </tr>
                   );
                 })}
