@@ -44,7 +44,7 @@ test("Flowchart and Data sources are in the BTS menu", async ({ page }) => {
 
 test("the flowchart opens in demo mode, view only, with no way to edit", async ({ page }) => {
   await openAdmin(page, "staff-manager", false);
-  await expect(page.getByText("Example:")).toBeVisible();
+  await expect(page.getByText(/Only the boxes linked to it are shown/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Another example" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Add a signal" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Settings" })).toHaveCount(0);

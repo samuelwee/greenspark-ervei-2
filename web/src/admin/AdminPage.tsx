@@ -123,7 +123,24 @@ export function AdminPage({ client }: { client: ApiClient }) {
       </header>
 
       {mode === "view" ? <div className="notice" role="note"><p><strong>View only.</strong> To change the flowchart, set Flowchart mode to Edit in the settings (the gear, top right).</p></div> : null}
-      {demo && examples.length ? <div className="demo-bar" role="note"><p><strong>Example:</strong> {examples[example % examples.length]!.name}. The highlighted boxes and lines show what raises it and what is offered. Click any box to trace its path.</p><button type="button" className="btn btn-small" onClick={() => { setPanelOpen(true); setExample((e) => (e + 1) % examples.length); }}>Another example</button></div> : null}
+      {demo && examples.length ? (
+        <div className="demo-bar" role="note">
+          {selected && entityOf(index, selected) ? (
+            <>
+              <p><strong>{entityOf(index, selected)!.name}.</strong> Only the boxes linked to it are shown. Click a box to trace from there.</p>
+              <span className="demo-bar-actions">
+                <button type="button" className="btn btn-small" onClick={() => { setPanelOpen(true); setExample((e) => (e + 1) % examples.length); }}>Another example</button>
+                <button type="button" className="btn btn-small" onClick={() => setSelected(null)}>Show all boxes</button>
+              </span>
+            </>
+          ) : (
+            <>
+              <p>Everything is shown. Click a box to trace its path, or start from an example.</p>
+              <span className="demo-bar-actions"><button type="button" className="btn btn-small" onClick={() => { setPanelOpen(true); setSelected({ kind: "circumstance", id: examples[example % examples.length]!.id }); }}>Show an example</button></span>
+            </>
+          )}
+        </div>
+      ) : null}
       {flow.problems.length ? (
         <div className="notice notice-error" role="alert">
           <div><p>The JSON file has problems, so editing is switched off until they are fixed:</p><ul className="problems">{flow.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
@@ -190,7 +207,7 @@ export function AdminPage({ client }: { client: ApiClient }) {
           <div className="board-scroll">
             <FlowBoard
               doc={doc} index={index} selected={selected} trace={tracing} utility={utility} showAllLinks={showAllLinks} strongOnly={strongOnly}
-              matches={matches} readOnly={readOnly} hideAdd={!editMode} onSelect={select} onAdd={(kind) => { setSelected(null); setCreating(kind); }}
+              matches={matches} readOnly={readOnly} hideAdd={!editMode} only={demo && selected && tracing ? tracing.nodes : null} onSelect={select} onAdd={(kind) => { setSelected(null); setCreating(kind); }}
               sources={DATA_SOURCE_GROUPS} onSourceSelect={() => select(null)} hidden={hiddenColumns}
             />
           </div>

@@ -259,3 +259,4 @@
 .admin.is-demo .flow-float aside, .admin.is-demo .flow-float > * { max-width: 100%; }
 .flow-float-close { position: sticky; top: 8px; float: right; z-index: 2; margin: 8px 8px 0 0; width: 28px; height: 28px; border: 0; border-radius: 50%; background: #eef1f4; font-size: 13px; cursor: pointer; }
 .flow-float-close:hover { background: #dfe3e8; }
+.demo-bar-actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
