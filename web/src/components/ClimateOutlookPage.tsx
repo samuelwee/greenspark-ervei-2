@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { ApiClient, ClimateDecades } from "../data/api";
 
 // Leaflet only loads with this page.
-const ClimateDecadeMap = lazy(() => import("./ClimateDecadeMap").then((m) => ({ default: m.ClimateDecadeMap })));
+const ClimateIncreaseMap = lazy(() => import("./ClimateIncreaseMap").then((m) => ({ default: m.ClimateIncreaseMap })));
 
 /** Background and text colour for a count of very hot days a year: pale to deep red. */
 function daysColor(n: number | null, max: number): { background: string; color: string } {
@@ -63,7 +63,7 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
         {error ? <p className="muted decades-note" role="alert">{error}</p> : !decades ? <p className="muted decades-note" role="status">Loading…</p> : !d ? <p className="muted decades-note">The decade-by-decade data isn’t on this server yet.</p> : (
           <>
             <p className="hint decades-note">Average days a year at {d.thresholds[threshold]}°C or more in each decade, by forecast town, biggest increase first. The increase is the {lastProjected?.replace("-", "–")} count minus the {lastObserved?.replace("-", "–")} count. Part decades are shown by their years. The models don’t cover 2026 to 2034 or 2065 to 2069.</p>
-            <Suspense fallback={<p className="muted decades-note" role="status">Loading the map…</p>}><ClimateDecadeMap data={d} threshold={threshold} max={max} /></Suspense>
+            <Suspense fallback={<p className="muted decades-note" role="status">Loading the map…</p>}><ClimateIncreaseMap data={d} threshold={threshold} /></Suspense>
             <div className="table-wrap">
               <table className="town-table decades-table">
                 <thead>
