@@ -21,12 +21,9 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
   const [decades, setDecades] = useState<ClimateDecades | null>(null);
   const [threshold, setThreshold] = useState<"hot" | "veryHot">("hot");
   const [error, setError] = useState<string | null>(null);
-  // A town picked on the map or in the table, and where it was picked, so only a map click scrolls the table.
+  // A town picked on the map or in the table, and where it was picked, so the map only moves for a table pick.
   const [selected, setSelected] = useState<{ id: string; from: "map" | "table" } | null>(null);
-  const pick = (id: string, from: "map" | "table") => {
-    setSelected({ id, from });
-    if (from === "map") requestAnimationFrame(() => document.getElementById(`decade-row-${id}`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
-  };
+  const pick = (id: string, from: "map" | "table") => setSelected({ id, from });
   useEffect(() => { document.title = "Climate outlook · ERVEI"; }, []);
   useEffect(() => {
     let live = true;
