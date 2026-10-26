@@ -45,6 +45,14 @@ export const DATA_SOURCE_GROUPS: DataSourceGroup[] = [
     ],
   },
   {
+    // Shown for completeness: no signal reads climate data yet, so these sources have no lines to the signals.
+    id: "climate", label: "Climate data",
+    items: [
+      { id: "silo", name: "Observed heat", detail: "SILO daily maximum, 1960 to 2025", signals: [] },
+      { id: "cmip6", name: "Projected heat", detail: "CMIP6, three models, to 2099", signals: [] },
+    ],
+  },
+  {
     id: "abs", label: "Australian Bureau of Statistics",
     items: [
       { id: "seifa", name: "Area disadvantage", detail: "SEIFA 2021, IRSD by postcode", signals: ["area_disadvantage"] },

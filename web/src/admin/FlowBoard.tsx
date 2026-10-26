@@ -95,8 +95,9 @@ export function FlowBoard(props: Props) {
   // Data sources show only the signals on the board, and only if they feed at least one of them.
   const shownSignals = useMemo(() => new Set(signalGroups.flatMap((g) => g.items.map((s) => s.id))), [signalGroups]);
   const sourceGroups = useMemo(() => (props.sources ?? [])
-    .map((g) => ({ ...g, items: g.items.map((d) => ({ ...d, signals: d.signals.filter((id) => shownSignals.has(id)) })).filter((d) => d.signals.length > 0) }))
-    .filter((g) => g.items.length > 0), [props.sources, shownSignals]);
+    // A source with no signals at all (climate data) stays on the board, unless a path is being traced.
+    .map((g) => ({ ...g, items: g.items.map((d) => ({ ...d, standalone: d.signals.length === 0, signals: d.signals.filter((id) => shownSignals.has(id)) })).filter((d) => d.signals.length > 0 || (d.standalone && !only)) }))
+    .filter((g) => g.items.length > 0), [props.sources, shownSignals, only]);
   const withSources = !!props.sources;
   // The shown columns, left to right, each followed by an arrow column (except the last).
   const columns = FLOW_COLUMNS.map((c) => c.id).filter((c) => (c !== "sources" || withSources) && !props.hidden?.has(c));
