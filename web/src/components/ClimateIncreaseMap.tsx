@@ -1,12 +1,14 @@
 // How much hotter each forecast town gets (hot days a year in the last projected decade minus the latest observed
-// decade) over a layer of how disadvantaged each postcode is (ABS SEIFA 2021, IRSD). Either layer can be switched off.
+// decade) over the postcode areas shaded by how disadvantaged they are (ABS SEIFA 2021, IRSD; ABS postal area boundaries). Either layer can be switched off.
 // The SEIFA layer describes areas, never people.
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { IRSD, POSTCODE_LOCATION } from "@greenspark/shared";
+import { IRSD } from "@greenspark/shared";
 import type { ClimateDecades } from "../data/api";
 import { addBaseTiles } from "./mapTiles";
+
+type Boundaries = import("geojson").FeatureCollection<import("geojson").Geometry, { postcode: string }>;
 
 const WA_BOUNDS: L.LatLngBoundsExpression = [[-35.2, 112.9], [-13.7, 129.1]];
 type Ready = Extract<ClimateDecades, { available: true }>;
@@ -23,6 +25,7 @@ const SEIFA_COLOR = ["#3b1a6b", "#53288f", "#6c3fb0", "#8660c4", "#a183d3", "#ba
 export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold: "hot" | "veryHot" }) {
   const [showIncrease, setShowIncrease] = useState(true);
   const [showSeifa, setShowSeifa] = useState(true);
+  const [boundaries, setBoundaries] = useState<Boundaries | null>(null);
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const seifaLayer = useRef<L.LayerGroup | null>(null);
@@ -35,9 +38,15 @@ export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold
   }), [data, threshold, lastObserved, lastProjected]);
   const max = useMemo(() => Math.max(1, ...towns.map((t) => t.increase)), [towns]);
 
+  // The boundaries are a 180 KB file, loaded when the map opens.
+  useEffect(() => {
+    let live = true;
+    void import("../data/postcode-boundaries.v1.json").then((m) => { if (live) setBoundaries(m.default as unknown as Boundaries); });
+    return () => { live = false; };
+  }, []);
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = (map.current = L.map(el.current, { scrollWheelZoom: false }).fitBounds(WA_BOUNDS, { padding: [22, 22] }));
+    const m = (map.current = L.map(el.current, { scrollWheelZoom: true }).fitBounds(WA_BOUNDS, { padding: [22, 22] }));
     addBaseTiles(m);
     m.createPane("seifa").style.zIndex = "420";
     m.createPane("increase").style.zIndex = "450";
@@ -46,20 +55,24 @@ export function ClimateIncreaseMap({ data, threshold }: { data: Ready; threshold
     return () => { m.remove(); map.current = null; };
   }, []);
 
-  // The postcodes are small dots underneath, so the town circles stay easy to read and click.
+  // The postcode areas sit underneath, so the town circles stay easy to read and click.
   useEffect(() => {
     const g = seifaLayer.current;
     if (!g) return;
     g.clearLayers();
-    if (!showSeifa) return;
-    for (const [postcode, [score, decileAus, decileWA]] of Object.entries(IRSD)) {
-      const loc = POSTCODE_LOCATION[postcode];
-      if (!loc) continue;
-      L.circleMarker(loc, { pane: "seifa", radius: 5, weight: 1, color: "#ffffff", fillColor: SEIFA_COLOR[decileWA - 1]!, fillOpacity: 0.95 })
-        .bindTooltip(`${postcode} · disadvantage decile ${decileWA} in WA, ${decileAus} in Australia (1 is most disadvantaged) · IRSD ${score}`)
-        .addTo(g);
-    }
-  }, [showSeifa]);
+    if (!showSeifa || !boundaries) return;
+    L.geoJSON(boundaries, {
+      pane: "seifa",
+      style: (f) => {
+        const r = IRSD[f?.properties.postcode ?? ""];
+        return { weight: 1, color: "#ffffff", fillColor: r ? SEIFA_COLOR[r[2] - 1]! : "#d8dce2", fillOpacity: 0.8 };
+      },
+      onEachFeature: (f, layer) => {
+        const r = IRSD[f.properties.postcode];
+        layer.bindTooltip(`${f.properties.postcode}${r ? ` · disadvantage decile ${r[2]} in WA, ${r[1]} in Australia (1 is most disadvantaged) · IRSD ${r[0]}` : ""}`, { sticky: true });
+      },
+    }).addTo(g);
+  }, [showSeifa, boundaries]);
   useEffect(() => {
     const g = heatLayer.current;
     if (!g) return;
