@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, supportMarkerRadius, type SupportGroupId } from "@greenspark/shared";
@@ -16,10 +16,12 @@ const REGION_BOUNDS: Record<MapRegion, L.LatLngBoundsExpression> = {
 };
 
 /** Count markers and weather coverage deliberately use different visual encodings. */
-export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date }: {
+export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date, legend }: {
   areas: SupportArea[]; towns: OutlookTown[]; activeGroups: SupportGroupId[]; alerts: EmergencyAlert[];
   showHeat: boolean; showAlerts: boolean; chosen: string | null; onChoose: (id: string | null) => void;
   region: MapRegion; date: string;
+  /** More legend sections, shown with the map's own under the map. */
+  legend?: ReactNode;
 }) {
   const el = useRef<HTMLDivElement>(null), wrap = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -164,14 +166,18 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
     <div className="support-map-stage">
       <div ref={el} className="outlook-map support-map" role="region" aria-label="Customer support groups and estimated forecast temperatures" />
       <div className="support-map-caption">{showHeat ? "Town forecast temperature estimate" : "Customer support groups"}<span>{showHeat ? `${date ? `Daily maximum · ${date}` : "Peak daily maximum · next 7 days"} · °C` : "Approximate postcode locations"}</span></div>
-      <div className="support-map-key" aria-label="Map legend">
-        <strong>Support groups</strong>
-        <div className="support-group-key">{SUPPORT_GROUPS.filter((item) => activeGroups.includes(item.id)).map((item) => <span key={item.id}><i style={{ background: SUPPORT_GROUP_COLORS[item.id].strong }} />{item.letter} {item.label}</span>)}</div>
-        <div className="support-urgency-key">{Object.entries(SUPPORT_URGENCY).map(([id, item]) => <span key={id}><i style={{ background: legendColors[id as keyof typeof SUPPORT_URGENCY] }} />{item.label}</span>)}</div>
-        <span className="support-size-key"><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /> Size = count · darker = more attention</span>
-        {zoom < 8.5 ? <span>Regional totals · select a circle to zoom in</span> : null}
-        {showHeat ? <><strong>{date ? "Daily maximum temperature" : "Peak daily maximum this week"}</strong><div className="support-temperature-scale"><i /><span><b>28°</b><b>32°</b><b>36°</b><b>40°</b><b>44°+</b></span></div><span>{temperatures.length ? "Estimated between town forecasts" : "No temperature forecast for this period"}</span></> : null}
-      </div>
+    </div>
+    {/* One legend under the map: support groups and temperature, then weather and Emergency WA. */}
+    <div className="support-legend" aria-label="Map legend">
+        <div className="support-map-key support-legend-groups">
+          <strong>Support groups</strong>
+          <div className="support-group-key">{SUPPORT_GROUPS.filter((item) => activeGroups.includes(item.id)).map((item) => <span key={item.id}><i style={{ background: SUPPORT_GROUP_COLORS[item.id].strong }} />{item.letter} {item.label}</span>)}</div>
+          <div className="support-urgency-key">{Object.entries(SUPPORT_URGENCY).map(([id, item]) => <span key={id}><i style={{ background: legendColors[id as keyof typeof SUPPORT_URGENCY] }} />{item.label}</span>)}</div>
+          <span className="support-size-key"><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /> Size = count · darker = more attention</span>
+          {zoom < 8.5 ? <span>Regional totals · select a circle to zoom in</span> : null}
+          {showHeat ? <><strong>{date ? "Daily maximum temperature" : "Peak daily maximum this week"}</strong><div className="support-temperature-scale"><i /><span><b>28°</b><b>32°</b><b>36°</b><b>40°</b><b>44°+</b></span></div><span>{temperatures.length ? "Estimated between town forecasts" : "No temperature forecast for this period"}</span></> : null}
+        </div>
+      {legend}
     </div>
     <div className="map-zoom outlook-zoom">
       <span className="sub">Town forecast values · shading estimated · approximate postcode groups</span>

@@ -255,3 +255,10 @@
 .support-group-filters-panel .support-filter { justify-content: flex-start; min-width: 0; }
 .support-group-filters-panel .support-filter > span { margin-left: auto; }
 .support-group-filters-panel .support-filter-all { grid-column: 1 / -1; }
+
+/* One legend under the map: support groups and temperature, weather hazards and Emergency WA side by side */
+.support-legend { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 12px 16px; border-top: 1px solid var(--border); background: #fbfcfe; }
+.support-legend .support-map-key { position: static; width: auto; max-width: none; flex: 1 1 280px; padding: 0; border: 0; background: none; box-shadow: none; pointer-events: auto; font-size: 11px; }
+.support-legend .support-map-key > strong { font-size: 11px; }
+.support-legend .support-weather-key { display: contents; }
+.support-legend .support-weather-key > div { flex: 1 1 260px; }
