@@ -1,5 +1,6 @@
 // The customers to contact, one row each, with their week as a strip of coloured days. Rows arrive already sorted
 // by when the weather reaches them, so the first-hazard markers step across the grid from left to right.
+import { SENSITIVITY } from "@greenspark/shared";
 import type { OutlookCustomer, OutlookTown } from "../data/api";
 import { accountHref, isModifiedClick } from "../route";
 import { band, percent } from "./predictionText";
@@ -14,6 +15,20 @@ export function contactRank(c: { kinds: string[]; firstDate: string | null }, to
   if (!c.firstDate) return 3;
   const days = Math.round((Date.parse(`${c.firstDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
   return days <= 0 ? 0 : days <= 3 ? 1 : 2;
+}
+
+/** Why a customer sits where they do in the list, for the hover on their name. */
+function whyHere(c: OutlookCustomer, rank: number, today: string): string {
+  const points = Math.min(15, c.sensitivity.reduce((n, x) => n + (SENSITIVITY[x.id]?.weight ?? 0), 0));
+  const hardship = c.risk ? 20 * c.risk.probability : 0;
+  return [
+    "Why they are here",
+    `Contact by: ${CONTACT_BY[rank]} (${CONTACT_NOTE[rank].toLowerCase()})`,
+    `First hot or dangerous day: ${c.firstDate ? (c.firstDate === today ? "today" : `${dayName(c.firstDate)} ${dayDate(c.firstDate)}`) : "none forecast"}`,
+    `Outlook group: ${c.tier === "act" ? "Act now" : c.tier === "watch" ? "Watch" : "Not listed"}`,
+    `Outlook score ${c.score} = weather ${c.exposure} × (1 + needs ${points}) + chance of hardship ${hardship.toFixed(1)}`,
+    "Order: contact by, then first hazard day, then act now before watch, then outlook score.",
+  ].join("\n");
 }
 
 const RISK_COLOR: Record<string, string> = { low: "#378ADD", raised: "#EF9F27", high: "#D85A30", very_high: "#A32D2D" };
@@ -47,7 +62,7 @@ export function OutlookWeekList({ rows, towns, dates, today, navigate }: {
           <div key={c.personId} className="week-block">
             {heading}
             <div className="week-row week-person" role="row" onClick={() => c.accountNumber && navigate(accountHref(c.accountNumber))}>
-              <div role="cell">
+              <div role="cell" title={whyHere(c, rank, today)}>
                 {c.accountNumber ? <a className="name-link" href={accountHref(c.accountNumber)} onClick={(e) => { e.stopPropagation(); if (isModifiedClick(e)) return; e.preventDefault(); navigate(accountHref(c.accountNumber!)); }}>{c.displayName}</a> : <strong>{c.displayName}</strong>}
                 <span className="sub">{c.suburb}</span>
               </div>
