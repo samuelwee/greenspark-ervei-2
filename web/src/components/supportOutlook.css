@@ -15,8 +15,8 @@
 .support-region select { min-height: 43px; font-weight: 600; }
 .support-map-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 13px 16px; }
 .support-map-toolbar p { font-size: 13px; }
-.support-layer-controls { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; }
-.support-layer-controls .check { white-space: nowrap; flex: 0 0 auto; }
+.support-layer-controls { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; }
+.support-layer-controls .check { white-space: nowrap; flex: 0 0 auto; gap: 5px; padding: 2px 0; }
 .support-map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 365px; border-top: 1px solid var(--border); }
 .support-map-column { min-width: 0; display: flex; flex-direction: column; }
 .support-map-stage { position: relative; flex: 1; min-height: 600px; }
@@ -235,3 +235,13 @@
 .weather-key-items i, .town-hazard-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; }
 @media (max-width: 850px) { .support-week-days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 550px) { .support-week-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .support-week { padding: 12px; } .support-week-heading { align-items: flex-start; } }
+
+/* One control bar above the map: area, forecast period and layers together */
+.support-map-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
+.support-map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.support-map-controls .support-region { flex: 0 0 160px; }
+.support-map-controls .support-region select { min-height: 36px; }
+.support-map-controls .support-time { padding: 0; background: none; border-top: 0; gap: 4px; }
+.support-map-controls .support-time button { min-height: 36px; min-width: 52px; padding: 2px 6px; }
+.support-map-controls .support-layer-controls { margin-left: auto; }
+@media (max-width: 899px) { .support-map-controls .support-layer-controls { margin-left: 0; } }

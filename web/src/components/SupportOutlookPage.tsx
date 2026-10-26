@@ -109,25 +109,27 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
         <button type="button" className={`support-filter support-filter-all${groups.length === ALL_GROUPS.length ? " is-on" : ""}`} aria-pressed={groups.length === ALL_GROUPS.length} onClick={() => setGroups(ALL_GROUPS)}>All groups <span>{baseRows.length.toLocaleString("en-AU")}</span></button>
         {SUPPORT_GROUPS.map((item) => <button key={item.id} type="button" style={groupStyle(item.id)} className={`support-filter${groups.includes(item.id) ? " is-on" : ""}`} aria-pressed={groups.includes(item.id)} onClick={() => setGroups((current) => current.includes(item.id) ? current.filter((id) => id !== item.id) : [...current, item.id])}><i>{item.letter}</i>{item.label}<span>{groupCounts[item.id].toLocaleString("en-AU")}</span></button>)}
       </div>
-      <label className="support-region"><span className="sr-only">Map area</span><select aria-label="Map area" value={region} onChange={(event) => setRegion(event.target.value as MapRegion)}>{Object.entries(REGION_LABEL).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
     </section>
 
     <section className="panel support-workspace" aria-label="Group map and support plan">
       <div className="support-map-toolbar">
         <p aria-live="polite"><strong>{selectedDefinition?.label ?? selectionLabel}</strong> · {rows.length.toLocaleString("en-AU")} customers across {postcodeCount} postcode areas</p>
-        <div className="support-layer-controls">
-          <label className="check"><input type="checkbox" checked={showHeat} onChange={() => setShowHeat((value) => !value)} /><span>Temperature layer</span></label>
-          <label className="check"><input type="checkbox" checked={showAlerts && !!emergency?.available} disabled={!emergency?.available} onChange={() => setShowAlerts((value) => !value)} /><span>Emergency WA{emergency && !emergency.available ? " · unavailable" : ""}</span></label>
+        <div className="support-map-controls" role="group" aria-label="Map controls">
+          <label className="support-region"><span className="sr-only">Map area</span><select aria-label="Map area" value={region} onChange={(event) => setRegion(event.target.value as MapRegion)}>{Object.entries(REGION_LABEL).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
+          <div className="support-time" role="group" aria-label="Forecast period">
+            <strong>Forecast period</strong><button type="button" aria-pressed={!date} className={!date ? "is-on" : ""} onClick={() => setDate("")}>Whole week</button>
+            {ready.days.map((day) => <button key={day.date} type="button" className={day.date === date ? "is-on" : ""} aria-pressed={day.date === date} onClick={() => setDate(day.date)}><span>{dayName(day.date)}</span>{dayDate(day.date)}</button>)}
+          </div>
+          <div className="support-layer-controls">
+            <label className="check"><input type="checkbox" checked={showHeat} onChange={() => setShowHeat((value) => !value)} /><span>Temperature layer</span></label>
+            <label className="check"><input type="checkbox" checked={showAlerts && !!emergency?.available} disabled={!emergency?.available} onChange={() => setShowAlerts((value) => !value)} /><span>Emergency WA{emergency && !emergency.available ? " · unavailable" : ""}</span></label>
+          </div>
         </div>
       </div>
       <SupportWeatherKey feed={emergency} enabled={showAlerts && !!emergency?.available} />
       <div className="support-map-layout">
         <div className="support-map-column">
           <Suspense fallback={<div className="outlook-map support-map" role="status">Loading the map…</div>}><SupportMap areas={mapped.areas} towns={ready.towns} activeGroups={groups} alerts={warnings} showHeat={showHeat} showAlerts={showAlerts && !!emergency?.available} chosen={picked?.id ?? null} onChoose={(id) => { setAreaId(id); setShown(PAGE); }} region={region} date={date} /></Suspense>
-          <div className="support-time" role="group" aria-label="Forecast period">
-            <strong>Forecast period</strong><button type="button" aria-pressed={!date} className={!date ? "is-on" : ""} onClick={() => setDate("")}>Whole week</button>
-            {ready.days.map((day) => <button key={day.date} type="button" className={day.date === date ? "is-on" : ""} aria-pressed={day.date === date} onClick={() => setDate(day.date)}><span>{dayName(day.date)}</span>{dayDate(day.date)}</button>)}
-          </div>
         </div>
 
         <aside className="support-detail support-solutions-panel" aria-label="Support plan for selected groups">
