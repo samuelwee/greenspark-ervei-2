@@ -272,3 +272,9 @@
 .admin.is-demo .flow-float .fdetail:not(.rest) { position: static; }
 .admin.is-demo .flane .ut { display: none; }
 .admin.is-demo .flane .dot.sensitive, .admin.is-demo .flane .dot.safety { display: none; }
+
+/* The flowchart for one case uses the demo style: electricity only, no utility letters or sensitive/safety dots, and the details in a floating card. */
+.case-flow.cf-demo .flane .ut, .case-flow.cf-demo .flane .dot.sensitive, .case-flow.cf-demo .flane .dot.safety { display: none; }
+.case-flow.cf-demo .cf-body { grid-template-columns: minmax(0, 1fr); }
+.case-flow.cf-demo .cf-body .board-scroll { max-height: none; }
+.case-flow.cf-demo .cf-panel { position: fixed; right: 18px; bottom: 18px; z-index: 800; width: min(380px, calc(100vw - 36px)); max-height: min(62vh, 560px); box-shadow: 0 10px 32px rgba(9, 30, 66, .28); border-radius: 14px; }

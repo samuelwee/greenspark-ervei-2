@@ -147,7 +147,7 @@ export function CaseFlowModal({ client, data, c, person, weather, onClose }: Pro
   }, [index, path, selected]);
 
   return (
-    <dialog ref={ref} className="case-flow" aria-labelledby="cf-title" onClose={onClose}>
+    <dialog ref={ref} className="case-flow cf-demo" aria-labelledby="cf-title" onClose={onClose}>
       <header className="cf-head">
         <div>
           <p className="eyebrow">Flowchart for this case</p>
@@ -162,7 +162,7 @@ export function CaseFlowModal({ client, data, c, person, weather, onClose }: Pro
         <div className="cf-body">
           <div className="board-scroll">
             <FlowBoard
-              doc={doc} index={index} selected={selected} trace={highlight} utility="all" showAllLinks strongOnly={false}
+              doc={doc} index={index} selected={selected} trace={highlight} utility="electricity" showAllLinks strongOnly={false}
               matches={new Set()} readOnly hideAdd only={path.trace.nodes} onSelect={setSelected} onAdd={() => {}}
               sources={DATA_SOURCE_GROUPS} onSourceSelect={() => setSelected(null)}
             />
