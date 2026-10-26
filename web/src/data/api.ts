@@ -105,6 +105,7 @@ export interface ApiClient {
   /** The help chat: a visitor's questions so far, ending with theirs. */
   assistantStatus?(): Promise<{ on: boolean; available: boolean }>;
   setAssistant?(on: boolean): Promise<{ on: boolean; available: boolean }>;
+  insights?(): Promise<Insights>;
   ask?(messages: { role: "user" | "assistant"; content: string }[]): Promise<{ answer: string; model: string }>;
   /** Every forecast town with its position and daily maximums, for shading the case page's map. */
   forecastTowns?(): Promise<{ available: boolean; towns: ForecastTown[] }>;
@@ -136,6 +137,18 @@ export interface MapPlace {
 export interface MapSummary { total: number; unplaced: number; places: MapPlace[] }
 
 export type HazardKind = "heat" | "hot" | "fire" | "warning";
+/** Counts across every customer, for the insights page. */
+export interface Insights {
+  total: number; rising: number; sensitive: number; safety: number; north: number;
+  priority: { label: string; count: number }[];
+  circumstances: { id: string; label: string; count: number; sensitivity: string }[];
+  areas: { id: string; label: string; count: number }[];
+  needGroups: { group: string; count: number }[];
+  needs: { id: string; label: string; group: string; count: number }[];
+  supportGroups: { id: string; count: number }[];
+  risk: { id: string; count: number }[];
+  howMany: { n: number; count: number }[];
+}
 export interface ForecastTown { id: string; name: string; lat: number; lng: number; days: { date: string; max: number | null }[] }
 export interface OutlookHazard { kind: HazardKind; date: string; severity: number; text: string }
 export interface OutlookTown {
@@ -264,6 +277,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     outlook: () => req("GET", "/api/outlook"),
     climateDecades: () => req("GET", "/api/climate/decades"),
     emergency: () => req("GET", "/api/emergency"),
+    insights: () => req("GET", "/api/insights"),
     ask: (messages) => req("POST", "/api/assistant", { messages }),
     assistantStatus: () => req("GET", "/api/assistant/status"),
     setAssistant: (on) => req("POST", "/api/assistant/status", { on }),

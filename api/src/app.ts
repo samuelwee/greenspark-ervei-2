@@ -17,7 +17,7 @@ import { FlowFile } from "./flow";
 import type { Predictions } from "./predictions";
 import { answerQuestion, MAX_HISTORY, MAX_MESSAGE_CHARS } from "./assistant";
 import { draftPlan, PLAN_KINDS, perthToday, planFacts, type AiConfig, type ContactRules, type PlanKind, type SupportPlan } from "./plan";
-import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, primarySupportGroup, supportGroupNeeds, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
+import { FlowError, POSTCODE_LOCATION, POSTCODE_TOWN, customerOutlook, townHazards, detectWeatherSignals, evaluateCase, flowCatalog, parseOp, primarySupportGroup, sensitivityOf, SENSITIVITY, supportGroupNeeds, type FlowDoc, type WeatherSignal, type WeatherSnapshot } from "@greenspark/shared";
 import type { ClimateDecades, ClimateHeat } from "./climate";
 import { SyntheticModelAdapter, withAssessments, type ModelAdapter } from "./adapters";
 
@@ -533,6 +533,57 @@ export function createApp(store: Store, options: AppOptions = {}) {
     if (!apiKey) throw new ApiError("validation_failed", `No ${choice.provider === "claude" ? "Anthropic" : "Gemini"} API key is set on the server.`);
     ai = { provider: choice.provider, apiKey, models: { support: model, signals: model } };
     res.json(aiStatus());
+  });
+
+  // Customer insights: counts across every customer, for the infographic page. Worked out from the same cases,
+  // signals and risk scores as everywhere else, and kept for a minute because it reads all of them.
+  let insightsCache: { at: number; key: string; body: unknown } | null = null;
+  app.get("/api/insights", async (_req, res) => {
+    const key = store.casesSignature();
+    if (insightsCache && insightsCache.key === key && Date.now() - insightsCache.at < 60_000) return res.json(insightsCache.body);
+    const data = await dataset();
+    const defs = new Map(data.circumstances.map((c) => [c.id, c]));
+    const areaLabel = new Map(data.supportAreas.map((a) => [a.id, a.label]));
+    const byPerson = new Map(data.cases.map((c) => [c.personId, c]));
+    const bump = (m: Map<string, number>, k: string) => { m.set(k, (m.get(k) ?? 0) + 1); };
+    const priority = new Map<string, number>(), circumstance = new Map<string, number>(), area = new Map<string, number>();
+    const needGroup = new Map<string, number>(), need = new Map<string, number>(), supportGroup = new Map<string, number>();
+    const risk = new Map<string, number>(), howMany = new Map<number, number>();
+    let rising = 0, sensitive = 0, safety = 0, north = 0;
+    for (const p of data.people) {
+      const c = byPerson.get(p.id);
+      bump(priority, c?.modelAssessment.priority?.label ?? "none");
+      if (c?.modelAssessment.trend === "rising") rising++;
+      const ids = [...new Set((c?.circumstances ?? []).map((x) => x.circumstanceId))];
+      for (const id of ids) { bump(circumstance, id); }
+      for (const aid of new Set(ids.map((id) => defs.get(id)?.supportAreaId).filter((x): x is string => !!x))) bump(area, aid);
+      if (ids.some((id) => defs.get(id)?.sensitivity === "sensitive")) sensitive++;
+      if (ids.some((id) => defs.get(id)?.sensitivity === "safety")) safety++;
+      howMany.set(Math.min(ids.length, 6), (howMany.get(Math.min(ids.length, 6)) ?? 0) + 1);
+      const sens = sensitivityOf(p);
+      for (const g of new Set(sens.map((s) => s.group))) bump(needGroup, g);
+      for (const s of sens) bump(need, s.id);
+      const signals = [...sens, ...(p.signalSummary?.account ?? []), ...(p.signalSummary?.selfReport ?? [])];
+      bump(supportGroup, primarySupportGroup(signals));
+      const r = riskFor(p);
+      if (!r) bump(risk, "none");
+      else { const x = r.baseRate ? r.probability / r.baseRate : 0; bump(risk, x >= 10 ? "very_high" : x >= 4 ? "high" : x >= 1.5 ? "raised" : "low"); }
+      if (p.account?.region.northOf26th ?? p.signalSummary?.northOf26th) north++;
+    }
+    const top = (m: Map<string, number>, n: number) => [...m].sort((a, b) => b[1] - a[1]).slice(0, n);
+    const body = {
+      total: data.people.length, rising, sensitive, safety, north,
+      priority: ["urgent", "high", "moderate", "routine", "none"].map((label) => ({ label, count: priority.get(label) ?? 0 })),
+      circumstances: top(circumstance, 10).map(([id, count]) => ({ id, label: defs.get(id)?.label ?? id, count, sensitivity: defs.get(id)?.sensitivity ?? "standard" })),
+      areas: top(area, 8).map(([id, count]) => ({ id, label: areaLabel.get(id) ?? id, count })),
+      needGroups: ["health", "supply", "cost", "isolation"].map((group) => ({ group, count: needGroup.get(group) ?? 0 })),
+      needs: top(need, 10).map(([id, count]) => ({ id, label: SENSITIVITY[id]?.label ?? id, group: SENSITIVITY[id]?.group ?? "cost", count })),
+      supportGroups: ["health", "supply", "bills", "concessions", "coaching", "monitor"].map((id) => ({ id, count: supportGroup.get(id) ?? 0 })),
+      risk: ["very_high", "high", "raised", "low", "none"].map((id) => ({ id, count: risk.get(id) ?? 0 })),
+      howMany: [0, 1, 2, 3, 4, 5, 6].map((n) => ({ n, count: howMany.get(n) ?? 0 })),
+    };
+    insightsCache = { at: Date.now(), key, body };
+    res.json(body);
   });
 
   // The help chat: how the tool works, from a written description, with no customer data. Each visitor gets a few
