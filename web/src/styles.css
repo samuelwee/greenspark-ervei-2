@@ -923,3 +923,7 @@ select:not([multiple]):disabled { opacity: .6; }
 .day-donut-n { font-size: 14px; font-weight: 700; fill: #253858; }
 
 .vis-bars.vis-plain li { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* Any link without its own styling (inline text links) uses the brand colour, never the browser blue or visited purple. */
+:where(a:not([class])), :where(a:not([class])):visited { color: var(--brand-hover); }
+:where(a:not([class])):hover { text-decoration-thickness: 2px; }
