@@ -131,13 +131,15 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           {ready.days.map((d) => (
             <li key={d.date} className={d.date === ready.today ? "is-today" : undefined}>
               <span className="day-name">{d.date === ready.today ? "Today" : dayName(d.date)} <span className="sub">{dayDate(d.date)}</span></span>
-              <span className="day-peak" style={tempColor(d.peak?.max ?? null)}>{d.peak ? `${d.peak.max}°` : "–"}</span>
-              <span className="sub">{d.peak?.town ?? ""}</span>
               <span className="day-bar" aria-hidden="true">
                 <i className="bar-act" style={{ height: `${(d.act / maxExposed) * 100}%` }} />
                 <i className="bar-watch" style={{ height: `${(d.watch / maxExposed) * 100}%` }} />
               </span>
               <span className="day-count"><span className="day-tiers"><strong className="n-act">{d.act}</strong> act · <strong className="n-watch">{d.watch}</strong> watch</span><span className="sub">{d.exposed} exposed</span></span>
+              <span className="day-hot">
+                <span className="day-peak" style={tempColor(d.peak?.max ?? null)}>{d.peak ? `${d.peak.max}°` : "–"}</span>
+                <span className="sub">{d.peak?.town ?? ""}</span>
+              </span>
             </li>
           ))}
         </ol>
