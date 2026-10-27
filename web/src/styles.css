@@ -892,3 +892,8 @@ select:not([multiple]):disabled { opacity: .6; }
 .ins-legend.is-col li { padding: 2px 6px; margin: -2px -6px; border-radius: 8px; }
 .ins-legend.is-col li.is-on { background: #f1f4f2; }
 .ins-donut circle:focus { outline: none; }
+
+.insights-head { margin: 8px 0 4px; }
+.insights-head h2 { margin: 0 0 4px; font-size: 20px; }
+.insights-head .hint { margin: 0; }
+.outlook > .insights { margin-top: 8px; }

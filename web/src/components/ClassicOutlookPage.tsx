@@ -8,6 +8,7 @@ import { CONTACT_BADGE, CONTACT_BY, OutlookWeekList, contactRank } from "./Outlo
 import { ALERT_LEVELS, GROUP_LABEL, HAZARD_HINT, HAZARD_ICON, HAZARD_LABEL, alertColor, dayDate, isWarning, dayName, tempColor } from "./outlookText";
 
 // Leaflet only loads with this page.
+const InsightsSections = lazy(() => import("./InsightsPage").then((m) => ({ default: m.InsightsSections })));
 const OutlookMap = lazy(() => import("./OutlookMap").then((m) => ({ default: m.OutlookMap })));
 const PAGE = 50;
 const LAYERS_KEY = "outlook-map-layers";
@@ -21,7 +22,7 @@ type Group = keyof typeof GROUP_LABEL;
 const VIEW_KEY = "outlook-list-view";
 const storedView = (): "week" | "table" => { try { return localStorage.getItem(VIEW_KEY) === "table" ? "table" : "week"; } catch { return "week"; } };
 
-export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency">; navigate: (to: string) => void }) {
+export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency" | "insights">; navigate: (to: string) => void }) {
   const [data, setData] = useState<Outlook | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
@@ -306,6 +307,8 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           <li>{ready.totals.uncovered} customers live in postcodes without a nearby forecast town and aren’t shown.</li>
         </ul>
       </details>
+
+      <Suspense fallback={null}><InsightsSections client={client} /></Suspense>
     </main>
   );
 }

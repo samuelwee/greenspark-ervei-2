@@ -71,19 +71,19 @@ function Bars({ rows, total, color }: { rows: { key: string; label: string; coun
   );
 }
 
-export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }) {
+/** The insights themselves. The Insights page shows them under its own heading; the home page adds its own heading and shows them at the bottom. */
+export function InsightsSections({ client, showHeading = true }: { client: Pick<ApiClient, "insights">; showHeading?: boolean }) {
   const [d, setD] = useState<Insights | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
-  useEffect(() => { document.title = "Customer insights · ERVEI"; }, []);
   useEffect(() => {
     let live = true;
     client.insights?.().then((x) => { if (live) setD(x); }, (e: unknown) => { if (live) setError(e instanceof Error ? e.message : "Could not load the insights."); });
     return () => { live = false; };
   }, [client]);
 
-  if (error) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="alert"><p>{error}</p></div></main>;
-  if (!d) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="status"><p>Counting customers…</p></div></main>;
+  if (error) return <section className="insights"><div className="empty" role="alert"><p>{error}</p></div></section>;
+  if (!d) return <section className="insights"><div className="empty" role="status"><p>Counting customers…</p></div></section>;
 
   const assessed = d.total - (d.priority.find((p) => p.label === "none")?.count ?? 0);
   const serious = (d.priority.find((p) => p.label === "urgent")?.count ?? 0) + (d.priority.find((p) => p.label === "high")?.count ?? 0);
@@ -95,14 +95,14 @@ export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }
   const needSupport = supportShown.reduce((a, g) => a + g.count, 0);
 
   return (
-    <main id="queue" className="outlook insights" tabIndex={-1}>
-      <div className="page-head">
-        <div>
+    <section className="insights" aria-labelledby={showHeading ? "insights-title" : undefined}>
+      {showHeading ? (
+        <div className="insights-head">
           <p className="eyebrow">Customer insights · counts only</p>
-          <h1>Who our customers are, and what they need</h1>
+          <h2 id="insights-title">Who our customers are, and what they need</h2>
           <p className="hint">A picture of every customer in the demo: how serious their situations are, what makes hot weather and bills harder for them, and which circumstances sit behind it. Synthetic data; no one is named.</p>
         </div>
-      </div>
+      ) : null}
 
       <section className="ins-hero" aria-label="Headline numbers">
         <div><strong>{n(d.total)}</strong><span>customers</span></div>
@@ -201,6 +201,23 @@ export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }
         </div>
         <p className="ins-note"><strong>{n(d.sensitive)}</strong> customers have a sensitive circumstance and <strong>{n(d.safety)}</strong> a safety circumstance. Both need a strong signal to be flagged, and safety circumstances always go to trained staff.</p>
       </section>
+    </section>
+  );
+}
+
+/** The Insights page: the same sections under a page heading. */
+export function InsightsPage({ client }: { client: Pick<ApiClient, "insights"> }) {
+  useEffect(() => { document.title = "Customer insights · ERVEI"; }, []);
+  return (
+    <main id="queue" className="outlook" tabIndex={-1}>
+      <div className="page-head">
+        <div>
+          <p className="eyebrow">Customer insights · counts only</p>
+          <h1>Who our customers are, and what they need</h1>
+          <p className="hint">A picture of every customer in the demo: how serious their situations are, what makes hot weather and bills harder for them, and which circumstances sit behind it. Synthetic data; no one is named.</p>
+        </div>
+      </div>
+      <InsightsSections client={client} showHeading={false} />
     </main>
   );
 }
