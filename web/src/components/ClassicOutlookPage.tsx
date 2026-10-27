@@ -10,7 +10,7 @@ import { ALERT_LEVELS, GROUP_LABEL, HAZARD_HINT, HAZARD_ICON, HAZARD_LABEL, aler
 // Leaflet only loads with this page.
 const InsightsSections = lazy(() => import("./InsightsPage").then((m) => ({ default: m.InsightsSections })));
 const OutlookMap = lazy(() => import("./OutlookMap").then((m) => ({ default: m.OutlookMap })));
-const PAGE = 50;
+const PAGE = 10;
 const LAYERS_KEY = "outlook-map-layers";
 type Layers = { towns: boolean; alerts: boolean };
 function storedLayers(): Layers {
