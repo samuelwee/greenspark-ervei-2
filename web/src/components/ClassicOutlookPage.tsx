@@ -22,6 +22,19 @@ type Group = keyof typeof GROUP_LABEL;
 const VIEW_KEY = "outlook-list-view";
 const storedView = (): "week" | "table" => { try { return localStorage.getItem(VIEW_KEY) === "table" ? "table" : "week"; } catch { return "week"; } };
 
+/** A day's act now and watch customers as a ring, filled as a share of the busiest day so days can be compared. */
+function DayDonut({ act, watch, max }: { act: number; watch: number; max: number }) {
+  const r = 24, c = 2 * Math.PI * r, a = (act / max) * c, w = (watch / max) * c;
+  return (
+    <svg className="day-donut" viewBox="0 0 64 64" role="img" aria-label={`${act} act now and ${watch} watch`}>
+      <circle cx="32" cy="32" r={r} fill="none" stroke="#f1f3f5" strokeWidth="10" />
+      {act > 0 ? <circle cx="32" cy="32" r={r} fill="none" stroke="#ae2e24" strokeWidth="10" strokeDasharray={`${a} ${c - a}`} transform="rotate(-90 32 32)" /> : null}
+      {watch > 0 ? <circle cx="32" cy="32" r={r} fill="none" stroke="#e0a030" strokeWidth="10" strokeDasharray={`${w} ${c - w}`} strokeDashoffset={-a} transform="rotate(-90 32 32)" /> : null}
+      <text x="32" y="36" textAnchor="middle" className="day-donut-n">{(act + watch).toLocaleString("en-AU")}</text>
+    </svg>
+  );
+}
+
 export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency" | "insights">; navigate: (to: string) => void }) {
   const [data, setData] = useState<Outlook | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,10 +144,7 @@ export function ClassicOutlookPage({ client, navigate }: { client: Pick<ApiClien
           {ready.days.map((d) => (
             <li key={d.date} className={d.date === ready.today ? "is-today" : undefined}>
               <span className="day-name">{d.date === ready.today ? "Today" : dayName(d.date)} <span className="sub">{dayDate(d.date)}</span></span>
-              <span className="day-bar" aria-hidden="true">
-                <i className="bar-act" style={{ height: `${(d.act / maxExposed) * 100}%` }} />
-                <i className="bar-watch" style={{ height: `${(d.watch / maxExposed) * 100}%` }} />
-              </span>
+              <DayDonut act={d.act} watch={d.watch} max={maxExposed} />
               <span className="day-count"><span className="day-tiers"><strong className="n-act">{d.act}</strong> act · <strong className="n-watch">{d.watch}</strong> watch</span><span className="sub">{d.exposed} exposed</span></span>
               <span className="day-hot">
                 <span className="day-peak" style={tempColor(d.peak?.max ?? null)}>{d.peak ? `${d.peak.max}°` : "–"}</span>
