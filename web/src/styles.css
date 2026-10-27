@@ -750,7 +750,7 @@ select:not([multiple]):disabled { opacity: .6; }
 .week-key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin: 0 0 10px; }
 .week-key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 .week-key .week-key-first { background: transparent; border: 2px solid #1b2a24; box-sizing: border-box; }
-.week-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 280px minmax(0, 1fr); gap: 24px; align-items: center; }
+.week-row { display: grid; grid-template-columns: minmax(0, 1fr) 280px minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
 .week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .week-needs { display: grid; grid-template-columns: repeat(2, max-content); justify-content: start; align-items: start; gap: 4px; }
 .week-head { margin: 0 -22px; padding: 10px 22px; font-size: 12px; font-weight: 600; color: var(--muted); background: #fafbfc; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }

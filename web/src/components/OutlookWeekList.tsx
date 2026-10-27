@@ -49,8 +49,8 @@ export function OutlookWeekList({ rows, towns, dates, today, navigate }: {
       </div>
       <div className="week-row week-head" role="row">
         <span role="columnheader">Customer</span>
-        <span role="columnheader">Needs</span>
         <div className="week-days">{dates.map((d) => <span key={d} role="columnheader" className="week-day">{dayName(d)}</span>)}</div>
+        <span role="columnheader">Needs</span>
         <span role="columnheader">Chance of hardship</span>
       </div>
       {rows.map((c) => {
@@ -66,6 +66,12 @@ export function OutlookWeekList({ rows, towns, dates, today, navigate }: {
                 {c.accountNumber ? <a className="name-link" href={accountHref(c.accountNumber)} onClick={(e) => { e.stopPropagation(); if (isModifiedClick(e)) return; e.preventDefault(); navigate(accountHref(c.accountNumber!)); }}>{c.displayName}</a> : <strong>{c.displayName}</strong>}
                 <span className="sub">{c.suburb}</span>
               </div>
+              <div className="week-days">{dates.map((d) => {
+                const hazards = (town?.hazards ?? []).filter((h) => h.date === d && h.kind !== "warning");
+                const worst = hazards.reduce((a, h) => Math.max(a, h.severity), 0);
+                const label = hazards.length ? hazards.map((h) => h.text || HAZARD_LABEL[h.kind]).join(", ") : "No hazard";
+                return <span key={d} role="cell" data-day={dayName(d)} className={`week-cell${d === firstDay ? " is-first" : ""}${warned && d === today ? " is-warned" : ""}`} style={{ background: hazards.length ? hazardColor(worst) : "#eef1f4" }} title={`${dayName(d)} ${dayDate(d)}: ${label}${warned && d === today ? " · warning in force" : ""}`} aria-label={`${dayName(d)}: ${label}`} />;
+              })}</div>
               <div role="cell">
                 <span className="need-chips week-needs">
                   {c.sensitivity.slice(0, 3).map((s) => <span key={s.id} className={`need need-${s.group}`} title={GROUP_LABEL[s.group]}>{s.label}</span>)}
@@ -73,12 +79,6 @@ export function OutlookWeekList({ rows, towns, dates, today, navigate }: {
                   {!c.sensitivity.length ? <span className="sub">High chance of hardship</span> : null}
                 </span>
               </div>
-              <div className="week-days">{dates.map((d) => {
-                const hazards = (town?.hazards ?? []).filter((h) => h.date === d && h.kind !== "warning");
-                const worst = hazards.reduce((a, h) => Math.max(a, h.severity), 0);
-                const label = hazards.length ? hazards.map((h) => h.text || HAZARD_LABEL[h.kind]).join(", ") : "No hazard";
-                return <span key={d} role="cell" data-day={dayName(d)} className={`week-cell${d === firstDay ? " is-first" : ""}${warned && d === today ? " is-warned" : ""}`} style={{ background: hazards.length ? hazardColor(worst) : "#eef1f4" }} title={`${dayName(d)} ${dayDate(d)}: ${label}${warned && d === today ? " · warning in force" : ""}`} aria-label={`${dayName(d)}: ${label}`} />;
-              })}</div>
               <div role="cell" className="week-risk">
                 {c.risk && b ? <><strong>{b.text} · {percent(c.risk.probability)}</strong><span className="week-bar"><i style={{ width: `${Math.max(3, Math.min(100, c.risk.probability * 100))}%`, background: RISK_COLOR[b.id] ?? "#888780" }} /></span></> : <span className="sub">No prediction</span>}
               </div>
