@@ -14,7 +14,7 @@
     <rect width="64" height="64" fill="url(#sun)"/>
     <!-- the shade: the dome swept along the light, which falls from the top left -->
     <g transform="translate(0 -1.750)">
-      <path d="M54 31 A22 19.500 0 0 0 11.100 25 L-23.100 119 L19.800 125 Z" fill="url(#shade)"/>
+      <path d="M54 31 A22 19.500 0 0 0 12.100 22.700 L-34.800 111 L7.100 119.300 Z" fill="url(#shade)"/>
     </g>
   </g>
   <!-- umbrella -->
