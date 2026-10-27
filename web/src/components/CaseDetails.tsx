@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CaseStatus, QueueCase, ReviewStatus, StaffUser } from "../domain/types";
 import type { ApiClient, CaseItem, Catalog, ContactMethod, PlanKind, PlanStep, SupportPlan } from "../data/api";
 import { CaseFlowModal } from "../admin/CaseFlowModal";
-import { RiskCard } from "./PredictionsPage";
+import { PredictionDetails } from "./PredictionsPage";
 import { isModifiedClick } from "../route";
 import { PERIOD_TEXT, readableDates } from "../domain/format";
 import { ageOn, PRIORITY_PROVIDER } from "../domain/types";
@@ -89,7 +89,7 @@ export function CaseDetails(props: { data: Catalog; item: CaseItem; user: StaffU
           {acct ? <UtilityAccount account={acct} accountNumber={person?.accountNumber ?? null} /> : null}
       </>
     ) },
-    { id: "priority", title: fromSignals ? "Priority and chance of hardship" : "Model assessment and chance of hardship", hint: "How the priority is worked out, and the 90-day risk model", body: (
+    { id: "priority", title: fromSignals ? "Priority" : "Model assessment", hint: "How the priority is worked out", body: (
       <>
           <section className="case-card model" aria-labelledby="ov-model">
             {fromSignals ? (
@@ -111,10 +111,11 @@ export function CaseDetails(props: { data: Catalog; item: CaseItem; user: StaffU
               <p>{a.explanation ?? (a.status === "pending" ? "Assessment pending. No priority has been assigned." : "Assessment unavailable. No priority has been assigned.")}</p>
             )}
           </section>
-
-          {props.navigate ? <RiskCard item={item} accountNumber={person?.accountNumber ?? null} navigate={props.navigate} /> : null}
       </>
     ) },
+    ...(item.prediction ? [{ id: "hardship", title: "Chance of hardship", hint: "The 90-day risk model: each harm, and what raises the risk", body: (
+      <PredictionDetails p={item.prediction} model={null} go={(to) => (e) => { if (isModifiedClick(e)) return; e.preventDefault(); props.navigate?.(to); }} />
+    ) }] : []),
     ...(acct ? [{ id: "signals", title: "Account signals", hint: "Warning signs in the account and the weather forecast", body: (
         <AccountSignals account={acct} asOf={data.asOf} weather={item.weatherSignals} summary={props.loadPlan ? <AiPlan kind="signals" caseId={c.id} version={c.version} load={props.loadPlan} /> : null} />
     ) }] : []),

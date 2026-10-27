@@ -97,7 +97,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
             })}
           </ul>
         ) : <p className="muted">No prediction for this customer.</p>}
-        {item.prediction ? <More label="Chance of hardship" onClick={() => onOpen("priority")} /> : null}
+        {item.prediction ? <More label="Chance of hardship" onClick={() => onOpen("hardship")} /> : null}
       </section>
 
       </div>
