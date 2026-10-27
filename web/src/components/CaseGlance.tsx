@@ -82,7 +82,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
         <h2 id="vis-risk">Chance of hardship, next 90 days</h2>
         <p className="vis-what">Predicted from their account history. Ignores the weather.</p>
         {item.prediction ? (
-          <ul className="vis-bars">
+          <ul className="vis-bars vis-plain">
             {OUTCOME_ORDER.map((id) => {
               const o = item.prediction!.outcomes[id];
               if (!o) return null;
@@ -90,7 +90,6 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
               return (
                 <li key={id} className={`pred-${b.id}`}>
                   <span>{OUTCOME_LABEL[id]}</span>
-                  <span className="vis-bar"><i style={{ width: `${Math.max(2, Math.min(100, o.probability * 100 * (100 / 80)))}%` }} /></span>
                   <strong title={`${percent(o.probability)} chance`}>{b.text}</strong>
                 </li>
               );
