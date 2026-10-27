@@ -82,7 +82,7 @@ export function ContactListPage({ client, navigate }: { client: Pick<ApiClient, 
     client.outlook().then((d) => { if (current) setData(d); }, (e: unknown) => { if (current) setError(e instanceof Error ? e.message : "Could not load the outlook."); });
     return () => { current = false; };
   }, [client, retry]);
-  useEffect(() => { document.title = "Contact list · ERVEI"; }, []);
+  useEffect(() => { document.title = "Customers in need · ERVEI"; }, []);
   useEffect(() => setShown(PAGE), [tier, hazard, group, town]);
 
   // Clicking a town's Act or Watch count narrows the list below to those customers and brings it into view.
@@ -125,7 +125,7 @@ export function ContactListPage({ client, navigate }: { client: Pick<ApiClient, 
     <main id="queue" className="outlook" tabIndex={-1}>
       <div className="page-head">
         <div>
-          <p className="eyebrow">Contact list · next 7 days</p>
+          <p className="eyebrow">Customers in need · next 7 days</p>
           <h1>Who to contact before the weather hits</h1>
           <p className="hint">
             The Bureau’s forecast for each customer’s area, matched against what we know about them: health, a supply that could stop, the cost of cooling, isolation.

@@ -421,7 +421,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
         </a>
         <nav className="mainnav" aria-label="Main">
           <a href="/" aria-current={props.page === "classic" ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate("/"); }}>Insights</a>
-          {([[CONTACT_LIST_PATH, "Contact list", "contactlist"], [CLIMATE_PATH, "Climate outlook", "climate"]] as const).map(([href, label, page]) => (
+          {([[CONTACT_LIST_PATH, "Customers in need", "contactlist"], [CLIMATE_PATH, "Climate outlook", "climate"]] as const).map(([href, label, page]) => (
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
           <NavMenu label="WIP" id="wip-menu" items={WIP_ITEMS} page={props.page} navigate={navigate} />
