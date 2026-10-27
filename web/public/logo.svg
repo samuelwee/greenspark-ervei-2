@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="sun" x1="1" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ff4b2b"/>
       <stop offset="1" stop-color="#ffa63d"/>
     </linearGradient>
-    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="shade" x1="1" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1a3fc4"/>
       <stop offset="1" stop-color="#7fd0ff"/>
     </linearGradient>
@@ -13,7 +13,7 @@
   <g clip-path="url(#tile)">
     <rect width="64" height="64" fill="url(#sun)"/>
     <!-- the shade: the dome swept along the light, which falls from the top left -->
-    <path d="M10 31 A22 22 0 0 1 52.700 23.500 L86.900 117.500 L44.200 125 Z" fill="url(#shade)"/>
+    <path d="M54 31 A22 22 0 0 0 11.300 23.500 L-22.900 117.500 L19.800 125 Z" fill="url(#shade)"/>
   </g>
   <!-- umbrella -->
   <path d="M10 31 A22 22 0 0 1 54 31 Z" fill="#fff"/>
