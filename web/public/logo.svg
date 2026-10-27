@@ -13,9 +13,13 @@
   <g clip-path="url(#tile)">
     <rect width="64" height="64" fill="url(#sun)"/>
     <!-- the shade: the dome swept along the light, which falls from the top left -->
-    <path d="M54 31 A22 19.500 0 0 0 11.100 25 L-23.100 119 L19.800 125 Z" fill="url(#shade)"/>
+    <g transform="translate(0 -1.750)">
+      <path d="M54 31 A22 19.500 0 0 0 11.100 25 L-23.100 119 L19.800 125 Z" fill="url(#shade)"/>
+    </g>
   </g>
   <!-- umbrella -->
+  <g transform="translate(0 -1.750)">
   <path d="M10 31 A22 19.500 0 0 1 54 31 Z" fill="#fff"/>
   <path d="M32 31 V50 A4.500 4.500 0 0 1 23 50" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  </g>
 </svg>
