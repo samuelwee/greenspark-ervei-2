@@ -156,7 +156,7 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
 
       <section className="panel ins-panel" aria-labelledby="ins-needs">
         <h2 id="ins-needs">What makes it harder for them</h2>
-        <p className="hint">Customers with at least one recorded need in each group. One person can be in several.</p>
+        <p className="hint">Customers with at least one recorded factor in each group, such as a health condition, a supply risk, a money pressure or distance. One person can be in several.</p>
         <div className="ins-tiles">
           {d.needGroups.map((g) => {
             const meta = NEED_GROUP[g.group]!;
@@ -171,7 +171,7 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
             );
           })}
         </div>
-        <h3 className="ins-sub">The most common needs</h3>
+        <h3 className="ins-sub">The most common factors</h3>
         <Bars total={d.total} color="#2f5fa7" rows={d.needs.map((x) => ({ key: x.id, label: x.label, count: x.count, color: NEED_GROUP[x.group]?.color, help: NEED_HELP[x.id] }))} />
       </section>
 
