@@ -62,6 +62,7 @@ function Donut({ slices, total, active, onActive, caption }: {
   let offset = 0;
   const on = slices.find((x) => x.key === active) ?? null;
   return (
+    <div className="ins-donut-box">
     <svg viewBox="0 0 200 200" className="ins-donut" role="group" aria-label={slices.map((x) => `${x.label} ${x.value}`).join(", ")}>
       <circle cx="100" cy="100" r={r} fill="none" stroke="#eef1f4" strokeWidth="34" />
       {slices.filter((x) => x.value > 0).map((x) => {
@@ -78,10 +79,11 @@ function Donut({ slices, total, active, onActive, caption }: {
         offset += len;
         return el;
       })}
-      <text x="100" y={on ? 84 : 98} textAnchor="middle" className="ins-donut-n">{on ? n(on.value) : n(total)}</text>
-      <text x="100" y={on ? 104 : 120} textAnchor="middle" className="ins-donut-l" style={on ? { fontSize: 10 } : undefined}>{on ? on.label : caption}</text>
-      {on ? <text x="100" y="122" textAnchor="middle" className="ins-donut-l">{pct(on.value, total)} of {n(total)}</text> : null}
+      <text x="100" y="112" textAnchor="middle" className="ins-donut-n">{on ? n(on.value) : n(total)}</text>
     </svg>
+    {/* The name and share sit under the ring, so the middle holds only the number. */}
+    <p className="ins-donut-cap" aria-live="polite">{on ? <><strong>{on.label}</strong><span>{pct(on.value, total)} of {n(total)}</span></> : <span>{caption}</span>}</p>
+    </div>
   );
 }
 

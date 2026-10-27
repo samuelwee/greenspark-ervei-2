@@ -867,7 +867,7 @@ select:not([multiple]):disabled { opacity: .6; }
 .ins-two.ins-flush { margin-top: 6px; gap: 28px; }
 .ins-donut-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 10px; }
 .ins-donut { width: 190px; height: 190px; flex: none; }
-.ins-donut-n { font-size: 30px; font-weight: 700; fill: #1b2a24; }
+.ins-donut-n { font-size: 34px; font-weight: 700; fill: #1b2a24; }
 .ins-donut-l { font-size: 12px; fill: #5e6c84; }
 .ins-columns { list-style: none; margin: 14px 0 0; padding: 0; height: 190px; display: flex; align-items: flex-end; gap: 12px; }
 .ins-columns li { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; text-align: center; gap: 4px; }
@@ -899,3 +899,6 @@ select:not([multiple]):disabled { opacity: .6; }
 .outlook > .insights { margin-top: 8px; }
 
 .ins-bar-label small { display: block; margin-top: 1px; font-size: 12px; font-weight: 400; color: var(--muted); line-height: 1.3; }
+.ins-donut-box { display: grid; justify-items: center; gap: 6px; width: 190px; flex: none; }
+.ins-donut-cap { margin: 0; min-height: 40px; display: grid; gap: 1px; text-align: center; font-size: 13px; color: var(--muted); }
+.ins-donut-cap strong { font-size: 14px; color: var(--fg); }
