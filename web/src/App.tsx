@@ -402,18 +402,6 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
     else setSelected((s) => { const n = new Map(s); for (const r of rows) n.delete(r.case.id); return n; });
   };
 
-  // The Insights link opens the home page and scrolls to its insights, which load a moment after the page.
-  const goToInsights = () => {
-    navigate("/#insights");
-    let tries = 0;
-    const look = () => {
-      const el = document.getElementById("insights");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      else if (tries++ < 40) window.setTimeout(look, 100);
-    };
-    window.setTimeout(look, 50);
-  };
-
   return (
     <div className="app">
       <a className="skip" href="#queue">Skip to main content</a>
@@ -432,7 +420,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav" aria-label="Main">
-          <a href="/#insights" onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); goToInsights(); }}>Insights</a>
+          <a href="/" aria-current={props.page === "classic" ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate("/"); }}>Insights</a>
           {([[CONTACT_LIST_PATH, "Contact list", "contactlist"], [CLIMATE_PATH, "Climate outlook", "climate"]] as const).map(([href, label, page]) => (
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
