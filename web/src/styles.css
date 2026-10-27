@@ -902,3 +902,19 @@ select:not([multiple]):disabled { opacity: .6; }
 .ins-donut-box { display: grid; justify-items: center; gap: 6px; width: 190px; flex: none; }
 .ins-donut-cap { margin: 0; min-height: 40px; display: grid; gap: 1px; text-align: center; font-size: 13px; color: var(--muted); }
 .ins-donut-cap strong { font-size: 14px; color: var(--fg); }
+
+/* The contact list's filters as picture tiles. */
+.graphic-filters { display: grid; gap: 14px; padding: 4px 22px 16px; }
+.graphic-filters > .chip, .graphic-filters > .link-btn { justify-self: start; }
+.gf-row { display: grid; gap: 6px; }
+.gf-title { font-size: 13px; font-weight: 600; color: var(--muted); }
+.gf-tiles { display: flex; flex-wrap: wrap; gap: 8px; }
+.gf-tile { display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border: 2px solid var(--border); border-radius: 14px; background: #fff; font: inherit; color: var(--fg); cursor: pointer; text-align: left; transition: border-color .12s, background .12s; }
+.gf-tile:hover { border-color: var(--c); }
+.gf-ico { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 17px; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 14%, #fff); transition: background .12s, color .12s; }
+.gf-text { display: grid; line-height: 1.2; }
+.gf-text strong { font-size: 14px; }
+.gf-text span { font-size: 12px; color: var(--muted); }
+.gf-tile[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); }
+.gf-tile[aria-pressed="true"] .gf-ico { background: var(--c); color: #fff; }
+.gf-tile:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }

@@ -21,6 +21,33 @@ type Group = keyof typeof GROUP_LABEL;
 const VIEW_KEY = "contact-list-view";
 const storedView = (): "week" | "table" => { try { return localStorage.getItem(VIEW_KEY) === "table" ? "table" : "week"; } catch { return "week"; } };
 
+interface Tile { value: string; label: string; icon: string; color: string; count: number }
+/** One filter as a row of big picture tiles: tap one to choose it, tap it again (or "All") to clear. */
+function TileRow({ title, tiles, value, onChange }: { title: string; tiles: Tile[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="gf-row" role="group" aria-label={title}>
+      <span className="gf-title">{title}</span>
+      <div className="gf-tiles">
+        {tiles.map((t) => (
+          <button key={t.value} type="button" className="gf-tile" style={{ "--c": t.color } as React.CSSProperties} aria-pressed={value === t.value} onClick={() => onChange(value === t.value ? "" : t.value)}>
+            <span className="gf-ico" aria-hidden="true">{t.icon}</span>
+            <span className="gf-text"><strong>{t.label}</strong><span>{t.count.toLocaleString("en-AU")}</span></span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+const WHO_TILES = [
+  { value: "", label: "Act now and watch", icon: "●", color: "#00875a" },
+  { value: "act", label: "Act now", icon: "!", color: "#ae2e24" },
+  { value: "watch", label: "Watch", icon: "◐", color: "#c27a12" },
+];
+const WEATHER_COLOR: Record<string, string> = { heat: "#ae2e24", hot: "#c27a12", fire: "#e2683c", warning: "#b3361f" };
+const NEED_TILES: Record<string, { icon: string; color: string }> = {
+  health: { icon: "♥", color: "#b3361f" }, supply: { icon: "⚡", color: "#c27a12" }, cost: { icon: "$", color: "#2f5fa7" }, isolation: { icon: "◎", color: "#6c3fb0" },
+};
+
 export function ContactListPage({ client, navigate }: { client: Pick<ApiClient, "outlook" | "emergency">; navigate: (to: string) => void }) {
   const [data, setData] = useState<Outlook | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +107,9 @@ export function ContactListPage({ client, navigate }: { client: Pick<ApiClient, 
     );
   }
 
+  // How many customers each tile would give, with the other filters and the chosen town still applied.
+  const fits = (c: OutlookCustomer, t: string, h: string, g: string) =>
+    (!t || c.tier === t) && (!h || c.kinds.includes(h as HazardKind)) && (!g || c.sensitivity.some((x) => x.group === g)) && (!town || c.townId === town);
   const open = (e: React.MouseEvent, c: OutlookCustomer) => {
     if (!c.accountNumber || isModifiedClick(e)) return;
     e.preventDefault();
@@ -193,24 +223,16 @@ export function ContactListPage({ client, navigate }: { client: Pick<ApiClient, 
         <div className="panel-head">
           <h2 id="who-title">Customers to contact before it hits <span className="pill">{rows.length}</span></h2>
         </div>
-        <div className="toolbar outlook-filters">
-          <label><span className="sub">Who</span>
-            <select value={tier} onChange={(e) => setTier(e.target.value as typeof tier)}>
-              <option value="">Act now and watch</option><option value="act">Act now</option><option value="watch">Watch</option>
-            </select>
-          </label>
-          <label><span className="sub">Weather</span>
-            <select value={hazard} onChange={(e) => setHazard(e.target.value as typeof hazard)}>
-              <option value="">Any</option>
-              {(Object.keys(HAZARD_LABEL) as HazardKind[]).map((k) => <option key={k} value={k}>{HAZARD_LABEL[k]}</option>)}
-            </select>
-          </label>
-          <label><span className="sub">Need</span>
-            <select value={group} onChange={(e) => setGroup(e.target.value as typeof group)}>
-              <option value="">Any</option>
-              {(Object.keys(GROUP_LABEL) as Group[]).map((g) => <option key={g} value={g}>{GROUP_LABEL[g]}</option>)}
-            </select>
-          </label>
+        <div className="graphic-filters">
+          <TileRow title="Who" value={tier} onChange={(v) => setTier(v as typeof tier)} tiles={WHO_TILES.map((t) => ({ ...t, count: ready.customers.filter((c) => fits(c, t.value, hazard, group)).length }))} />
+          <TileRow title="Weather" value={hazard} onChange={(v) => setHazard(v as typeof hazard)} tiles={[
+            { value: "", label: "Any weather", icon: "◌", color: "#00875a", count: ready.customers.filter((c) => fits(c, tier, "", group)).length },
+            ...(Object.keys(HAZARD_LABEL) as HazardKind[]).map((k) => ({ value: k, label: HAZARD_LABEL[k], icon: HAZARD_ICON[k], color: WEATHER_COLOR[k] ?? "#5e6c84", count: ready.customers.filter((c) => fits(c, tier, k, group)).length })),
+          ]} />
+          <TileRow title="Need" value={group} onChange={(v) => setGroup(v as typeof group)} tiles={[
+            { value: "", label: "Any need", icon: "◌", color: "#00875a", count: ready.customers.filter((c) => fits(c, tier, hazard, "")).length },
+            ...(Object.keys(GROUP_LABEL) as Group[]).map((g) => ({ value: g, label: GROUP_LABEL[g], icon: NEED_TILES[g]?.icon ?? "•", color: NEED_TILES[g]?.color ?? "#5e6c84", count: ready.customers.filter((c) => fits(c, tier, hazard, g)).length })),
+          ]} />
           {chosen ? <span className="chip">{chosen.name}<button type="button" aria-label={`Remove town ${chosen.name}`} onClick={() => setTown(null)}>✕</button></span> : null}
           {filtered ? <button type="button" className="link-btn" onClick={() => { setTier(""); setHazard(""); setGroup(""); setTown(null); }}>Clear</button> : null}
         </div>
