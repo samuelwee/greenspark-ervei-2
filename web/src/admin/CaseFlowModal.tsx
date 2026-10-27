@@ -61,6 +61,7 @@ function Panel({ refr, path, index, onSelect }: { refr: Ref | null; path: Path; 
     const def = index.signals.get(refr.id);
     const s = path.seen.get(refr.id);
     const targets = index.circumstancesOfSignal.get(refr.id) ?? [];
+    const flaggedTargets = targets.filter((t) => path.flagged.has(t.id));
     return (
       <>
         {back}
@@ -69,10 +70,10 @@ function Panel({ refr, path, index, onSelect }: { refr: Ref | null; path: Path; 
         <p className={s ? "cf-yes" : "cf-no"}>{s ? "Seen for this case" : "Not seen for this case"}</p>
         {s ? <p>{readableDates(s.evidence)}</p> : null}
         {def?.detect ? <p className="hint">{def.detect}</p> : null}
-        <p className="block-label">Points to</p>
+        {flaggedTargets.length ? <p className="block-label">Points to</p> : null}
         <ul className="plain cf-list">
-          {targets.map((t) => (
-            <li key={t.id}>{pick("circumstance", t.id, circName(t.id))} <span className="sub">{t.strength === "strong" ? "Strong" : "Supporting"} · {path.flagged.has(t.id) ? "flagged for this case" : "not flagged"}</span></li>
+          {flaggedTargets.map((t) => (
+            <li key={t.id}>{pick("circumstance", t.id, circName(t.id))} <span className="sub">{t.strength === "strong" ? "Strong" : "Supporting"} · flagged for this case</span></li>
           ))}
         </ul>
       </>
