@@ -897,3 +897,5 @@ select:not([multiple]):disabled { opacity: .6; }
 .insights-head h2 { margin: 0 0 4px; font-size: 20px; }
 .insights-head .hint { margin: 0; }
 .outlook > .insights { margin-top: 8px; }
+
+.ins-bar-label small { display: block; margin-top: 1px; font-size: 12px; font-weight: 400; color: var(--muted); line-height: 1.3; }

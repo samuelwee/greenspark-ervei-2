@@ -21,6 +21,35 @@ const RISK: Record<string, { label: string; color: string }> = {
   very_high: { label: "Very high", color: "#a32d2d" }, high: { label: "High", color: "#d85a30" },
   raised: { label: "Raised", color: "#ef9f27" }, low: { label: "Low", color: "#378ADD" }, none: { label: "No prediction", color: "#c9ced6" },
 };
+/** What each need means, in a line, under its name in the list. */
+const NEED_HELP: Record<string, string> = {
+  acct_life_support: "Life support equipment is registered on the account.",
+  ask_temperature_need: "A medical need to keep warm or cool.",
+  ask_medical_equipment: "Uses medical equipment that needs power.",
+  ask_illness: "A serious illness or injury.",
+  ask_older: "An older customer.",
+  ask_disability: "A disability that affects how much energy they need.",
+  acct_access_needs: "Access needs are recorded on the account.",
+  acct_disconnected: "Supply is disconnected right now.",
+  acct_prepay_low_credit: "A prepay meter that keeps running out of credit.",
+  acct_disconnection_warning: "A disconnection warning was sent recently.",
+  acct_small_recharges: "Topping up prepay in small amounts.",
+  ask_prepay: "On a prepay meter.",
+  ask_rationing: "Going without heating or cooling to save money.",
+  ask_trade_offs: "Choosing between paying bills and buying food or medicine.",
+  acct_seasonal_peak: "A summer bill far above their usual.",
+  ask_inefficient_home: "A home that is hard to keep cool or warm.",
+  acct_rising_arrears: "The amount overdue keeps growing.",
+  acct_missed_payment: "A bill is past its due date and unpaid.",
+  ask_fixed_income: "Lives on a fixed income.",
+  acct_concession_on_file: "Holds a concession card.",
+  acct_remote_area: "Supplied in a remote area, north of the 26th parallel.",
+  ask_remote_community: "Lives in a remote community.",
+  acct_outage_history: "Several, or very long, power outages in the past year.",
+  acct_digital_disengaged: "Has no online account and isn't opening messages.",
+  acct_interpreter: "Needs an interpreter.",
+  ask_no_internet: "No internet or phone credit.",
+};
 const SENSITIVITY_TAG: Record<string, string> = { sensitive: "Sensitive", safety: "Safety" };
 const n = (v: number) => v.toLocaleString("en-AU");
 const pct = (v: number, total: number) => (total ? `${Math.round((v / total) * 100)}%` : "0%");
@@ -56,13 +85,13 @@ function Donut({ slices, total, active, onActive, caption }: {
   );
 }
 
-function Bars({ rows, total, color }: { rows: { key: string; label: string; count: number; color?: string; tag?: string }[]; total: number; color: string }) {
+function Bars({ rows, total, color }: { rows: { key: string; label: string; count: number; color?: string; tag?: string; help?: string }[]; total: number; color: string }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
   return (
     <ol className="ins-bars">
       {rows.map((r) => (
         <li key={r.key}>
-          <span className="ins-bar-label">{r.label}{r.tag ? <em>{r.tag}</em> : null}</span>
+          <span className="ins-bar-label">{r.label}{r.tag ? <em>{r.tag}</em> : null}{r.help ? <small>{r.help}</small> : null}</span>
           <span className="ins-bar-track"><i style={{ width: `${(r.count / max) * 100}%`, background: r.color ?? color }} /></span>
           <span className="ins-bar-n"><strong>{n(r.count)}</strong> <span className="sub">{pct(r.count, total)}</span></span>
         </li>
@@ -141,7 +170,7 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
           })}
         </div>
         <h3 className="ins-sub">The most common needs</h3>
-        <Bars total={d.total} color="#2f5fa7" rows={d.needs.map((x) => ({ key: x.id, label: x.label, count: x.count, color: NEED_GROUP[x.group]?.color }))} />
+        <Bars total={d.total} color="#2f5fa7" rows={d.needs.map((x) => ({ key: x.id, label: x.label, count: x.count, color: NEED_GROUP[x.group]?.color, help: NEED_HELP[x.id] }))} />
       </section>
 
       <div className="ins-two">
