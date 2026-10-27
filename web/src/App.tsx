@@ -402,6 +402,18 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
     else setSelected((s) => { const n = new Map(s); for (const r of rows) n.delete(r.case.id); return n; });
   };
 
+  // The Insights link opens the home page and scrolls to its insights, which load a moment after the page.
+  const goToInsights = () => {
+    navigate("/#insights");
+    let tries = 0;
+    const look = () => {
+      const el = document.getElementById("insights");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      else if (tries++ < 40) window.setTimeout(look, 100);
+    };
+    window.setTimeout(look, 50);
+  };
+
   return (
     <div className="app">
       <a className="skip" href="#queue">Skip to main content</a>
@@ -420,6 +432,10 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav" aria-label="Main">
+          <a href="/#insights" onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); goToInsights(); }}>Insights</a>
+          {([[CONTACT_LIST_PATH, "Contact list", "contactlist"], [CLIMATE_PATH, "Climate outlook", "climate"]] as const).map(([href, label, page]) => (
+            <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
+          ))}
           <NavMenu label="WIP" id="wip-menu" items={WIP_ITEMS} page={props.page} navigate={navigate} />
           <NavMenu label="BTS" id="bts-menu" items={BTS_ITEMS} page={props.page} navigate={navigate} />
         </nav>
@@ -649,7 +665,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   );
 }
 
-const WIP_ITEMS = [[NEW_OUTLOOK_PATH, "New outlook", "outlook"], [CLIMATE_PATH, "Climate outlook", "climate"], [AREA_MAP_PATH, "Area map", "areamap"], [INSIGHTS_PATH, "Customer insights", "insights"], [CONTACT_LIST_PATH, "Contact list", "contactlist"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
+const WIP_ITEMS = [[NEW_OUTLOOK_PATH, "New outlook", "outlook"], [AREA_MAP_PATH, "Area map", "areamap"], [INSIGHTS_PATH, "Customer insights", "insights"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
 // In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
 const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Classic outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
 

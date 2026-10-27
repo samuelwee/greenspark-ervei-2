@@ -126,7 +126,7 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
   const needSupport = supportShown.reduce((a, g) => a + g.count, 0);
 
   return (
-    <section className="insights" aria-labelledby={showHeading ? "insights-title" : undefined}>
+    <section className="insights" id={showHeading ? "insights" : undefined} aria-labelledby={showHeading ? "insights-title" : undefined}>
       {showHeading ? (
         <div className="insights-head">
           <p className="eyebrow">Customer insights · counts only</p>
