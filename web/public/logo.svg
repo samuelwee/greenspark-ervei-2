@@ -12,11 +12,10 @@
   </defs>
   <g clip-path="url(#tile)">
     <rect width="64" height="64" fill="url(#sun)"/>
-    <!-- the umbrella's shade, thrown down and to the right at an angle -->
-    <path d="M13 31 L51 31 L96 90 L58 90 Z" fill="url(#shade)"/>
+    <!-- the shade: the dome swept along the light, which falls from the top left -->
+    <path d="M10 31 A22 22 0 0 1 48.600 16.600 L103.600 79.600 L65 94 Z" fill="url(#shade)"/>
   </g>
   <!-- umbrella -->
-  <path d="M10 31 A22 22 0 0 1 54 31 Q49.500 27 45 31 Q38.500 27 32 31 Q25.500 27 19 31 Q14.500 27 10 31 Z" fill="#fff"/>
+  <path d="M10 31 A22 22 0 0 1 54 31 Z" fill="#fff"/>
   <path d="M32 31 V50 A4.500 4.500 0 0 1 23 50" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="32" cy="8.500" r="2" fill="#fff"/>
 </svg>
