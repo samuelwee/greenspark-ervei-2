@@ -416,7 +416,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
             navigate("/");
           }}
         >
-          <span className="logo" aria-hidden="true">🌱</span>
+          <img className="logo" src="/logo.svg" alt="" aria-hidden="true" />
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav" aria-label="Main">
