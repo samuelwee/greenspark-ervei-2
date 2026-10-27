@@ -61,6 +61,17 @@ export function AdminPage({ client }: { client: ApiClient }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [demo]);
+  // Clicking on empty space, anywhere but a box, a control, the details or a dialog, clears the selection.
+  useEffect(() => {
+    if (!selected) return;
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Element | null;
+      if (!t || !t.isConnected || t.closest("[data-node], .fdetail, .flow-float, button, a, input, select, textarea, label, dialog, .results")) return;
+      setSelected(null);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, [selected]);
   // If the selected item is deleted (by you or somebody else), clear the selection.
   useEffect(() => { if (index && selected && !entityOf(index, selected)) setSelected(null); }, [index, selected]);
 

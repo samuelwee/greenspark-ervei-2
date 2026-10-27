@@ -159,7 +159,7 @@ export function CaseFlowModal({ client, data, c, person, weather, onClose }: Pro
         </div>
       </header>
       {error ? <p className="notice notice-error" role="alert">{error}</p> : !doc || !index || !path ? <p className="muted cf-loading">Loading the flowchart…</p> : (
-        <div className="cf-body">
+        <div className="cf-body" onClick={(e) => { if (selected && !(e.target as Element).closest("[data-node], .cf-panel, button, a")) setSelected(null); }}>
           <div className="board-scroll">
             <FlowBoard
               doc={doc} index={index} selected={selected} trace={highlight} utility="electricity" showAllLinks strongOnly={false}
