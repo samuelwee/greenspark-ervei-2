@@ -931,3 +931,4 @@ select:not([multiple]):disabled { opacity: .6; }
 /* The three page links sit beside the logo; the WIP and BTS menus stay on the right. */
 .topbar .mainnav.mainnav-left { margin-left: 8px; }
 @media (max-width: 899px) { .topbar .mainnav.mainnav-left { margin-left: 0; flex-wrap: wrap; } }
+.topbar .mainnav.mainnav-left a { padding: 10px 16px; font-size: 16px; }
