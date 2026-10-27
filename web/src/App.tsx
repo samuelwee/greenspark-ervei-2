@@ -465,14 +465,14 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
         <main id="queue" className="detail-main" tabIndex={-1}>
           <a
             className="back-link"
-            href={QUEUE_PATH}
+            href={CONTACT_LIST_PATH}
             onClick={(e) => {
               if (isModifiedClick(e)) return;
               e.preventDefault();
-              navigate(QUEUE_PATH);
+              navigate(CONTACT_LIST_PATH);
             }}
           >
-            ← Back to case queue
+            ← Back to customers in need
           </a>
           <NoticeBar notice={notice} busy={busy} onUndo={undo} onDismiss={() => say(null)} />
           {openItem ? (
