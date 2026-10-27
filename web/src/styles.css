@@ -904,17 +904,17 @@ select:not([multiple]):disabled { opacity: .6; }
 .ins-donut-cap strong { font-size: 14px; color: var(--fg); }
 
 /* The contact list's filters as picture tiles. */
-.graphic-filters { display: grid; gap: 14px; padding: 4px 22px 16px; }
+.graphic-filters { display: grid; gap: 8px; padding: 4px 22px 16px; }
 .graphic-filters > .chip, .graphic-filters > .link-btn { justify-self: start; }
-.gf-row { display: grid; gap: 6px; }
-.gf-title { font-size: 13px; font-weight: 600; color: var(--muted); }
-.gf-tiles { display: flex; flex-wrap: wrap; gap: 8px; }
-.gf-tile { display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border: 2px solid var(--border); border-radius: 14px; background: #fff; font: inherit; color: var(--fg); cursor: pointer; text-align: left; transition: border-color .12s, background .12s; }
+.gf-row { display: grid; gap: 4px; }
+.gf-title { font-size: 12px; font-weight: 600; color: var(--muted); }
+.gf-tiles { display: flex; flex-wrap: wrap; gap: 6px; }
+.gf-tile { display: flex; align-items: center; gap: 7px; padding: 4px 10px 4px 4px; border: 1.5px solid var(--border); border-radius: 10px; background: #fff; font: inherit; color: var(--fg); cursor: pointer; text-align: left; transition: border-color .12s, background .12s; }
 .gf-tile:hover { border-color: var(--c); }
-.gf-ico { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 17px; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 14%, #fff); transition: background .12s, color .12s; }
-.gf-text { display: grid; line-height: 1.2; }
-.gf-text strong { font-size: 14px; }
-.gf-text span { font-size: 12px; color: var(--muted); }
+.gf-ico { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 12px; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 14%, #fff); transition: background .12s, color .12s; }
+.gf-text { display: grid; line-height: 1.15; }
+.gf-text strong { font-size: 12.5px; }
+.gf-text span { font-size: 11px; color: var(--muted); }
 .gf-tile[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); }
 .gf-tile[aria-pressed="true"] .gf-ico { background: var(--c); color: #fff; }
 .gf-tile:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
