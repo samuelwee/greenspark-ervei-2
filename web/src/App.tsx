@@ -419,11 +419,13 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <img className="logo" src="/logo.svg" alt="" aria-hidden="true" />
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
-        <nav className="mainnav" aria-label="Main">
+        <nav className="mainnav mainnav-left" aria-label="Main">
           <a href="/" aria-current={props.page === "classic" ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate("/"); }}>Insights</a>
           {([[CONTACT_LIST_PATH, "Customers in need", "contactlist"], [CLIMATE_PATH, "Climate outlook", "climate"]] as const).map(([href, label, page]) => (
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
+        </nav>
+        <nav className="mainnav" aria-label="More">
           <NavMenu label="WIP" id="wip-menu" items={WIP_ITEMS} page={props.page} navigate={navigate} />
           <NavMenu label="BTS" id="bts-menu" items={BTS_ITEMS} page={props.page} navigate={navigate} />
         </nav>

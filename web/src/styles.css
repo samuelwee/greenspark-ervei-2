@@ -927,3 +927,7 @@ select:not([multiple]):disabled { opacity: .6; }
 /* Any link without its own styling (inline text links) uses the brand colour, never the browser blue or visited purple. */
 :where(a:not([class])), :where(a:not([class])):visited { color: var(--brand-hover); }
 :where(a:not([class])):hover { text-decoration-thickness: 2px; }
+
+/* The three page links sit beside the logo; the WIP and BTS menus stay on the right. */
+.topbar .mainnav.mainnav-left { margin-left: 8px; }
+@media (max-width: 899px) { .topbar .mainnav.mainnav-left { margin-left: 0; flex-wrap: wrap; } }
