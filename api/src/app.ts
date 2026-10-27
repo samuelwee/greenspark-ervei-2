@@ -609,7 +609,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
   // questions every ten minutes, since every answer is a paid call.
   const asked = new Map<string, number[]>();
   // Anyone can switch the help chat on or off in the demo settings, for everyone, until the server restarts.
-  let assistantOn = true;
+  let assistantOn = false;
   app.get("/api/assistant/status", (_req, res) => { res.json({ on: assistantOn, available: !!ai?.apiKey }); });
   app.post("/api/assistant/status", (req, res) => {
     assistantOn = parse(z.object({ on: z.boolean() }), req.body).on;

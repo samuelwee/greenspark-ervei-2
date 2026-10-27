@@ -11,7 +11,7 @@ const MAX = 600;
 export const ASSISTANT_EVENT = "assistant-change";
 
 export function AssistantChat({ client }: { client: Pick<ApiClient, "ask" | "assistantStatus"> }) {
-  const [on, setOn] = useState(true);
+  const [on, setOn] = useState(false);
   useEffect(() => {
     client.assistantStatus?.().then((s) => setOn(s.on), () => undefined);
     const onChange = (e: Event) => setOn((e as CustomEvent<boolean>).detail);
