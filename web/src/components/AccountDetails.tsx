@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { detectAccountSignals, planCost, planForTariff, SYNERGY_PLANS, type Bill, type CustomerAccount, type PaymentKind, type PaymentMethod } from "../domain/types";
+import { detectAccountSignals, planCost, planForTariff, profileForCustomer, SYNERGY_PLANS, type Bill, type CustomerAccount, type PaymentKind, type PaymentMethod } from "../domain/types";
 import { readableDates, shortDate } from "../domain/format";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -253,15 +253,16 @@ export function SupplyAndCollections({ account: a }: { account: CustomerAccount 
 /**
  * The last complete month of usage (what the chart calls "this year") worked out as a ~30-day cost on
  * each Synergy plan, with the current plan first. Time-of-use plans are estimates: usage is recorded by
- * month, not hour by hour, so each day's kWh is assumed to spread evenly across the plan's peak, off-peak
- * and super off-peak hours.
+ * month, not hour by hour, so each day's kWh is spread across the plan's peak, off-peak and super
+ * off-peak hours following the customer's (unshown) usage profile.
  */
 export function PlanCosts({ account }: { account: CustomerAccount }) {
   // The chart drops the current, part-way month, so the last complete month is the last entry here.
   const last = account.usage.slice(0, -1).at(-1);
   if (!last || last.kWh === 0) return null;
   const month = new Date(`${last.month}-01T00:00:00Z`).toLocaleDateString("en-AU", { month: "short", year: "numeric", timeZone: "UTC" });
-  const rows = SYNERGY_PLANS.map((p) => ({ plan: p, cost: planCost(p, last.kWh, 30) }));
+  const profile = profileForCustomer(account.sourceCustomerId);
+  const rows = SYNERGY_PLANS.map((p) => ({ plan: p, cost: planCost(p, last.kWh, 30, profile) }));
   const current = rows.find((r) => planForTariff(account.plan.tariff)?.id === r.plan.id);
   return (
     <div className="plan-costs">
@@ -278,7 +279,8 @@ export function PlanCosts({ account }: { account: CustomerAccount }) {
         ))}
       </ul>
       <p className="hint">Synergy standard prices (1 July 2026): usage at each plan's rates plus the daily supply charge.
-      Time-of-use plans are estimates assuming the day's kWh is spread evenly through the day.
+      Time-of-use plans are estimates: usage is recorded by month, so the day's kWh is assumed to follow a
+      typical household pattern of when it is used.
       Credits and concessions are not included.</p>
     </div>
   );
