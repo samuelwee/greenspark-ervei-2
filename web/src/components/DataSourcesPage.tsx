@@ -12,7 +12,7 @@ const SOURCES: Source[] = [
     extracted: "Preferred channel, SMS and email opt-in, do not call, consent to proactive support contact, online account, authorised representative, interpreter required." },
   { file: "postcode_context.csv", rows: "58", contains: "Region, retailer and climate details for each postcode.",
     extracted: "Region name, climate zone, north of the 26th parallel (the remote area signal).",
-    leftOut: "The disadvantage quintile (marked PLACEHOLDER) and the census, SEIFA, heat and tree canopy columns (empty)." },
+    leftOut: "The disadvantage quintile (marked PLACEHOLDER) and the census, SEIFA, heat and tree canopy columns (empty). Area disadvantage comes from the ABS instead (see below)." },
   { file: "bills.csv", rows: "56,266", contains: "Every bill: billing period, kWh, charges, credits, amount due, due dates, payment.",
     extracted: "All bills: period, issue and due dates, extensions, kWh (plus the same period last year from daily reads), usage and supply charges, concession, government and feed-in credits, amount due, date paid, paid on time, final and opening-balance bills." },
   { file: "payments.csv", rows: "47,888", contains: "Every payment, with method, kind and result.",
@@ -125,6 +125,7 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
               <tr><th scope="row">Suggested plan</th><td>Case page, What to do first; top of Support areas and why</td><td>Priority, flagged circumstances and their signals, solutions, contact settings</td></tr>
               <tr><th scope="row">What the signals say</th><td>Case page, Account signals section</td><td>The account and weather signals and their evidence</td></tr>
               <tr><th scope="row">Order of Solutions to offer, and each reason</th><td>Case page, What to do first (the top three) and the Solutions to offer section</td><td>The same call as the Suggested plan</td></tr>
+              <tr><th scope="row">Help chat answers</th><td>The chat button at the bottom right, when it is switched on in the demo settings (off by default)</td><td>The question, and a written description of how ERVEI works. It sees no customer data.</td></tr>
               <tr><th scope="row">Date to act by and contact method</th><td>Solutions to offer and its Timeline</td><td>The AI picks working days and a method; the server turns them into dates and checks the method against the contact settings</td></tr>
             </tbody>
           </table>
@@ -146,6 +147,7 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
               <tr><th scope="row">Signals, circumstances and solutions</th><td>Worked out by the app's rules and the Flowchart file from the data.</td></tr>
               <tr><th scope="row">Priority (shown as Contact by: Today, This week, Soon, Monitor)</th><td>Worked out by the Priority model's points (see Priority model).</td></tr>
               <tr><th scope="row">Chance of hardship</th><td>A statistical model trained on the monthly panel (see Risk model). Not generative AI.</td></tr>
+              <tr><th scope="row">Customer insights</th><td>Counts only, worked out by the app from every customer's signals, circumstances and chance of hardship (the Insights page and the Customers in need filters).</td></tr>
               <tr><th scope="row">Classic outlook, act now and watch, and the funnel</th><td>Worked out by the app from the forecast and each customer's signals (see Classic outlook).</td></tr>
               <tr><th scope="row">Sample heatwave</th><td>Built into the app, used when the weather source is set to Sample heatwave: a hand-written week for each forecast town, with a three-day heatwave over the Lower West.</td></tr>
               <tr><th scope="row">Map locations and groups</th><td>Approximate postcode centres; the dataset has no household coordinates. Each circle counts one primary support group in a postcode. Hue identifies the group; shade shows its highest weather-response urgency. Translucent fills and small symbol offsets reveal overlapping groups. No customer is counted in two primary groups.</td></tr>
@@ -203,6 +205,23 @@ export function DataSourcesPage({ client }: { client: ApiClient }) {
             <tbody>
               <tr><th scope="row">SILO (Queensland Government)</th><td>Daily maximum temperature at each postcode's location, 1995 to 2024, from its 5 km grid built from Bureau of Meteorology observations: days a year at 35°C and 40°C or more, and the average summer maximum.</td><td>CC BY 4.0. Contains SILO data from the Queensland Government, based on Bureau of Meteorology observations.</td></tr>
               <tr><th scope="row">Climate Change in Australia, CMIP6 application-ready data</th><td>Daily maximum temperature from three climate models (ACCESS-CM2, EC-Earth3, NorESM2-MM) for 2035–2064 under SSP2-4.5, a middle emissions path, scaled to AGCD observations. The change in hot days at each forecast town from 1985–2014 (the median of the three) is added to each postcode's SILO figure. Every third year is sampled.</td><td>CC BY 4.0. CSIRO, the Bureau of Meteorology and the Australian Climate Service. The projections are a guide only and not for financial decisions.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="case-card" aria-labelledby="ds-abs">
+        <h2 id="ds-abs">Australian Bureau of Statistics</h2>
+        <p className="hint">
+          Two public ABS products, both CC BY 4.0, (c) Commonwealth of Australia. Built into the app as small tables
+          (<code>shared/src/area.ts</code> and <code>scripts/build-postcode-boundaries.mts</code>), so nothing is fetched while the app runs.
+        </p>
+        <div className="table-scroll">
+          <table className="mini-table ds-table">
+            <thead><tr><th scope="col">Source</th><th scope="col">What is used</th><th scope="col">Where it appears</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">SEIFA 2021, Index of Relative Socio-economic Disadvantage</th><td>The score and the decile in Australia and in WA for each postcode customers live in (Postal Area, released 27 Apr 2023). A lower score means more disadvantage.</td><td>The Lives in a disadvantaged area signal, a supporting one, and the optional layer on the Climate outlook map.</td></tr>
+              <tr><th scope="row">ASGS Edition 3, Postal Areas (POA) 2021</th><td>The outline of each postcode in the SEIFA table, simplified to about 500 m. Postal areas approximate postcodes.</td><td>The shaded postcode areas on the Climate outlook map.</td></tr>
             </tbody>
           </table>
         </div>
