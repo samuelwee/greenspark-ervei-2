@@ -9,9 +9,14 @@ let h: Harness | null = null;
 let directory: string | null = null;
 afterEach(async () => { await h?.stop(); h = null; if (directory) rmSync(directory, { recursive: true, force: true }); directory = null; });
 function selection(): CreateGroupTask {
-  const person = h!.store.dataset().people.find((p) => h!.store.getCaseForPerson(p.id)?.workflow.status !== "resolved")!;
+  // A customer with a recorded risk signal (some fixture people have none).
+  const person = h!.store.dataset().people.find((p) => {
+    if (h!.store.getCaseForPerson(p.id)?.workflow.status === "resolved") return false;
+    const signals = [...sensitivityOf(p), ...(p.signalSummary?.account ?? []), ...(p.signalSummary?.selfReport ?? [])];
+    return primarySupportGroup(signals) !== null;
+  })!;
   const signals = [...sensitivityOf(person), ...(person.signalSummary?.account ?? []), ...(person.signalSummary?.selfReport ?? [])];
-  const groupId = primarySupportGroup(signals);
+  const groupId = primarySupportGroup(signals)!;
   return { kind: "solution", groupIds: [groupId], solutionId: NEED_SOLUTIONS[groupId][0]!, eventDate: "2026-10-12", dueDate: "2026-10-18", scope: "Test area", scopePostcodes: [],
     personIds: [person.id], assigneeUserId: h!.store.catalog.users.find((u) => u.role === "support_worker")!.id };
 }
@@ -67,11 +72,11 @@ describe("group tasks", () => {
     expect(preview.unavailable).toBe(1); expect(preview.eligible).toBe(0);
     const large = await h.call("staff-manager", "POST", "/api/group-tasks/preview", { ...input, assigneeUserId: undefined, dueDate: undefined, personIds: Array.from({ length: 10000 }, (_, i) => `missing-customer-${i}`) });
     expect(large.status).toBe(200); expect(large.body.unavailable).toBe(10000);
-    expect((await h.call("staff-manager", "POST", "/api/group-tasks", { ...input, groupIds: [input.groupIds[0]! === "health" ? "monitor" : "health"] })).status).toBe(422);
+    expect((await h.call("staff-manager", "POST", "/api/group-tasks", { ...input, groupIds: ["no-such-group"] })).status).toBe(422);
   });
   it("a task can span several selected groups when each customer fits its own group", async () => {
     h = await start(); const input = selection();
-    const other = input.groupIds[0]! === "health" ? "monitor" : "health";
+    const other = input.groupIds[0]! === "bills" ? "health" : "bills";
     const task = await h.call("staff-manager", "POST", "/api/group-tasks", { ...input, groupIds: [other, input.groupIds[0]!] });
     expect(task.status).toBe(201);
     expect(task.body.task.groupIds).toEqual([other, input.groupIds[0]!]);

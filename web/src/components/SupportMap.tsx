@@ -78,7 +78,7 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
         : `${area.suburb}, postcode ${area.postcode}, ${definition.label}: ${count} customers; ${area.act} act now, ${area.watch} review soon, ${area.monitor} monitor`;
       let position = L.latLng(area.lat, area.lng);
       if (multipleGroups && (area.parts.length > 1 || renderedAreas.some((other) => other.postcode === area.postcode && other.group !== area.group))) {
-        const offsets = { health: [-13, -13], supply: [13, -13], bills: [-18, 6], concessions: [18, 6], coaching: [-10, 22], monitor: [10, 22] } as const;
+        const offsets = { health: [-13, -13], disconnected: [13, -13], supply: [-18, 6], bills: [18, 6], coaching: [-10, 22] } as const;
         const offset = offsets[group], pixel = map.current!.latLngToLayerPoint(position).add(L.point(offset[0], offset[1]));
         position = map.current!.layerPointToLatLng(pixel);
       }

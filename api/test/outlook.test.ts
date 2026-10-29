@@ -62,11 +62,12 @@ describe("weather outlook", () => {
     const snapshot = sampleWeather("2026-10-16");
     h = await start(":memory:", undefined, { weather: { current: () => snapshot, status: () => ({ mode: "demo" }), setMode: async () => undefined } });
     const { body } = await h.call("staff-manager", "GET", "/api/outlook");
-    expect(body.groupCustomers).toHaveLength(body.totals.covered);
-    expect(new Set(body.groupCustomers.map((c: any) => c.personId)).size).toBe(body.totals.covered);
+    // Group planning covers only customers whose signals support a specific action.
+    expect(body.groupCustomers.length + body.totals.unassigned).toBe(body.totals.covered);
+    expect(new Set(body.groupCustomers.map((c: any) => c.personId)).size).toBe(body.groupCustomers.length);
     expect(body.groupCustomers.some((c: any) => c.tier === null)).toBe(true);
     for (const row of body.groupCustomers) {
-      expect(["health", "supply", "bills", "concessions", "coaching", "monitor"]).toContain(row.group);
+      expect(["health", "disconnected", "supply", "bills", "coaching"]).toContain(row.group);
       expect(row.supportNeeds).toContain(row.group);
       expect(row.daily).toHaveLength(7);
       expect(row).not.toHaveProperty("account");

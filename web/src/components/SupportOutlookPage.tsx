@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, emptySupportCounts, supportUrgency, type SupportGroupId } from "@greenspark/shared";
+import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, emptySupportCounts, groupIn, supportUrgency, type SupportGroupId } from "@greenspark/shared";
 import { SupportWeek } from "./SupportWeek";
 import { SupportWeatherKey } from "./SupportWeatherKey";
 import { SupportSolutions } from "./SupportSolutions";
@@ -71,10 +71,13 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const baseRows = useMemo(() => allRows.filter((customer) => !hideCovered || !(covered && (covered.personIds.has(customer.personId) || (customer.postcode != null && covered.postcodes.has(customer.postcode))))), [allRows, hideCovered, covered]);
   const groupCounts = useMemo(() => {
     const counts = emptySupportCounts();
-    for (const customer of baseRows) counts[groupOf(customer)]++;
+    for (const customer of baseRows) {
+      const g = groupOf(customer);
+      if (g) counts[g]++;
+    }
     return counts;
   }, [baseRows]);
-  const rows = useMemo(() => baseRows.filter((customer) => groups.includes(groupOf(customer))), [baseRows, groups]);
+  const rows = useMemo(() => baseRows.filter((customer) => groupIn(groups, groupOf(customer))), [baseRows, groups]);
   const mapped = useMemo(() => supportAreas(rows, true), [rows]);
   const postcodeCount = new Set(mapped.areas.map((area) => area.postcode)).size;
   const selectedPostcode = areaId?.split(":")[0] ?? null;
@@ -176,7 +179,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
       <label className="check"><input type="checkbox" checked={hideCovered} onChange={() => setHideCovered((value) => !value)} /><span>Hide customers with a scheduled action this week</span></label>
       <label>Attention <select aria-label="Attention filter" value={tier} onChange={(event) => setTier(event.target.value as typeof tier)}><option value="">All attention levels</option><option value="act">Act now</option><option value="watch">Review soon</option></select></label>
       {hideCovered ? <span className="sub">{hiddenCount ? `${hiddenCount} hidden by saved tasks` : "No scheduled actions this week"}</span> : null}
-      <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
+      <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{ready.totals.unassigned ? ` · ${ready.totals.unassigned} covered without a support group` : ""}{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
     </div>
     {!rows.length ? <div className="empty"><h2>{groups.length ? "No customers match this selection" : "Select a support group"}</h2><p>Turn on one or more coloured group filters, or clear the attention and exposure filters.</p><button type="button" className="btn" onClick={() => { setGroups(ALL_GROUPS); setRegion("wa"); setTier(""); setOnlyExposed(false); }}>Show all covered customers</button></div> : null}
 
@@ -199,13 +202,13 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
 
 
     <details className="panel outlook-how"><summary>How the grouping and map work</summary><ul>
-      <li><strong>Six primary action groups:</strong> interrupted or low-credit supply first, then health, other supply needs, concession renewal, payment support, energy coaching and monitoring. Other recorded needs remain available as secondary tags and solutions. An active concession alone does not establish a need for payment support.</li>
+      <li><strong>Five primary action groups:</strong> a disconnected supply first, then low credit, medical needs, financial hardship and unusual usage or billing trends (including a lapsed concession that will raise the bill). Other recorded needs remain available as secondary tags and solutions. An active concession alone does not establish a need, and customers with no recorded risk signal are not shown here — review their cases separately.</li>
       <li><strong>Solutions:</strong> selected groups have their own coloured cards. The same solution is shown once when it applies across multiple groups, counting each relevant customer once. Clicking a circle scopes all selected groups to that postcode.</li>
       <li><strong>Circle size</strong> shows customer count. <strong>Colour</strong> identifies the support group. <strong>Darkness</strong> shows the highest weather-response urgency within that postcode group. Translucent fills reveal overlaps; symbols at a shared postcode are slightly offset for readability.</li>
-      <li><strong>Act now</strong> combines hazardous weather with a recorded health or supply need. <strong>Review soon</strong> combines hot weather with needs that add up, or dangerous weather with high predicted risk. Monitor does not mean safe or fully assessed.</li>
+      <li><strong>Act now</strong> combines hazardous weather with a recorded health or supply need. <strong>Review soon</strong> combines hot weather with needs that add up, or dangerous weather with high predicted risk. Monitor is the weather layer’s attention tier, not a group.</li>
       <li><strong>Forecast period</strong> recalculates attention from that day’s hazards. Group membership comes from recorded signals. A warning remains relevant until its expiry.</li>
       <li><strong>Temperature shading</strong> estimates the daily maximum between nearby town forecasts, using a fixed °C scale. Blank areas are cooler than 28°C or outside available coverage. Whole week shows each town’s peak, which can occur on different days; select a date to compare the same day. It is not BoM’s official heatwave-severity product. {ready.demo ? "The current forecast values are fictional demo inputs." : "Town forecast values come from the Bureau."}</li>
-      <li><strong>Approximate locations:</strong> circles use postcode centres. {ready.totals.uncovered} customers lack forecast coverage and are not included here. Check their cases separately.</li>
+      <li><strong>Approximate locations:</strong> circles use postcode centres. {ready.totals.uncovered} customers lack forecast coverage and are not included here; {ready.totals.unassigned} more are covered but carry no recorded risk group. Check their cases separately.</li>
       <li><strong>Staff decide:</strong> these groups suggest work to review. They do not send messages, change accounts or determine eligibility.</li>
     </ul></details>
   </main>;

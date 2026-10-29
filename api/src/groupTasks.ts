@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { NEED_SOLUTIONS, primarySupportGroup, sensitivityOf, supportGroupNeeds, type CreateGroupTask, type GroupTask, type GroupTaskDetail, type GroupTaskPreview, type GroupTaskSelection, type StaffUser, type SupportGroupId } from "@greenspark/shared";
+import { NEED_SOLUTIONS, groupIn, primarySupportGroup, sensitivityOf, supportGroupNeeds, type CreateGroupTask, type GroupTask, type GroupTaskDetail, type GroupTaskPreview, type GroupTaskSelection, type StaffUser, type SupportGroupId } from "@greenspark/shared";
 import type { Store } from "./store";
 import type { Clock } from "./clock";
 import { ApiError } from "./errors";
@@ -58,9 +58,8 @@ export class GroupTasks {
       if (r.status === "resolved") return false;
       const person = JSON.parse(String(r.doc));
       const signals = [...sensitivityOf(person), ...(person.signalSummary?.account ?? []), ...(person.signalSummary?.selfReport ?? [])];
-      if (!input.groupIds.includes(primarySupportGroup(signals))) return false;
+      if (!groupIn(input.groupIds, primarySupportGroup(signals))) return false;
       const solutions = supportGroupNeeds(signals).flatMap((need) => NEED_SOLUTIONS[need]);
-      if (signals.some((s) => ["acct_interpreter", "acct_digital_disengaged", "ask_no_internet"].includes(s.id))) solutions.push("contact");
       return solutions.includes(solutionId);
     });
     const duplicate = eligible.filter((r) => duplicates.has(String(r.id))).length;

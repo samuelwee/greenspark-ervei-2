@@ -30,28 +30,29 @@ test("filled area markers conserve customer counts and filters remain separate f
   // Base tiles load independently of our API; allow them to settle for the visual artifact.
   await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".leaflet-tile")].every((tile) => tile.complete && tile.naturalWidth > 0), undefined, { timeout: 15_000 }).catch(() => undefined);
   await page.screenshot({ path: test.info().outputPath("support-map-desktop.png"), fullPage: true, animations: "disabled" });
-  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^B Keep power connected/ }).click();
-  await expect(page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^A Health/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^B Keep power/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^B Disconnected/ }).click();
+  await expect(page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^A Medical/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^B Disconnected/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^C Low Credit/ }).click();
   expect(await markerCount()).toBe(await groupCount());
   await expect(page.locator('.support-marker[data-group="health"]').first()).toBeAttached();
   await expect(page.locator('.support-marker[data-group="supply"]').first()).toBeAttached();
   const hues = await page.locator(".support-filter:not(.support-filter-all)").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).getPropertyValue("--group-strong").trim()));
-  expect(new Set(hues).size).toBe(6);
+  expect(new Set(hues).size).toBe(5);
   await page.screenshot({ path: test.info().outputPath("support-map-overlap.png"), fullPage: true, animations: "disabled" });
-  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^C Payment support/ }).click();
-  await expect(page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^C Payment support/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^D Financial Hardship/ }).click();
+  await expect(page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^D Financial Hardship/ })).toHaveAttribute("aria-pressed", "true");
   expect(await markerCount()).toBe(await groupCount());
   expect(await heatStats(page)).toEqual(before);
   await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^All groups/ }).click();
   expect(await markerCount()).toBe(await groupCount());
 });
 
-test("six solution cards stack, share exact solutions once and retain postcode scope when toggling groups", async ({ page }) => {
+test("five solution cards stack, share exact solutions once and retain postcode scope when toggling groups", async ({ page }) => {
   await openMap(page);
   await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^All groups/ }).click();
-  await expect(page.locator(".support-solution-card")).toHaveCount(6);
-  await expect(page.locator('.support-solution-card[data-group="monitor"] button')).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator(".support-solution-card")).toHaveCount(5);
+  await expect(page.locator('.support-solution-card[data-group="coaching"] button')).toHaveAttribute("aria-expanded", "true");
   await expect(page.locator('.support-solution-card[data-group="health"] button')).toHaveAttribute("aria-expanded", "false");
   await expect(page.locator('.shared-solution-entry[data-solution-id="hardship"]')).toHaveCount(1);
   await page.locator(".shared-solutions summary").click();
@@ -60,10 +61,10 @@ test("six solution cards stack, share exact solutions once and retain postcode s
   await page.locator(".support-area-picker summary").click();
   await page.locator(".support-area-picker button").filter({ hasText: "Mandurah" }).click();
   await expect(page.locator(".support-detail-title")).toContainText("postcode 6210");
-  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^E Energy coaching/ }).click();
-  await expect(page.locator(".support-solution-card")).toHaveCount(5);
+  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^E Unusual Trend/ }).click();
+  await expect(page.locator(".support-solution-card")).toHaveCount(4);
   await expect(page.locator(".support-detail-title")).toContainText("postcode 6210");
-  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^E Energy coaching/ }).click();
+  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^E Unusual Trend/ }).click();
   await expect(page.locator('.support-solution-card[data-group="coaching"] button')).toHaveAttribute("aria-expanded", "true");
   const counts = await page.locator(".solution-card-heading small").allTextContents();
   const sum = counts.reduce((n, value) => n + Number(value.split(" customers")[0]!.replaceAll(",", "")), 0);
@@ -74,7 +75,7 @@ test("six solution cards stack, share exact solutions once and retain postcode s
   await page.locator('.support-solution-card[data-group="supply"] button').click();
   await page.getByRole("button", { name: "Reset map", exact: true }).click();
   await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".leaflet-tile")].every((tile) => tile.complete && tile.naturalWidth > 0), undefined, { timeout: 15_000 }).catch(() => undefined);
-  await page.screenshot({ path: test.info().outputPath("six-group-solutions.png"), fullPage: true, animations: "disabled" });
+  await page.screenshot({ path: test.info().outputPath("five-group-solutions.png"), fullPage: true, animations: "disabled" });
 });
 
 test("area review drills down to its customers and preserves real case links", async ({ page }) => {
@@ -105,7 +106,7 @@ test("a later cool day visibly cools the temperature layer and attention without
 test("mobile controls fit the viewport and action filters work from the keyboard", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openMap(page);
-  const filter = page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^B Keep power connected/ });
+  const filter = page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^B Disconnected/ });
   await filter.focus();
   await page.keyboard.press("Enter");
   await expect(filter).toHaveAttribute("aria-pressed", "true");

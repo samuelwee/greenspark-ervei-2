@@ -17,7 +17,8 @@ export function customerOnDate(customer: OutlookCustomer, date: string): Outlook
   // A missing daily forecast is unavailable, rather than carrying a week-wide urgent tier into that day.
   return { ...customer, tier: day?.tier ?? null, exposure: day?.exposure ?? 0, score: day?.score ?? 0 };
 }
-export const groupOf = (customer: OutlookCustomer): SupportGroupId => customer.group ?? primarySupportGroup(customer.sensitivity);
+/** The customer's primary group; null when no recorded signal supports a specific action. */
+export const groupOf = (customer: OutlookCustomer): SupportGroupId | null => customer.group ?? primarySupportGroup(customer.sensitivity);
 export function inMapRegion(customer: Pick<OutlookCustomer, "location" | "postcode">, region: MapRegion): boolean {
   if (region === "wa") return true;
   const at = customer.location ?? (customer.postcode ? POSTCODE_LOCATION[customer.postcode] : undefined);
@@ -37,15 +38,15 @@ export function supportAreas(customers: OutlookCustomer[], separateGroups = fals
     const postcode = customer.postcode;
     const at = customer.location ?? (postcode ? POSTCODE_LOCATION[postcode] : undefined);
     if (!postcode || !at) { unplaced++; continue; }
-    const group = groupOf(customer), key = separateGroups ? `${postcode}:${group}` : postcode;
+    const group = groupOf(customer), key = separateGroups && group ? `${postcode}:${group}` : postcode;
     let area = byPostcode.get(key);
     if (!area) {
-      area = { id: key, postcode, suburb: customer.suburb, lat: at[0], lng: at[1], ...(separateGroups ? { group } : {}), customers: [], count: 0, urgency: "monitor", act: 0, watch: 0, monitor: 0, groups: emptySupportCounts() };
+      area = { id: key, postcode, suburb: customer.suburb, lat: at[0], lng: at[1], ...(separateGroups && group ? { group } : {}), customers: [], count: 0, urgency: "monitor", act: 0, watch: 0, monitor: 0, groups: emptySupportCounts() };
       byPostcode.set(key, area);
     }
     area.customers.push(customer);
     area.count++;
-    area.groups[groupOf(customer)]++;
+    if (group) area.groups[group]++;
     if (customer.tier === "act") area.act++;
     else if (customer.tier === "watch") area.watch++;
     else area.monitor++;

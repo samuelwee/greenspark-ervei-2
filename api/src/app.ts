@@ -39,7 +39,7 @@ const assignee = { assigneeUserId: z.string().min(1).optional() };
 const taskDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => { const d = new Date(`${s}T00:00:00Z`); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s; }, "Choose a valid date");
 const taskPeople = z.array(z.string().min(1).max(100)).max(50000).refine((ids) => new Set(ids).size === ids.length, "Duplicate customers");
 const taskSelection = z.object({ kind: z.enum(["solution", "moratorium"]),
-  groupIds: z.array(z.enum(["health", "supply", "bills", "concessions", "coaching", "monitor"])).max(6),
+  groupIds: z.array(z.enum(["health", "disconnected", "supply", "bills", "coaching"])).max(5),
   solutionId: z.enum(Object.keys(SOLUTIONS) as [SolutionId, ...SolutionId[]]).nullable(),
   scopePostcodes: z.array(z.string().min(1).max(10)).max(5000),
   eventDate: taskDate, scope: z.string().trim().min(1).max(150), personIds: taskPeople }).strict();
@@ -378,6 +378,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
         kinds: [...new Set(o.hazards.map((h) => h.kind))], dates: [...new Set(o.hazards.map((h) => h.date))], firstDate: o.hazards.find((h) => h.kind !== "warning")?.date ?? null, firstKind: o.hazards.find((h) => h.kind !== "warning")?.kind ?? null, worst: worst?.text ?? null,
         sensitivity: o.sensitivity.map(({ id, group, label }) => ({ id, group, label })), accountNumber: p.accountNumber ?? null, displayName: p.displayName, suburb: p.suburb, postcode: p.address?.postcode ?? null, risk,
         priority: c?.modelAssessment.priority ? { label: c.modelAssessment.priority.label, score: c.modelAssessment.priority.score } : null, status: c?.workflow.status ?? null,
+        // No group when no recorded signal supports a specific action; those customers stay in the queue.
         group: primarySupportGroup(supportSignals), supportNeeds: supportGroupNeeds(supportSignals),
         location: p.address?.postcode ? POSTCODE_LOCATION[p.address.postcode] ?? null : null,
         assignedTo: c?.workflow.assignedToUserId ?? null,
@@ -407,14 +408,16 @@ export function createApp(store: Store, options: AppOptions = {}) {
       return { date, peak, exposed: on.length, act: on.filter((r) => r.tier === "act").length, watch: on.filter((r) => r.tier === "watch").length };
     });
     const listed = rows.filter((r) => r.tier).sort((a, b) => (a.tier === b.tier ? 0 : a.tier === "act" ? -1 : 1) || b.score - a.score);
+    // Group planning covers customers whose recorded signals support a specific action; customers
+    // without a risk signal are reviewed in the case queue, not on this weather-triggered view.
+    const grouped = rows.filter((r) => r.group);
     const body = {
       available: true, weather: status, today, demo: w.demo, issuedAt: w.issuedAt, days, towns,
       climate: options.climate ? { thresholds: options.climate.thresholds, baselineYears: options.climate.baseline.years, scenario: options.climate.projection.scenario, period: options.climate.projection.period } : null,
       warnings: w.warnings.filter((x) => x.districts.length).map((x) => ({ title: x.title, districts: x.districts.map((d) => w.districts[d] ?? d), expires: x.expires })),
-      totals: { covered: rows.length, uncovered, exposed: rows.filter((r) => r.exposure > 0).length, vulnerable: rows.filter((r) => r.vulnerable).length, act: listed.filter((r) => r.tier === "act").length, watch: listed.filter((r) => r.tier === "watch").length },
+      totals: { covered: rows.length, uncovered, unassigned: rows.length - grouped.length, exposed: rows.filter((r) => r.exposure > 0).length, vulnerable: rows.filter((r) => r.vulnerable).length, act: listed.filter((r) => r.tier === "act").length, watch: listed.filter((r) => r.tier === "watch").length },
       customers: listed.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
-      // Group planning includes covered customers outside the priority list, without changing the funnel contract.
-      groupCustomers: rows.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
+      groupCustomers: grouped.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
     };
     outlookCache = { key, body };
     res.json(body);

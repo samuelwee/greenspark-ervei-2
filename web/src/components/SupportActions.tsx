@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { DIRECTIVES, NEED_SOLUTIONS, SOLUTIONS, SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, type GroupTask, type GroupTaskDetail, type GroupTaskPreview, type GroupTaskSelection, type SolutionId, type SupportGroupId } from "@greenspark/shared";
+import { DIRECTIVES, NEED_SOLUTIONS, SOLUTIONS, SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, groupIn, type GroupTask, type GroupTaskDetail, type GroupTaskPreview, type GroupTaskSelection, type SolutionId, type SupportGroupId } from "@greenspark/shared";
 import type { ApiClient, GroupTaskList, OutlookCustomer } from "../data/api";
 import { groupOf } from "../domain/supportGroups";
 import { solutionsFor } from "../domain/supportSolutions";
@@ -21,7 +21,7 @@ function CreateTask({ client, groupIds, label, customers, eventDate, scope, defa
   const [preview, setPreview] = useState<GroupTaskPreview | null>(null), [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false), [retry, setRetry] = useState(0);
   const isMoratorium = choice === MORATORIUM;
-  const groupCustomers = useMemo(() => customers.filter((c) => groupIds.includes(groupOf(c))), [groupIds, customers]);
+  const groupCustomers = useMemo(() => customers.filter((c) => groupIn(groupIds, groupOf(c))), [groupIds, customers]);
   // A moratorium covers the postcode areas where the selected customers live; the customer
   // selection stays the unit of thought, the area scope is inferred from it.
   const inferredPostcodes = useMemo(() => isMoratorium ? [...new Set(groupCustomers.map((c) => c.postcode).filter((p): p is string => !!p))] : [], [isMoratorium, groupCustomers]);
