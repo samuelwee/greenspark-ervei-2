@@ -296,3 +296,8 @@
 @media (min-width: 851px) {
   .combined-outlook .support-solutions-panel { max-height: none; height: 0; min-height: 100%; }
 }
+
+/* Home page: the scope filters sit inside the support plan panel. */
+.combined-outlook .support-detail .support-scope { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 0; margin: 0; }
+.combined-outlook .support-detail .support-scope label:not(.check) { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.combined-outlook .support-detail .support-scope select { flex: 1; max-width: 190px; }

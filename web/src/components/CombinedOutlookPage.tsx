@@ -185,6 +185,13 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
               setSupportTab(next); document.getElementById(`support-tab-${next}`)?.focus();
             }
           }}>{(["solutions", "actions"] as const).map((tab) => <button key={tab} id={`support-tab-${tab}`} role="tab" type="button" aria-selected={supportTab === tab} tabIndex={supportTab === tab ? 0 : -1} aria-controls={`support-panel-${tab}`} onClick={() => setSupportTab(tab)}>{tab === "solutions" ? "Solutions" : "Actions"}</button>)}</div>
+          <div className="support-scope">
+      <label className="check"><input type="checkbox" checked={onlyExposed} onChange={() => setOnlyExposed((value) => !value)} /><span>Only customers exposed to forecast hazards</span></label>
+      <label className="check"><input type="checkbox" checked={hideCovered} onChange={() => setHideCovered((value) => !value)} /><span>Hide customers with a scheduled action this week</span></label>
+      <label>Attention <select aria-label="Attention filter" value={tier} onChange={(event) => setTier(event.target.value as typeof tier)}><option value="">All attention levels</option><option value="act">Act now</option><option value="watch">Review soon</option></select></label>
+      {hideCovered ? <span className="sub">{hiddenCount ? `${hiddenCount} hidden by saved tasks` : "No scheduled actions this week"}</span> : null}
+      <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{ready.totals.unassigned ? ` · ${ready.totals.unassigned} covered without a support group` : ""}{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
+    </div>
           <p className="support-member-count"><strong>{members.length.toLocaleString("en-AU")}</strong> customers</p>
           <p className="sub"><strong>{scopeLabel}</strong></p>
           <p className="sub">{selectedPostcode ? "All selected groups in this postcode" : "Select a circle to plan local support"}</p>
@@ -201,13 +208,6 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
       </div>
     </section>
 
-    <div className="support-scope">
-      <label className="check"><input type="checkbox" checked={onlyExposed} onChange={() => setOnlyExposed((value) => !value)} /><span>Only customers exposed to forecast hazards</span></label>
-      <label className="check"><input type="checkbox" checked={hideCovered} onChange={() => setHideCovered((value) => !value)} /><span>Hide customers with a scheduled action this week</span></label>
-      <label>Attention <select aria-label="Attention filter" value={tier} onChange={(event) => setTier(event.target.value as typeof tier)}><option value="">All attention levels</option><option value="act">Act now</option><option value="watch">Review soon</option></select></label>
-      {hideCovered ? <span className="sub">{hiddenCount ? `${hiddenCount} hidden by saved tasks` : "No scheduled actions this week"}</span> : null}
-      <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{ready.totals.unassigned ? ` · ${ready.totals.unassigned} covered without a support group` : ""}{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
-    </div>
     {!rows.length ? <div className="empty"><h2>{groups.length ? "No customers match this selection" : "Select a support group"}</h2><p>Turn on one or more coloured group filters, or clear the attention and exposure filters.</p><button type="button" className="btn" onClick={() => { setGroups(ALL_GROUPS); setRegion("wa"); setTier(""); setOnlyExposed(false); }}>Show all covered customers</button></div> : null}
 
     <details id="group-customers" className="panel support-customer-detail" open={showCustomers} onToggle={(event) => setShowCustomers(event.currentTarget.open)}>
