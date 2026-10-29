@@ -28,7 +28,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
   const [region, setRegion] = useState<MapRegion>("perth"), [date, setDate] = useState("");
   const [areaId, setAreaId] = useState<string | null>(null);
   const [onlyExposed, setOnlyExposed] = useState(false), [showHeat, setShowHeat] = useState(true), [showAlerts, setShowAlerts] = useState(true);
-  const [showCustomers, setShowCustomers] = useState(false), [shown, setShown] = useState(PAGE);
+  const [showCustomers, setShowCustomers] = useState(true), [shown, setShown] = useState(PAGE);
   const [emergency, setEmergency] = useState<EmergencyFeed | null>(null);
   const [supportTab, setSupportTab] = useState<"solutions" | "actions">("solutions");
   const [hideCovered, setHideCovered] = useState(false);
@@ -59,7 +59,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
   }, [client]);
   useEffect(() => { document.title = "Combined outlook · ERVEI"; }, []);
   useEffect(() => { setAreaId(null); }, [region]);
-  useEffect(() => { setShown(PAGE); setShowCustomers(false); }, [groups, region, date, tier, onlyExposed, hideCovered]);
+  useEffect(() => { setShown(PAGE); setShowCustomers(true); }, [groups, region, date, tier, onlyExposed, hideCovered]);
 
   const ready = data?.available ? data : null;
   const allRows = useMemo(() => (ready?.groupCustomers ?? ready?.customers ?? [])
@@ -224,7 +224,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
       <div className="pager"><span>Showing {Math.min(shown, members.length)} of {members.length}</span>{shown < members.length ? <button type="button" className="btn btn-small" onClick={() => setShown((value) => value + PAGE)}>Show {Math.min(PAGE, members.length - shown)} more</button> : null}</div>
     </details>
 
-    <details className="panel support-forecast-detail"><summary>Weather forecast by town</summary><p className="hint">Daily maximum temperatures. The map estimates the colour between these town forecasts; the labels show the town values.</p><div className="table-wrap"><table className="town-table"><thead><tr><th scope="col">Forecast town</th>{ready.days.map((day) => <th key={day.date} scope="col">{dayName(day.date)} {dayDate(day.date)}</th>)}</tr></thead><tbody>{ready.towns.map((town) => <tr key={town.id}><th scope="row">{town.name}<span className="sub">{town.districtName}</span></th>{ready.days.map((day) => { const value = town.days.find((item) => item.date === day.date); return <td key={day.date} style={tempColor(value?.max ?? null)}>{value?.max === null || value?.max === undefined ? "–" : `${value.max}°C`}</td>; })}</tr>)}</tbody></table></div></details>
+    <details className="panel support-forecast-detail" open><summary>Weather forecast by town</summary><p className="hint">Daily maximum temperatures. The map estimates the colour between these town forecasts; the labels show the town values.</p><div className="table-wrap"><table className="town-table"><thead><tr><th scope="col">Forecast town</th>{ready.days.map((day) => <th key={day.date} scope="col">{dayName(day.date)} {dayDate(day.date)}</th>)}</tr></thead><tbody>{ready.towns.map((town) => <tr key={town.id}><th scope="row">{town.name}<span className="sub">{town.districtName}</span></th>{ready.days.map((day) => { const value = town.days.find((item) => item.date === day.date); return <td key={day.date} style={tempColor(value?.max ?? null)}>{value?.max === null || value?.max === undefined ? "–" : `${value.max}°C`}</td>; })}</tr>)}</tbody></table></div></details>
 
 
 
