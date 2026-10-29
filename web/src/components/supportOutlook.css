@@ -311,3 +311,7 @@
 .combined-outlook .support-weather-key > div:nth-child(2) small { display: none; }
 .combined-outlook .solution-group-badge { display: none; }
 .combined-outlook .pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; } .combined-outlook .pager-buttons { display: flex; align-items: center; gap: 10px; }
+
+/* Home page: the group filters scroll away; the Solutions and Actions tabs alone stay pinned at the top of the panel. */
+.combined-outlook .support-group-filters-panel { position: static; margin-top: 0; padding-top: 0; }
+.combined-outlook .support-solutions-panel .support-panel-tabs { top: -18px; padding-top: 18px; margin-top: -10px; }
