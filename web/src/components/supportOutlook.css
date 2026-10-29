@@ -285,7 +285,7 @@
 /* Home page: the forecast-by-town table, compact, with act now and watch counts. */
 .town-compact summary { padding-block: 10px; }
 .town-compact .hint { margin: 0 0 6px; padding-inline: 16px; font-size: 12px; }
-.town-compact .town-table th, .town-compact .town-table td { padding: 3px 8px; font-size: 12px; line-height: 1.25; white-space: nowrap; text-align: center; }
+.town-compact .town-table th, .town-compact .town-table td { padding: 6px 8px; font-size: 12px; line-height: 1.25; white-space: nowrap; text-align: center; }
 .town-compact .town-table th[scope="row"], .town-compact .town-table thead th:first-child { text-align: left; }
 .town-compact .town-table th .sub { display: inline; margin-left: 4px; font-size: 11px; font-weight: 400; }
 .town-compact .town-n { font-weight: 600; }
