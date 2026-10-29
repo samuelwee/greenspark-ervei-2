@@ -291,3 +291,8 @@
 .town-compact .town-n { font-weight: 600; }
 .town-compact thead .n-act, .town-compact tbody td:nth-child(2) { color: #ae2e24; }
 .town-compact thead .n-watch, .town-compact tbody td:nth-child(3) { color: #8a5a00; }
+
+/* Home page: the support plan fills the height of the map beside it and scrolls inside that space. */
+@media (min-width: 851px) {
+  .combined-outlook .support-solutions-panel { max-height: none; height: 0; min-height: 100%; }
+}
