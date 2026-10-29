@@ -161,7 +161,7 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
             const meta = NEED_GROUP[g.group]!;
             return (
               <div key={g.group} className="ins-tile" style={{ borderTopColor: meta.color }}>
-                <span className="ins-tile-icon" style={{ background: meta.color }} aria-hidden="true">{meta.icon}</span>
+                <span className="ins-tile-icon" style={{ background: meta.color }} aria-hidden="true">{meta.icon === "⚡" ? <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M13.5 2 5 13.5h6L9.5 22 19 10h-6.2z" /></svg> : meta.icon}</span>
                 <strong style={{ color: meta.color }}>{pct(g.count, d.total)}</strong>
                 <h3>{meta.label}</h3>
                 <span className="sub">{n(g.count)} customers</span>
