@@ -309,3 +309,4 @@
 .combined-outlook .support-legend .support-group-key, .combined-outlook .support-legend .support-urgency-key, .combined-outlook .support-legend .weather-key-items { gap: 3px 12px; font-size: 11.5px; }
 .combined-outlook .support-legend .support-size-key, .combined-outlook .support-legend .support-map-key > span, .combined-outlook .support-legend .support-weather-key small { font-size: 11px; line-height: 1.3; }
 .combined-outlook .support-weather-key > div:nth-child(2) small { display: none; }
+.combined-outlook .solution-group-badge { display: none; }

@@ -16,7 +16,7 @@ const REGION_BOUNDS: Record<MapRegion, L.LatLngBoundsExpression> = {
 };
 
 /** Count markers and weather coverage deliberately use different visual encodings. */
-export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date, legend, hideShortcuts }: {
+export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date, legend, hideShortcuts, hideLetters }: {
   areas: SupportArea[]; towns: OutlookTown[]; activeGroups: SupportGroupId[]; alerts: EmergencyAlert[];
   showHeat: boolean; showAlerts: boolean; chosen: string | null; onChoose: (id: string | null) => void;
   region: MapRegion; date: string;
@@ -24,6 +24,8 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
   legend?: ReactNode;
   /** Leaves out the Reset map and Mandurah shortcuts. */
   hideShortcuts?: boolean;
+  /** Names the support groups without their A to E letters. */
+  hideLetters?: boolean;
 }) {
   const el = useRef<HTMLDivElement>(null), wrap = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -173,7 +175,7 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
     <div className="support-legend" aria-label="Map legend">
         <div className="support-map-key support-legend-groups">
           <strong>Support groups</strong>
-          <div className="support-group-key">{SUPPORT_GROUPS.filter((item) => activeGroups.includes(item.id)).map((item) => <span key={item.id}><i style={{ background: SUPPORT_GROUP_COLORS[item.id].strong }} />{item.letter} {item.label}</span>)}</div>
+          <div className="support-group-key">{SUPPORT_GROUPS.filter((item) => activeGroups.includes(item.id)).map((item) => <span key={item.id}><i style={{ background: SUPPORT_GROUP_COLORS[item.id].strong }} />{hideLetters ? "" : `${item.letter} `}{item.label}</span>)}</div>
           <div className="support-urgency-key">{Object.entries(SUPPORT_URGENCY).map(([id, item]) => <span key={id}><i style={{ background: legendColors[id as keyof typeof SUPPORT_URGENCY] }} />{item.label}</span>)}</div>
           <span className="support-size-key"><span className="support-size-dots"><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /><i style={{ background: legendColors.strong }} /></span>Size = count · darker = more attention</span>
           {zoom < 8.5 ? <span>Regional totals · select a circle to zoom in</span> : null}
