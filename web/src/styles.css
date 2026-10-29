@@ -755,7 +755,7 @@ select:not([multiple]):disabled { opacity: .6; }
 .decades-table .t-split { border-left: 2px solid var(--border); }
 .decades-table .t-heat { text-align: center; font-weight: 600; min-width: 52px; }
 .decades-table .t-proj { background-image: repeating-linear-gradient(135deg, transparent 0 6px, #ffffff33 6px 8px); }
-.decades-table .town-name { font-weight: 600; display: block; }
+.decades-table .town-name { font-weight: 600; display: block; padding: 0; font-size: inherit; text-align: left; }
 
 .view-toggle { display: flex; gap: 6px; margin: 0 0 12px; padding: 0 22px; }
 .view-toggle .btn[aria-pressed="true"] { background: var(--brand, #006c50); border-color: var(--brand, #006c50); color: #fff; }
@@ -800,8 +800,7 @@ select:not([multiple]):disabled { opacity: .6; }
 .leaflet-tooltip.decade-map-label { background: none; border: 0; box-shadow: none; padding: 0; font-weight: 600; font-size: 12px; line-height: 1; pointer-events: none; }
 .leaflet-tooltip.decade-map-label::before { display: none; }
 
-.decades-table tbody tr { cursor: pointer; }
-.decades-table tr.is-selected { outline: 3px solid #1f7a50; outline-offset: -3px; }
+.decades-table tbody tr { cursor: default; }
 .case-wx-days li button { display: grid; gap: 2px; justify-items: center; width: 100%; padding: 4px 0; border: 2px solid transparent; border-radius: 8px; background: none; color: inherit; font: inherit; cursor: pointer; }
 .case-wx-days li button:hover { background: rgba(255, 255, 255, .6); }
 .case-wx-days li button[aria-pressed="true"] { border-color: #1b2a24; background: #fff; }
