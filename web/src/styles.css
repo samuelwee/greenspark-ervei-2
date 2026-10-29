@@ -289,6 +289,15 @@ textarea { resize: vertical; }
 .usage-key { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .usage-key .key-bar { width: 10px; height: 10px; border-radius: 2px; background: var(--brand); }
 .usage-key .key-line { width: 14px; border-top: 2px dashed var(--muted); margin-left: 8px; }
+.plan-costs { margin: 8px 0 4px; }
+.plan-costs ul { list-style: none; margin: 0 0 2px; display: grid; gap: 2px; }
+/* Three columns: name, then the dollar amount and the difference vs the current plan,
+   each right-aligned so the values line up in a wide browser. */
+.plan-costs li { display: grid; grid-template-columns: 25em 5em 6em; gap: 10px; align-items: baseline; font-size: 13px; text-align: right; }
+.plan-costs li :first-child { text-align: left; }
+.plan-costs li .sub { font-weight: 400; }
+.plan-costs .save { color: var(--brand-hover); }
+.plan-costs .more { color: var(--muted); }
 .contact-prefs { list-style: none; padding: 0; margin: 4px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
 .contact-prefs li { display: grid; gap: 1px; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--r-control); }
 .contact-prefs li > span { font-size: 12px; color: var(--muted); }

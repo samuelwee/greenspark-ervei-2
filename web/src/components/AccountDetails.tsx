@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { detectAccountSignals, type Bill, type CustomerAccount, type PaymentKind, type PaymentMethod } from "../domain/types";
+import { detectAccountSignals, planCost, planForTariff, SYNERGY_PLANS, type Bill, type CustomerAccount, type PaymentKind, type PaymentMethod } from "../domain/types";
 import { readableDates, shortDate } from "../domain/format";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -250,6 +250,40 @@ export function SupplyAndCollections({ account: a }: { account: CustomerAccount 
   );
 }
 
+/**
+ * The last complete month of usage (what the chart calls "this year") worked out as a ~30-day cost on
+ * each Synergy plan, with the current plan first. Time-of-use plans are estimates: usage is recorded by
+ * month, not hour by hour, so each day's kWh is assumed to spread evenly across the plan's peak, off-peak
+ * and super off-peak hours.
+ */
+export function PlanCosts({ account }: { account: CustomerAccount }) {
+  // The chart drops the current, part-way month, so the last complete month is the last entry here.
+  const last = account.usage.slice(0, -1).at(-1);
+  if (!last || last.kWh === 0) return null;
+  const month = new Date(`${last.month}-01T00:00:00Z`).toLocaleDateString("en-AU", { month: "short", year: "numeric", timeZone: "UTC" });
+  const rows = SYNERGY_PLANS.map((p) => ({ plan: p, cost: planCost(p, last.kWh, 30) }));
+  const current = rows.find((r) => planForTariff(account.plan.tariff)?.id === r.plan.id);
+  return (
+    <div className="plan-costs">
+      <p className="subhead">{month} usage ({last.kWh} kWh, about 30 days) on each plan</p>
+      <ul>
+        {rows.map((r) => (
+          <li key={r.plan.id}>
+            <span>{r.plan.name}{r.plan.id === current?.plan.id ? <span className="sub"> · current</span> : null}{r.plan.note ? <span className="sub"> · {r.plan.note}</span> : null}</span>
+            <strong>{dollars(r.cost)}</strong>
+            {current && r.plan.id !== current.plan.id ? (
+              <span className={r.cost < current.cost ? "save" : "more"}>{r.cost < current.cost ? `save ${dollars(current.cost - r.cost)}` : `${dollars(r.cost - current.cost)} more`}</span>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      <p className="hint">Synergy standard prices (1 July 2026): usage at each plan's rates plus the daily supply charge.
+      Time-of-use plans are estimates assuming the day's kWh is spread evenly through the day.
+      Credits and concessions are not included.</p>
+    </div>
+  );
+}
+
 /** Bills and payments, or prepaid top-ups. */
 export function AccountHistory({ account: a, asOf }: { account: CustomerAccount; asOf: string }) {
   const payments = a.payments.slice(-10).reverse();
@@ -293,6 +327,7 @@ export function AccountHistory({ account: a, asOf }: { account: CustomerAccount;
       )}
       <p className="subhead">Usage by month</p>
       <UsageChart usage={recentUsage} />
+      <PlanCosts account={a} />
       <div className="table-scroll">
         <table className="mini-table">
           <thead><tr><th scope="col">Month</th><th scope="col">kWh (last year)</th>{a.solar ? <th scope="col">Solar export</th> : null}<th scope="col">Outage hours</th></tr></thead>
