@@ -192,8 +192,8 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
           <h2 id="ins-risk">Chance of hardship, next 90 days</h2>
           <p className="hint">The model's band for each customer, against the average for them.</p>
           <ol className="ins-columns" aria-label="Customers by chance of hardship">
-            {d.risk.map((r) => {
-              const max = Math.max(1, ...d.risk.map((x) => x.count));
+            {d.risk.filter((x) => x.id !== "none").map((r) => {
+              const max = Math.max(1, ...d.risk.filter((x) => x.id !== "none").map((x) => x.count));
               return (
                 <li key={r.id}>
                   <span className="ins-col-n">{n(r.count)}</span>
