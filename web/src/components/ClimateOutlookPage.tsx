@@ -23,7 +23,7 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
   const [error, setError] = useState<string | null>(null);
   // A town picked on the map or in the table, and where it was picked, so the map only moves for a table pick.
   const [selected, setSelected] = useState<{ id: string; from: "map" | "table" } | null>(null);
-  // Choosing the selected town again deselects it.
+  // Choosing the selected town again deselects it. The map only zooms when a town name in the table is clicked.
   const pick = (id: string, from: "map" | "table") => setSelected((current) => current?.id === id ? null : { id, from });
   useEffect(() => { document.title = "Climate outlook · ERVEI"; }, []);
   useEffect(() => {
@@ -83,8 +83,8 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
                 </thead>
                 <tbody>
                   {towns.map(({ t, increase }) => (
-                    <tr key={t.id} id={`decade-row-${t.id}`} className={selected?.id === t.id ? "is-selected" : undefined} onClick={() => pick(t.id, "table")}>
-                      <th scope="row"><span className="town-name">{t.name}</span>{t.district ? <span className="sub">{t.district}</span> : null}</th>
+                    <tr key={t.id} id={`decade-row-${t.id}`} className={selected?.id === t.id ? "is-selected" : undefined} onClick={() => pick(t.id, "map")}>
+                      <th scope="row"><button type="button" className="link-btn town-name" title="Zoom the map to this town" onClick={(e) => { e.stopPropagation(); setSelected({ id: t.id, from: "table" }); }}>{t.name}</button>{t.district ? <span className="sub">{t.district}</span> : null}</th>
                       <td className="t-num">{t.customers}</td>
                       <td className="t-num"><span className="future-add">{increase === null ? "–" : `${increase >= 0 ? "+" : "−"}${Math.abs(Math.round(increase))}`}</span></td>
                       {d.observedDecades.map((dec) => { const v = t.observed[dec]?.[threshold] ?? null; return <td key={dec} className="t-num t-heat" style={daysColor(v, max)}>{v === null ? "–" : Math.round(v)}</td>; })}
