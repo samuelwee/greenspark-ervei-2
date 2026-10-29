@@ -87,7 +87,7 @@ export function CasePageGuide() {
       <section className="case-card bts-facts" aria-labelledby="cp-before">
         <h2 id="cp-before">Before you get in touch</h2>
         <ul className="plain history">
-          <li><strong>Pick the case.</strong> The Classic outlook (the home page) lists customers this week's forecast could hurt, act now first. The case queue puts the most urgent first: search by name, account number or suburb, or filter by priority, support need or status. Cases with a follow-up date show when it's due or overdue.</li>
+          <li><strong>Pick the case.</strong> The home page's outlook lists customers this week's forecast could hurt, act now first. The case queue puts the most urgent first: search by name, account number or suburb, or filter by priority, support need or status. Cases with a follow-up date show when it's due or overdue.</li>
           <li><strong>Get the picture in a minute.</strong> The summary cards say how urgent it is, what seems to be going on and what to do first, with the AI's plan and the top three solutions.</li>
           <li><strong>Check the evidence.</strong> Don't take the plan on trust. Look at the signals behind each circumstance: what was seen, when, and whether it is strong or supporting. Older evidence may no longer be true.</li>
           <li><strong>Check what's been tried.</strong> Support history shows a plan that broke or a program the customer left, which changes what to offer and how. Contact history shows what was said last time and whether anything was promised.</li>

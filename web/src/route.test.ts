@@ -25,7 +25,7 @@ describe("account routes", () => {
 describe("pages", () => {
   it("knows the queue, case pages and the Flowchart page", async () => {
     const { pageFromPath } = await import("./route");
-    expect(pageFromPath("/")).toBe("classic");
+    expect(pageFromPath("/")).toBe("combined");
     expect(pageFromPath("/outlook/new")).toBe("outlook");
     expect(pageFromPath("/queue")).toBe("queue");
     expect(pageFromPath("/funnel")).toBe("funnel");
@@ -33,8 +33,8 @@ describe("pages", () => {
     expect(pageFromPath("/flowchart")).toBe("admin");
     expect(pageFromPath("/flowchart/")).toBe("admin");
     expect(pageFromPath("/admin")).toBe("admin"); // old links still work
-    expect(pageFromPath("/flowchart/extra")).toBe("classic");
+    expect(pageFromPath("/flowchart/extra")).toBe("combined");
     expect(pageFromPath("/accounts/DEMO-700011")).toBe("case");
-    expect(pageFromPath("/cases/GS-2011")).toBe("classic");
+    expect(pageFromPath("/cases/GS-2011")).toBe("combined");
   });
 });

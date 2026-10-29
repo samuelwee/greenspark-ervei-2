@@ -57,7 +57,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
     const timer = window.setInterval(load, 5 * 60 * 1000);
     return () => { current = false; window.clearInterval(timer); };
   }, [client]);
-  useEffect(() => { document.title = "Combined outlook · ERVEI"; }, []);
+  useEffect(() => { document.title = "Insights · ERVEI"; }, []);
   useEffect(() => { setAreaId(null); }, [region]);
   useEffect(() => { setShown(PAGE); setShowCustomers(true); }, [groups, region, date, tier, onlyExposed, hideCovered]);
 

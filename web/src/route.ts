@@ -32,12 +32,12 @@ export const CLIMATE_PATH = "/climate";
 export const AREA_MAP_PATH = "/area-map";
 export const INSIGHTS_PATH = "/insights";
 export const CONTACT_LIST_PATH = "/contact-list";
-/** The classic outlook (act-now and watch list) is the home page. */
-export const CLASSIC_OUTLOOK_PATH = "/";
+/** The classic outlook (act-now and watch list), under the WIP menu. */
+export const CLASSIC_OUTLOOK_PATH = "/outlook/classic";
 /** The grouped support workspace. */
 export const NEW_OUTLOOK_PATH = "/outlook/new";
-/** The classic summary on top of the grouped support workspace. */
-export const COMBINED_OUTLOOK_PATH = "/outlook/combined";
+/** The classic summary on top of the grouped support workspace: the home page. */
+export const COMBINED_OUTLOOK_PATH = "/";
 
 /** Behind-the-scenes pages, under the BTS menu. */
 export const FLOWCHART_PATH = "/bts/flowchart";
@@ -61,12 +61,12 @@ export function pageFromPath(path: string): Page {
   if (/^\/insights\/?$/.test(path)) return "insights";
   if (/^\/contact-list\/?$/.test(path)) return "contactlist";
   if (/^\/outlook\/new\/?$/.test(path)) return "outlook";
-  if (/^\/outlook\/combined\/?$/.test(path)) return "combined";
+  if (/^\/outlook\/classic\/?$/.test(path)) return "classic";
   if (accountFromPath(path)) return "case";
-  return /^\/queue\/?$/.test(path) ? "queue" : "classic"; // "/", the old /outlook/classic link and anything unknown
+  return /^\/queue\/?$/.test(path) ? "queue" : "combined"; // "/", the old /outlook/combined link and anything unknown
 }
 
-/** Minimal path router: the classic outlook lives at "/", the queue at "/queue", each case at "/accounts/:accountNumber" and the BTS pages under "/bts/". */
+/** Minimal path router: the combined outlook lives at "/", the queue at "/queue", each case at "/accounts/:accountNumber" and the BTS pages under "/bts/". */
 export function useRoute() {
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => {

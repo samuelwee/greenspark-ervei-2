@@ -9,7 +9,7 @@ import { CaseTable } from "./components/CaseTable";
 import type { MapSummary } from "./data/api";
 // Leaflet only loads when the map view is first opened.
 const CaseMap = lazy(() => import("./components/CaseMap").then((m) => ({ default: m.CaseMap })));
-import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, NEW_OUTLOOK_PATH, COMBINED_OUTLOOK_PATH, CLIMATE_PATH, AREA_MAP_PATH, INSIGHTS_PATH, CONTACT_LIST_PATH, isModifiedClick, useRoute, type Page } from "./route";
+import { accountHref, DATA_SOURCES_PATH, FLOWCHART_PATH, PRIORITY_MODEL_PATH, CASE_PAGE_PATH, RISK_MODEL_PATH, OUTLOOK_MODEL_PATH, QUEUE_PATH, FUNNEL_PATH, NEW_OUTLOOK_PATH, CLASSIC_OUTLOOK_PATH, CLIMATE_PATH, AREA_MAP_PATH, INSIGHTS_PATH, CONTACT_LIST_PATH, isModifiedClick, useRoute, type Page } from "./route";
 import { DemoSettings } from "./components/DemoSettings";
 import { OutlookPage } from "./components/OutlookPage";
 import { ClassicOutlookPage } from "./components/ClassicOutlookPage";
@@ -421,7 +421,7 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
           <span><strong>ERVEI</strong><span className="brand-sub">Community support workspace</span></span>
         </a>
         <nav className="mainnav mainnav-left" aria-label="Main">
-          <a href="/" aria-current={props.page === "classic" ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate("/"); }}>Insights</a>
+          <a href="/" aria-current={props.page === "combined" ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate("/"); }}>Insights</a>
           {([[CONTACT_LIST_PATH, "Customers in need", "contactlist"], [CLIMATE_PATH, "Climate outlook", "climate"]] as const).map(([href, label, page]) => (
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
@@ -658,7 +658,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   );
 }
 
-const WIP_ITEMS = [[COMBINED_OUTLOOK_PATH, "Combined outlook", "combined"], [NEW_OUTLOOK_PATH, "New outlook", "outlook"], [AREA_MAP_PATH, "Area map", "areamap"], [INSIGHTS_PATH, "Customer insights", "insights"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
+const WIP_ITEMS = [[CLASSIC_OUTLOOK_PATH, "Classic outlook", "classic"], [NEW_OUTLOOK_PATH, "New outlook", "outlook"], [AREA_MAP_PATH, "Area map", "areamap"], [INSIGHTS_PATH, "Customer insights", "insights"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
 // In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
 const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Classic outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
 
