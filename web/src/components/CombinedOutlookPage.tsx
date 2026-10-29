@@ -178,12 +178,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
             <button type="button" className={`support-filter support-filter-all${groups.length === ALL_GROUPS.length ? " is-on" : ""}`} aria-pressed={groups.length === ALL_GROUPS.length} onClick={() => setGroups((current) => current.length === ALL_GROUPS.length ? [] : ALL_GROUPS)}>All groups <span>{baseRows.length.toLocaleString("en-AU")}</span></button>
             {SUPPORT_GROUPS.map((item) => <button key={item.id} type="button" style={groupStyle(item.id)} className={`support-filter${groups.includes(item.id) ? " is-on" : ""}`} aria-pressed={groups.includes(item.id)} onClick={() => setGroups((current) => current.includes(item.id) ? current.filter((id) => id !== item.id) : [...current, item.id])}>{item.label}<span>{groupCounts[item.id].toLocaleString("en-AU")}</span></button>)}
           </div>
-                    <div className="support-panel-tabs" role="tablist" aria-label="Support plan view" onKeyDown={(event) => {
-            if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
-              event.preventDefault(); const next = event.key === "Home" ? "solutions" : event.key === "End" ? "actions" : supportTab === "solutions" ? "actions" : "solutions";
-              setSupportTab(next); document.getElementById(`support-tab-${next}`)?.focus();
-            }
-          }}>{(["solutions", "actions"] as const).map((tab) => <button key={tab} id={`support-tab-${tab}`} role="tab" type="button" aria-selected={supportTab === tab} tabIndex={supportTab === tab ? 0 : -1} aria-controls={`support-panel-${tab}`} onClick={() => setSupportTab(tab)}>{tab === "solutions" ? "Solutions" : "Actions"}</button>)}</div>
+                    <details className="more-filters"><summary>More filters</summary>
           <div className="support-scope">
       <label className="check"><input type="checkbox" checked={onlyExposed} onChange={() => setOnlyExposed((value) => !value)} /><span>Only customers exposed to forecast hazards</span></label>
       <label className="check"><input type="checkbox" checked={hideCovered} onChange={() => setHideCovered((value) => !value)} /><span>Hide customers with a scheduled action this week</span></label>
@@ -191,6 +186,13 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
       {hideCovered ? <span className="sub">{hiddenCount ? `${hiddenCount} hidden by saved tasks` : "No scheduled actions this week"}</span> : null}
       <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{ready.totals.unassigned ? ` · ${ready.totals.unassigned} covered without a support group` : ""}{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
     </div>
+          </details>
+          <div className="support-panel-tabs" role="tablist" aria-label="Support plan view" onKeyDown={(event) => {
+            if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+              event.preventDefault(); const next = event.key === "Home" ? "solutions" : event.key === "End" ? "actions" : supportTab === "solutions" ? "actions" : "solutions";
+              setSupportTab(next); document.getElementById(`support-tab-${next}`)?.focus();
+            }
+          }}>{(["solutions", "actions"] as const).map((tab) => <button key={tab} id={`support-tab-${tab}`} role="tab" type="button" aria-selected={supportTab === tab} tabIndex={supportTab === tab ? 0 : -1} aria-controls={`support-panel-${tab}`} onClick={() => setSupportTab(tab)}>{tab === "solutions" ? "Solutions" : "Actions"}</button>)}</div>
           <p className="support-member-count"><strong>{members.length.toLocaleString("en-AU")}</strong> customers</p>
           <p className="sub"><strong>{scopeLabel}</strong></p>
           <p className="sub">{selectedPostcode ? "All selected groups in this postcode" : "Select a circle to plan local support"}</p>

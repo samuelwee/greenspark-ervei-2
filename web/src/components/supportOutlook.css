@@ -315,3 +315,7 @@
 /* Home page: the group filters scroll away; the Solutions and Actions tabs alone stay pinned at the top of the panel. */
 .combined-outlook .support-group-filters-panel { position: static; margin-top: 0; padding-top: 0; }
 .combined-outlook .support-solutions-panel .support-panel-tabs { top: -18px; padding-top: 18px; margin-top: -10px; }
+
+/* Home page: the scope filters sit in a "More filters" toggle under the group buttons. */
+.more-filters > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand-hover); padding: 4px 0; }
+.more-filters[open] > summary { margin-bottom: 8px; }
