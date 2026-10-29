@@ -185,7 +185,8 @@ export function createApp(store: Store, options: AppOptions = {}) {
     const hit = byCase.get(c.id);
     const wx = weatherKey();
     if (hit && hit.version === c.version && hit.wx === wx) return hit.result;
-    const person = store.getPerson(c.personId);
+    // The full account, so account facts like HUGS eligibility can be checked as well as the stored signal summary.
+    const person = store.getPersonWithAccount(c.personId);
     const result = evaluateCase(c, person, store.catalog, doc, catalogOf(doc), weatherFor(person));
     byCase.set(c.id, { version: c.version, wx, result });
     return result;

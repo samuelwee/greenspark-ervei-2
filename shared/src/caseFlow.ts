@@ -6,6 +6,7 @@
 //   safety circumstances are never actioned automatically (the case page routes them to trained staff).
 // Solutions are the flagged circumstances' solutions. Everything is worked out again whenever the flow changes.
 import { ACCOUNT_SIGNAL_IDS, detectAccountSignals } from "./accountSignals";
+import { recommendationEligibility } from "./hugs";
 import { priorityFromSignals } from "./priority";
 import { WEATHER_SIGNAL_IDS, type WeatherSignal } from "./weather";
 import { AREA_SIGNAL_ID, areaSignal } from "./area";
@@ -176,9 +177,11 @@ export function evaluateCase(
   for (const r of catalog.recommendations) {
     const uses = circumstances.filter((x) => defs.get(x.circumstanceId)?.recommendationIds.includes(r.id));
     if (!uses.length) continue;
+    // Where the solution has an eligibility check (HUGS) and there is an account to check it against.
     recommendations.push({
       recommendationId: r.id, circumstanceIds: uses.map((x) => x.circumstanceId),
       evidenceFieldIds: [...new Set(uses.flatMap((x) => x.evidenceFieldIds))], reviewStatus,
+      eligibility: person?.account ? recommendationEligibility(r.id, person.account, data.asOf) ?? undefined : undefined,
     });
   }
   const hasData = !!person?.account || !!person?.signalSummary || Object.values(c.reportedAnswers).some((v) => v !== null);

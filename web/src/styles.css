@@ -585,6 +585,10 @@ button.kpi:hover { border-color: #b3bac5; }
 .solution-top > strong { font-size: 15px; }
 .solution-top .rank-when { margin-bottom: 0; }
 .solutions .solution-facts { padding: 8px 12px 0; gap: 4px; }
+.solutions .solution-facts.eligibility { margin-top: 6px; }
+.solutions .solution-facts.eligibility dd strong { display: block; }
+.solutions .solution-facts.eligibility span { display: block; }
+.elig-not-met { color: var(--urgent); }
 .solutions .solution > a.sub { padding: 4px 12px 0; }
 /* One chevron for every dropdown, with room beside it (browsers draw their own tight to the edge) */
 select:not([multiple]) {
