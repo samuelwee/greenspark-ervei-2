@@ -113,7 +113,7 @@ test("mobile controls fit the viewport and action filters work from the keyboard
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>(".leaflet-tile")].every((tile) => tile.complete && tile.naturalWidth > 0), undefined, { timeout: 15_000 }).catch(() => undefined);
   await page.screenshot({ path: test.info().outputPath("support-map-mobile.png"), fullPage: true, animations: "disabled" });
-  await page.getByRole("group", { name: "Map area" }).getByRole("button", { name: "All of WA" }).click();
+  await page.getByLabel("Map area", { exact: true }).selectOption("wa");
   await expect(page.locator(".support-detail-title")).toContainText("All of WA");
   await expect(page.getByText("Regional totals · select a circle to zoom in")).toBeVisible();
   const regional = page.locator(".support-marker.is-regional").first();
@@ -258,7 +258,7 @@ test("week overview follows region and groups while emergency warnings remain cu
   await expect(page.getByLabel("Weather and emergency legend")).toContainText("Layer off");
   await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^All groups/ }).click();
   expect(Number(await first.locator(".support-day-counts b").first().innerText())).toBeGreaterThanOrEqual(act);
-  await page.getByRole("group", { name: "Map area" }).getByRole("button", { name: "All of WA" }).click();
+  await page.getByLabel("Map area", { exact: true }).selectOption("wa");
   expect((await week.locator(".support-day-town").allTextContents()).some((name) => name.includes("Kununurra"))).toBe(true);
   await week.getByRole("button", { name: "Whole week", exact: true }).click();
   await expect(page.locator(".support-map-caption")).toContainText("Peak daily maximum");
