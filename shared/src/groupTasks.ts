@@ -15,25 +15,60 @@ export const NEED_SOLUTIONS: Record<SupportGroupId, SolutionId[]> = {
   health: ["cooling"], supply: ["supply"], bills: ["payment", "hardship"], concessions: ["concession"], coaching: ["coaching"], monitor: ["information"],
 };
 
+/**
+ * Area directives: a direction that applies to whole postcode areas for the forecast
+ * week, with no per-customer work to track. These sit alongside the customer solutions.
+ */
+export const DIRECTIVES = {
+  disconnection_moratorium: {
+    title: "Disconnection moratorium",
+    steps: "No disconnections in the selected postcode areas during the forecast week. Each customer there is shielded by the area signal instead of individual checks.",
+    confirm: "Confirm the retailer honours the moratorium for every selected area before the forecast event.",
+  },
+} as const;
+export type DirectiveId = keyof typeof DIRECTIVES;
+
+export type GroupTaskKind = "solution" | "moratorium";
+
 export interface GroupTaskSelection {
-  groupId: SupportGroupId;
-  solutionId: SolutionId;
+  kind: GroupTaskKind;
+  /** Primary groups the task covers; empty for area directives. */
+  groupIds: SupportGroupId[];
+  /** Solution tasks only; null for area directives. */
+  solutionId: SolutionId | null;
+  /** Area directives only: the postcode areas covered. Solution tasks leave it empty. */
+  scopePostcodes: string[];
   eventDate: string;
   scope: string;
   personIds: string[];
 }
 export interface CreateGroupTask extends GroupTaskSelection { assigneeUserId: string; dueDate: string }
 export interface GroupTask {
-  id: string; groupId: SupportGroupId; solutionId: SolutionId;
-  eventDate: string; scope: string; assigneeUserId: string; dueDate: string;
+  id: string; kind: GroupTaskKind; groupIds: SupportGroupId[]; solutionId: SolutionId | null;
+  eventDate: string; scope: string; scopePostcodes: string[];
+  assigneeUserId: string; dueDate: string;
   createdBy: string; createdAt: string; version: number;
-  cancelled: boolean; total: number; completed: number;
+  cancelled: boolean;
+  /** Members for solution tasks; scoped postcode areas for moratoriums. */
+  total: number; completed: number;
 }
 export interface GroupTaskMember {
   personId: string; caseId: string; displayName: string; accountNumber: string | null;
   completed: boolean;
 }
+/** A scoped postcode area of a moratorium, tracked like a customer member. */
+export interface GroupTaskArea {
+  postcode: string;
+  /** The suburb name for the postcode, when the dataset has one. */
+  suburb: string | null;
+  completed: boolean;
+}
 export interface GroupTaskDetail {
-  task: GroupTask; members: GroupTaskMember[]; page: number; pageCount: number;
+  task: GroupTask;
+  /** Solution tasks only; empty for moratoriums. */
+  members: GroupTaskMember[];
+  /** Moratorium tasks only; empty for solution tasks. */
+  areas: GroupTaskArea[];
+  page: number; pageCount: number;
 }
 export interface GroupTaskPreview { selected: number; eligible: number; duplicate: number; unavailable: number }

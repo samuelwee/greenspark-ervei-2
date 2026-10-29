@@ -41,7 +41,7 @@ A case's worker is `workflow.assignedToUserId`. Every case has one: there is no 
 - `assigneeUserId` must be an active user with role `support_worker`. Cases can't be unassigned.
 - Assigning to the current assignee is a no-op that is reported, not an error, and does not bump the version.
 - Resolved cases may be reassigned.
-- Maximum 100 items per request.
+- Maximum 200 items per request.
 
 ## Bulk actions
 

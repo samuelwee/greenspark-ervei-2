@@ -4,7 +4,7 @@ import { SupportWeek } from "./SupportWeek";
 import { SupportWeatherKey } from "./SupportWeatherKey";
 import { SupportSolutions } from "./SupportSolutions";
 import { SupportActions, type ActionsClient } from "./SupportActions";
-import type { ApiClient, EmergencyFeed, Outlook, OutlookCustomer } from "../data/api";
+import type { ApiClient, EmergencyFeed, GroupTaskList, Outlook, OutlookCustomer } from "../data/api";
 import { accountHref, isModifiedClick } from "../route";
 import { customerOnDate, groupOf, inMapRegion, REGION_LABEL, supportAreas, type MapRegion } from "../domain/supportGroups";
 import { dayDate, dayName, isWarning, tempColor } from "./outlookText";
@@ -30,6 +30,8 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const [showCustomers, setShowCustomers] = useState(false), [shown, setShown] = useState(PAGE);
   const [emergency, setEmergency] = useState<EmergencyFeed | null>(null);
   const [supportTab, setSupportTab] = useState<"solutions" | "actions">("solutions");
+  const [hideCovered, setHideCovered] = useState(false);
+  const [taskCatalog, setTaskCatalog] = useState<GroupTaskList | null>(null), [taskError, setTaskError] = useState<string | null>(null), [tasksRetry, setTasksRetry] = useState(0);
 
   useEffect(() => {
     if (!client.outlook) { setError("The weather outlook isn't available on this server."); return; }
@@ -56,12 +58,17 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   }, [client]);
   useEffect(() => { document.title = "New outlook · ERVEI"; }, []);
   useEffect(() => { setAreaId(null); }, [region]);
-  useEffect(() => { setShown(PAGE); setShowCustomers(false); }, [groups, region, date, tier, onlyExposed]);
+  useEffect(() => { setShown(PAGE); setShowCustomers(false); }, [groups, region, date, tier, onlyExposed, hideCovered]);
 
   const ready = data?.available ? data : null;
-  const baseRows = useMemo(() => (ready?.groupCustomers ?? ready?.customers ?? [])
+  const allRows = useMemo(() => (ready?.groupCustomers ?? ready?.customers ?? [])
     .map((customer) => customerOnDate(customer, date))
     .filter((customer) => inMapRegion(customer, region) && (!tier || customer.tier === tier) && (!onlyExposed || customer.exposure > 0)), [ready, date, region, tier, onlyExposed]);
+  const covered = useMemo(() => {
+    if (!taskCatalog) return null;
+    return { personIds: new Set(taskCatalog.coveredPersonIds), postcodes: new Set(taskCatalog.coveredPostcodes) };
+  }, [taskCatalog]);
+  const baseRows = useMemo(() => allRows.filter((customer) => !hideCovered || !(covered && (covered.personIds.has(customer.personId) || (customer.postcode != null && covered.postcodes.has(customer.postcode))))), [allRows, hideCovered, covered]);
   const groupCounts = useMemo(() => {
     const counts = emptySupportCounts();
     for (const customer of baseRows) counts[groupOf(customer)]++;
@@ -86,6 +93,19 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   weekStart.setUTCDate(weekStart.getUTCDate() - (weekStart.getUTCDay() + 6) % 7);
   const eventDate = weekStart.toISOString().slice(0, 10);
   const defaultDue = date || members.map((c) => c.firstDate).filter((d): d is string => !!d).sort()[0] || forecastStart;
+  const hiddenCount = hideCovered ? allRows.length - baseRows.length : 0;
+
+  useEffect(() => {
+    if (!client.groupTasks) { setTaskError("Group tasks are unavailable on this server."); return; }
+    let current = true; setTaskError(null);
+    const load = () => client.groupTasks!(eventDate).then(
+      (result) => { if (current) { setTaskCatalog(result); setTaskError(null); } },
+      (failure: unknown) => { if (current) setTaskError(failure instanceof Error ? failure.message : "Could not load group tasks."); },
+    );
+    void load();
+    const timer = window.setInterval(load, 5 * 60 * 1000);
+    return () => { current = false; window.clearInterval(timer); };
+  }, [client, eventDate, tasksRetry]);
 
   if (error) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="alert"><h1>We couldn’t load the outlook</h1><p>{error}</p><button type="button" className="btn" onClick={() => setRetry((n) => n + 1)}>Try again</button></div></main>;
   if (!data) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="status"><p>Loading the forecast…</p></div></main>;
@@ -146,14 +166,16 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
           <p className="support-caution">Suggested support steps. Confirm individual needs, consent and eligibility before acting.</p>
           <button type="button" className="btn support-review" disabled={!members.length} onClick={review}>Review {selectedPostcode ? "this area" : "group"} <span aria-hidden="true">→</span></button>
           </div>
-          <div id="support-panel-actions" role="tabpanel" aria-labelledby="support-tab-actions" hidden={supportTab !== "actions"}>{supportTab === "actions" ? <SupportActions client={client} customers={members} groups={groups} scope={scopeLabel} eventDate={eventDate} defaultDue={defaultDue} focusGroup={picked?.group ?? null} /> : null}</div>
+          <div id="support-panel-actions" role="tabpanel" aria-labelledby="support-tab-actions" hidden={supportTab !== "actions"}>{supportTab === "actions" ? <SupportActions client={client} customers={members} groups={groups} scope={scopeLabel} eventDate={eventDate} defaultDue={defaultDue} focusGroup={picked?.group ?? null} catalog={taskCatalog} taskError={taskError} onRefresh={() => setTasksRetry((r) => r + 1)} /> : null}</div>
         </aside>
       </div>
     </section>
 
     <div className="support-scope">
       <label className="check"><input type="checkbox" checked={onlyExposed} onChange={() => setOnlyExposed((value) => !value)} /><span>Only customers exposed to forecast hazards</span></label>
+      <label className="check"><input type="checkbox" checked={hideCovered} onChange={() => setHideCovered((value) => !value)} /><span>Hide customers with a scheduled action this week</span></label>
       <label>Attention <select aria-label="Attention filter" value={tier} onChange={(event) => setTier(event.target.value as typeof tier)}><option value="">All attention levels</option><option value="act">Act now</option><option value="watch">Review soon</option></select></label>
+      {hideCovered ? <span className="sub">{hiddenCount ? `${hiddenCount} hidden by saved tasks` : "No scheduled actions this week"}</span> : null}
       <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
     </div>
     {!rows.length ? <div className="empty"><h2>{groups.length ? "No customers match this selection" : "Select a support group"}</h2><p>Turn on one or more coloured group filters, or clear the attention and exposure filters.</p><button type="button" className="btn" onClick={() => { setGroups(ALL_GROUPS); setRegion("wa"); setTier(""); setOnlyExposed(false); }}>Show all covered customers</button></div> : null}

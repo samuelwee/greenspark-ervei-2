@@ -37,12 +37,16 @@ const reviewBody = z.object({ reviewStatus: z.enum(["needs_review", "reviewed"])
 // The worker for a new case: required from a manager; a support worker's new case is theirs.
 const assignee = { assigneeUserId: z.string().min(1).optional() };
 const taskDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => { const d = new Date(`${s}T00:00:00Z`); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s; }, "Choose a valid date");
-const taskPeople = z.array(z.string().min(1).max(100)).min(1).max(50000).refine((ids) => new Set(ids).size === ids.length, "Duplicate customers");
-const taskSelection = z.object({ groupId: z.enum(["health", "supply", "bills", "concessions", "coaching", "monitor"]),
-  solutionId: z.enum(Object.keys(SOLUTIONS) as [SolutionId, ...SolutionId[]]), eventDate: taskDate,
-  scope: z.string().trim().min(1).max(150), personIds: taskPeople }).strict();
+const taskPeople = z.array(z.string().min(1).max(100)).max(50000).refine((ids) => new Set(ids).size === ids.length, "Duplicate customers");
+const taskSelection = z.object({ kind: z.enum(["solution", "moratorium"]),
+  groupIds: z.array(z.enum(["health", "supply", "bills", "concessions", "coaching", "monitor"])).max(6),
+  solutionId: z.enum(Object.keys(SOLUTIONS) as [SolutionId, ...SolutionId[]]).nullable(),
+  scopePostcodes: z.array(z.string().min(1).max(10)).max(5000),
+  eventDate: taskDate, scope: z.string().trim().min(1).max(150), personIds: taskPeople }).strict();
 const taskCreate = taskSelection.extend({ assigneeUserId: z.string().min(1), dueDate: taskDate }).strict();
 const taskProgress = z.object({ expectedVersion: z.number().int().min(1), personIds: taskPeople, completed: z.boolean() }).strict();
+const taskPostcodes = z.array(z.string().min(1).max(10)).min(1).max(50000).refine((a) => new Set(a).size === a.length, "Duplicate postcodes");
+const taskAreaProgress = z.object({ expectedVersion: z.number().int().min(1), postcodes: taskPostcodes, completed: z.boolean() }).strict();
 const taskCancel = z.object({ expectedVersion: z.number().int().min(1) }).strict();
 const newCaseBody = z.union([
   z.object({ personId: z.string().min(1), ...assignee }).strict(),
@@ -241,7 +245,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
   app.get("/api/group-tasks", (req, res) => {
     const eventDate = parse(taskDate, req.query.eventDate);
     const a = actor(res);
-    res.json({ tasks: groupTasks.list(eventDate), actorId: a.id,
+    res.json({ tasks: groupTasks.list(eventDate), ...groupTasks.coverage(eventDate), actorId: a.id,
       canAssignOthers: a.role === "manager", users: store.catalog.users.filter((u) => u.role === "support_worker") });
   });
   app.post("/api/group-tasks/preview", (req, res) => { res.json(groupTasks.preview(parse(taskSelection, req.body))); });
@@ -254,6 +258,9 @@ export function createApp(store: Store, options: AppOptions = {}) {
   });
   app.patch("/api/group-tasks/:taskId/progress", (req, res) => {
     res.json({ task: groupTasks.update(actor(res), String(req.params.taskId), parse(taskProgress, req.body)) });
+  });
+  app.patch("/api/group-tasks/:taskId/area-progress", (req, res) => {
+    res.json({ task: groupTasks.updateAreas(actor(res), String(req.params.taskId), parse(taskAreaProgress, req.body)) });
   });
   app.post("/api/group-tasks/:taskId/cancel", (req, res) => {
     res.json({ task: groupTasks.cancel(actor(res), String(req.params.taskId), parse(taskCancel, req.body).expectedVersion) });

@@ -172,6 +172,54 @@ test("actions create a persistent area task, exclude duplicates and track custom
   expect(failures).toEqual([]);
 });
 
+test("a disconnection moratorium covers its postcode areas and the hide-covered filter removes them", async ({ page }) => {
+  await openMap(page);
+  await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^All groups/ }).click();
+  await page.locator(".support-area-picker summary").click();
+  const options = page.locator(".support-area-picker button");
+  const names = await options.allTextContents();
+  const index = names.findIndex((name) => !name.includes("Mandurah"));
+  await options.nth(index).click();
+  const before = Number(await page.locator(".support-member-count strong").innerText());
+  expect(before).toBeGreaterThan(0);
+  await page.getByRole("tab", { name: "Actions", exact: true }).click();
+  const panel = page.getByRole("tabpanel", { name: "Actions", exact: true });
+  // The picked area's group card is expanded by default; note it so it can be re-opened.
+  const openGroup = await page.evaluate(() => document.querySelector<HTMLElement>('.action-group-card .solution-card-heading[aria-expanded="true"]')?.closest<HTMLElement>(".action-group-card")?.dataset.group ?? null);
+  expect(openGroup).toBeTruthy();
+  // Both the all-groups form and the group forms offer the moratorium option.
+  const allHeading = panel.locator('.action-group-card[data-group="all"] .solution-card-heading');
+  await allHeading.click();
+  await expect(panel.locator('.action-group-card[data-group="all"] .group-task-form').getByRole("option", { name: "Disconnection moratorium", exact: true })).toBeAttached();
+  await allHeading.click();
+  await panel.locator(`.action-group-card[data-group="${openGroup}"] .solution-card-heading`).click();
+  // The picked area's group card is expanded; its form offers the moratorium as a task option.
+  const form = panel.locator(".group-task-form");
+  await expect(form).toHaveCount(1);
+  await form.getByRole("combobox", { name: "Support task", exact: true }).selectOption({ label: "Disconnection moratorium" });
+  await form.getByRole("combobox", { name: "Assign to", exact: true }).selectOption({ index: 1 });
+  await expect(form.locator(".task-selection-info strong")).toHaveText("1 postcode areas");
+  await form.getByRole("button", { name: /^Issue disconnection moratorium/ }).click();
+  await expect(panel.getByRole("status")).toContainText("Moratorium issued for 1 postcode areas");
+  await expect(panel.locator(".saved-group-task").filter({ hasText: "Disconnection moratorium" }).first()).toBeVisible();
+  // The detail view tracks the scoped postcode areas like a customer checklist.
+  await panel.locator(".saved-group-task").filter({ hasText: "Disconnection moratorium" }).first().getByRole("button", { name: "View task", exact: true }).click();
+  await expect(panel.locator(".task-progress-label")).toHaveText("0 of 1 completed");
+  await panel.locator(".task-member-list input").first().click();
+  await expect(panel.locator(".task-progress-label")).toHaveText("1 of 1 completed");
+  // The checklist shows the area's postcode with its suburb name.
+  const scope = (await panel.locator(".task-detail-card p").first().innerText()).trim();
+  await expect(panel.locator(".task-member-list li").first()).toContainText(scope);
+  await panel.getByRole("button", { name: /Back to actions/ }).click();
+  // Checklist completion does not change coverage: the filter still hides the area's customers.
+  await page.getByRole("checkbox", { name: /Hide customers with a scheduled action this week/ }).check();
+  await expect(page.locator(".support-member-count strong")).toHaveText("0");
+  await expect(page.locator(".support-scope")).toContainText("hidden by saved tasks");
+  await page.getByRole("checkbox", { name: /Hide customers with a scheduled action this week/ }).uncheck();
+  await expect(page.locator(".support-member-count strong")).toHaveText(String(before));
+  await page.screenshot({ path: test.info().outputPath("moratorium-hide-covered.png"), fullPage: true, animations: "disabled" });
+});
+
 test("group controls and map have no serious accessibility violations", async ({ page }) => {
   await openMap(page);
   await page.getByRole("group", { name: "Primary support group", exact: true }).getByRole("button", { name: /^All groups/ }).click();
