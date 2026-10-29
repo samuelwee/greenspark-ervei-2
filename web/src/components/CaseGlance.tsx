@@ -148,12 +148,19 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
       </section>
 
       {a?.usage.length ? (
-        <section className="case-card vis-card vis-wide" aria-labelledby="vis-use">
-          <h2 id="vis-use">Electricity use</h2>
-          <UsageChart usage={a.usage.slice(0, -1)} />
-          <PlanCosts account={a} />
-          <More label={a.prepay ? "Prepaid top-ups" : "Bills"} onClick={() => onOpen("bills")} />
-        </section>
+        <>
+          <section className="case-card vis-card" aria-labelledby="vis-use">
+            <h2 id="vis-use">Electricity use</h2>
+            <UsageChart usage={a.usage.slice(0, -1)} />
+            <More label={a.prepay ? "Prepaid top-ups" : "Bills"} onClick={() => onOpen("bills")} />
+          </section>
+          {a.usage.slice(0, -1).at(-1)?.kWh ? (
+            <section className="case-card vis-card" aria-labelledby="vis-plans">
+              <h2 id="vis-plans">Plan comparison</h2>
+              <PlanCosts account={a} />
+            </section>
+          ) : null}
+        </>
       ) : null}
     </div>
   );
