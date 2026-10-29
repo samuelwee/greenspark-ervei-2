@@ -1,3 +1,5 @@
+import type { HugsEligibility } from "./hugs";
+
 export type Role = "manager" | "support_worker";
 export type CaseStatus = "new" | "in_progress" | "waiting" | "resolved";
 export type ReviewStatus = "needs_review" | "reviewed";
@@ -220,6 +222,8 @@ export interface CaseRecommendation {
   circumstanceIds: string[];
   evidenceFieldIds: string[];
   reviewStatus: "pending" | "reviewed";
+  /** Where the solution has an eligibility check (HUGS), worked out from the account. Missing with no account. */
+  eligibility?: HugsEligibility | null;
 }
 
 export interface CaseNote {

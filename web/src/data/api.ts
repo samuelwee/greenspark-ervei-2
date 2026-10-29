@@ -1,7 +1,11 @@
 import type { FlowDoc, FlowOp, WeatherSignal } from "@greenspark/shared";
 import type { CreateGroupTask, GroupTask, GroupTaskDetail, GroupTaskPreview, GroupTaskSelection } from "@greenspark/shared";
 
-export interface GroupTaskList { tasks: GroupTask[]; users: StaffUser[]; actorId: string; canAssignOthers: boolean }
+export interface GroupTaskList {
+  tasks: GroupTask[]; users: StaffUser[]; actorId: string; canAssignOthers: boolean;
+  /** Customers with work scheduled this week: members of active solution tasks, and postcode areas under a moratorium. */
+  coveredPersonIds: string[]; coveredPostcodes: string[];
+}
 import type {
   AssessmentStatus, CaseStatus, CircumstanceDefinition, EvidenceFieldDefinition, Person, QueueCase,
   QueueQuery, RecommendationDefinition, ReviewStatus, StaffUser, SupportArea,
@@ -79,6 +83,8 @@ export interface ApiClient {
   createGroupTask?(input: CreateGroupTask): Promise<{ task: GroupTask; preview: GroupTaskPreview }>;
   groupTask?(id: string, page?: number): Promise<GroupTaskDetail>;
   updateGroupTask?(id: string, input: { expectedVersion: number; personIds: string[]; completed: boolean }): Promise<{ task: GroupTask }>;
+  /** Moratorium postcode checklist progress. */
+  updateGroupTaskAreas?(id: string, input: { expectedVersion: number; postcodes: string[]; completed: boolean }): Promise<{ task: GroupTask }>;
   cancelGroupTask?(id: string, expectedVersion: number): Promise<{ task: GroupTask }>;
   /** The utility hardship flow behind the Flowchart page (a JSON file on the server). */
   flow(): Promise<FlowSnapshot>;
@@ -193,7 +199,7 @@ export type Outlook =
     towns: OutlookTown[];
     climate: ClimateInfo | null;
     warnings: { title: string; districts: string[]; expires: string | null }[];
-    totals: { covered: number; uncovered: number; exposed: number; vulnerable: number; act: number; watch: number };
+    totals: { covered: number; uncovered: number; unassigned: number; exposed: number; vulnerable: number; act: number; watch: number };
     customers: OutlookCustomer[];
     groupCustomers?: OutlookCustomer[];
   };
@@ -259,6 +265,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     createGroupTask: (input) => req("POST", "/api/group-tasks", input),
     groupTask: (id, page = 1) => req("GET", `/api/group-tasks/${encodeURIComponent(id)}?page=${page}`),
     updateGroupTask: (id, input) => req("PATCH", `/api/group-tasks/${encodeURIComponent(id)}/progress`, input),
+    updateGroupTaskAreas: (id, input) => req("PATCH", `/api/group-tasks/${encodeURIComponent(id)}/area-progress`, input),
     cancelGroupTask: (id, expectedVersion) => req("POST", `/api/group-tasks/${encodeURIComponent(id)}/cancel`, { expectedVersion }),
     flow: () => req("GET", "/api/admin/flow"),
     weather: () => req("GET", "/api/weather"),

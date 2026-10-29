@@ -5,8 +5,9 @@ import { accountSignalSummary, toDataset, type CaseNote, type CustomerAccount, t
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS group_tasks (
- id TEXT PRIMARY KEY, group_id TEXT NOT NULL, solution_id TEXT NOT NULL, event_date TEXT NOT NULL,
- scope TEXT NOT NULL, assignee_user_id TEXT NOT NULL, due_date TEXT NOT NULL, created_by TEXT NOT NULL,
+ id TEXT PRIMARY KEY, kind TEXT NOT NULL DEFAULT 'solution', group_ids TEXT NOT NULL DEFAULT '[]',
+ solution_id TEXT, event_date TEXT NOT NULL, scope TEXT NOT NULL, scope_postcodes TEXT NOT NULL DEFAULT '[]',
+ assignee_user_id TEXT NOT NULL, due_date TEXT NOT NULL, created_by TEXT NOT NULL,
  created_at TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1, cancelled INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS group_task_members (
@@ -15,6 +16,12 @@ CREATE TABLE IF NOT EXISTS group_task_members (
  PRIMARY KEY(task_id, person_id)
 );
 CREATE INDEX IF NOT EXISTS group_task_member_person ON group_task_members(person_id);
+CREATE TABLE IF NOT EXISTS group_task_areas (
+ task_id TEXT NOT NULL REFERENCES group_tasks(id) ON DELETE CASCADE, postcode TEXT NOT NULL,
+ completed INTEGER NOT NULL DEFAULT 0, updated_by TEXT, updated_at TEXT,
+ PRIMARY KEY(task_id, postcode)
+);
+CREATE INDEX IF NOT EXISTS group_task_area_postcode ON group_task_areas(postcode);
 CREATE INDEX IF NOT EXISTS group_task_event_solution ON group_tasks(event_date, solution_id, cancelled);
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS people (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, doc TEXT NOT NULL, is_created INTEGER NOT NULL DEFAULT 0);
@@ -62,6 +69,38 @@ export class Store {
     // Databases created before notes could be edited lack the edit columns.
     const noteColumns = (this.db.prepare("PRAGMA table_info(notes)").all() as Row[]).map((c) => c.name);
     if (!noteColumns.includes("edited_at")) this.db.exec("ALTER TABLE notes ADD COLUMN edited_at TEXT; ALTER TABLE notes ADD COLUMN edited_by TEXT;");
+    // Group tasks gained their kind and area scope; older tables are rebuilt once. Task IDs are
+    // kept, so member rows stay valid against the rebuilt table.
+    const taskColumns = (this.db.prepare("PRAGMA table_info(group_tasks)").all() as Row[]).map((c) => c.name);
+    if (!taskColumns.includes("kind")) {
+      const oldIndexes = (this.db.prepare("PRAGMA index_list(group_tasks)").all() as Row[]).map((r) => String(r.name)).filter((n) => n.startsWith("group_task_"));
+      for (const name of oldIndexes) this.db.exec(`DROP INDEX ${name}`);
+      // Member rows survive the rebuild: the old table's foreign key would cascade them away.
+      const oldMembers = this.db.prepare("SELECT task_id, person_id, case_id, completed, updated_by, updated_at FROM group_task_members").all() as Row[];
+      this.db.exec(`
+        ALTER TABLE group_tasks RENAME TO group_tasks_old;
+        CREATE TABLE group_tasks (
+          id TEXT PRIMARY KEY, kind TEXT NOT NULL, group_ids TEXT NOT NULL, solution_id TEXT,
+          event_date TEXT NOT NULL, scope TEXT NOT NULL, scope_postcodes TEXT NOT NULL,
+          assignee_user_id TEXT NOT NULL, due_date TEXT NOT NULL, created_by TEXT NOT NULL,
+          created_at TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1, cancelled INTEGER NOT NULL DEFAULT 0
+        );
+        INSERT INTO group_tasks (id, kind, group_ids, solution_id, event_date, scope, scope_postcodes, assignee_user_id, due_date, created_by, created_at, version, cancelled)
+        SELECT id, 'solution', '["' || group_id || '"]', solution_id, event_date, scope, '[]', assignee_user_id, due_date, created_by, created_at, version, cancelled FROM group_tasks_old;
+        DROP TABLE group_task_members;
+        DROP TABLE group_tasks_old;
+        CREATE TABLE group_task_members (
+          task_id TEXT NOT NULL REFERENCES group_tasks(id) ON DELETE CASCADE, person_id TEXT NOT NULL,
+          case_id TEXT NOT NULL, completed INTEGER NOT NULL DEFAULT 0, updated_by TEXT, updated_at TEXT,
+          PRIMARY KEY(task_id, person_id)
+        );
+        CREATE INDEX group_task_member_person ON group_task_members(person_id);
+        CREATE INDEX group_task_event_solution ON group_tasks(event_date, solution_id, cancelled);
+        CREATE INDEX group_task_event_kind ON group_tasks(event_date, kind, cancelled);
+      `);
+      const addMember = this.db.prepare("INSERT INTO group_task_members (task_id, person_id, case_id, completed, updated_by, updated_at) VALUES (?,?,?,?,?,?)");
+      for (const m of oldMembers) addMember.run(String(m.task_id), String(m.person_id), String(m.case_id), Number(m.completed), m.updated_by == null ? null : String(m.updated_by), m.updated_at == null ? null : String(m.updated_at));
+    } else this.db.exec("CREATE INDEX IF NOT EXISTS group_task_event_kind ON group_tasks(event_date, kind, cancelled);");
     // A new fixture dataset (a different datasetId) replaces everything, including workflow changes.
     const seeded = this.getMeta("seeded_dataset");
     if (seeded && seeded !== raw.metadata.datasetId) this.clear();
@@ -199,7 +238,7 @@ export class Store {
   /** Empties every table, ready to seed a new dataset. */
   private clear() {
     this.transaction(() => {
-      for (const t of ["group_task_members", "group_tasks", "workflow_action_items", "workflow_actions", "note_edits", "notes", "cases", "accounts", "people", "meta"]) this.db.exec(`DELETE FROM ${t}`);
+      for (const t of ["group_task_members", "group_task_areas", "group_tasks", "workflow_action_items", "workflow_actions", "note_edits", "notes", "cases", "accounts", "people", "meta"]) this.db.exec(`DELETE FROM ${t}`);
     });
   }
 

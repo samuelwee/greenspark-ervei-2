@@ -1,7 +1,7 @@
 import { detectAccountSignals } from "../domain/types";
 import type { ApiClient, CaseItem, Catalog, SupportPlan } from "../data/api";
 import { CaseWeather, OutlookBanner } from "./CaseWeather";
-import { UsageChart } from "./AccountDetails";
+import { PlanCosts, UsageChart } from "./AccountDetails";
 import { paragraphs } from "./paragraphs";
 import { OUTCOME_LABEL, OUTCOME_ORDER, band, percent } from "./predictionText";
 
@@ -151,6 +151,7 @@ export function CaseGlance({ item, data, plan, planFailed, onOpen, client }: { i
         <section className="case-card vis-card vis-wide" aria-labelledby="vis-use">
           <h2 id="vis-use">Electricity use</h2>
           <UsageChart usage={a.usage.slice(0, -1)} />
+          <PlanCosts account={a} />
           <More label={a.prepay ? "Prepaid top-ups" : "Bills"} onClick={() => onOpen("bills")} />
         </section>
       ) : null}

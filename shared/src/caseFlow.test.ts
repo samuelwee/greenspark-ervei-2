@@ -85,6 +85,24 @@ describe("the real flow over the fixture", () => {
   const out = applyFlow(data, realFlow);
   const ids = (scenario: string) => out.cases.filter((_, i) => scenarios[i] === scenario).map((x) => x.circumstances.map((y) => y.circumstanceId));
 
+  it("checks HUGS eligibility for the hugs recommendation, from the account", () => {
+    const recs = out.cases.flatMap((c) => c.recommendations.filter((r) => r.recommendationId === "hugs"));
+    expect(recs.length).toBeGreaterThan(0);
+    for (const r of recs) expect(r.eligibility, "every hugs recommendation has its check").not.toBeNull();
+    // demo-person-021: the plan ran 112 days, a disconnection warning, $332.26 owing and no HUGS this financial year.
+    const ok = out.cases.find((c) => c.personId === "demo-person-021")!;
+    expect(ok.recommendations.find((r) => r.recommendationId === "hugs")?.eligibility?.meets).toBe(true);
+    // demo-person-005 has no payment plan, so that criterion is not met.
+    const noPlan = out.cases.find((c) => c.personId === "demo-person-005")!;
+    const el = noPlan.recommendations.find((r) => r.recommendationId === "hugs")?.eligibility;
+    expect(el?.meets).toBe(false);
+    expect(el?.criteria.find((c) => c.id === "payment_plan_90_days")?.met).toBe(false);
+    // demo-person-105 received a HUGS benefit this financial year.
+    const prior = out.cases.find((c) => c.personId === "demo-person-105")!;
+    const fy = prior.recommendations.find((r) => r.recommendationId === "hugs")?.eligibility;
+    expect(fy?.criteria.find((c) => c.id === "no_hugs_this_financial_year")?.met).toBe(false);
+  });
+
   it("uses the flow's categories and circumstances as the catalogs", () => {
     expect(out.circumstanceSource).toBe("flow");
     expect(out.supportAreas.every((a) => realFlow.categories.some((cat) => cat.id === a.id))).toBe(true);

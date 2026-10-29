@@ -13,7 +13,7 @@ describe("group solutions", () => {
     expect(plan.cards[0]!.secondary).toEqual([expect.objectContaining({ id: "bills", count: 1 })]);
   });
   it("removes inactive groups and moves a formerly shared solution into its remaining group", () => {
-    const plan = buildSolutionPlan([row("a", "health", ["health", "bills"]), row("b", "bills", ["bills"])], ["health", "concessions"]);
+    const plan = buildSolutionPlan([row("a", "health", ["health", "bills"]), row("b", "bills", ["bills"])], ["health", "coaching"]);
     expect(plan.shared).toEqual([]);
     expect(plan.cards[0]!.own.find((entry) => entry.id === "hardship")?.customers).toHaveLength(1);
     expect(plan.cards[1]!.members).toEqual([]);

@@ -105,6 +105,10 @@ function supportFacts(c: QueueCase, person: Person | null, cat: Catalog): string
     lines.push(`Solution [id ${r.recommendationId}]: ${d?.label ?? r.recommendationId} (for ${forNames})`);
     if (d?.description) lines.push(`  Key facts: ${d.description}`);
     if (d?.howToAccess) lines.push(`  How to access: ${d.howToAccess}`);
+    if (r.eligibility) {
+      const failed = r.eligibility.criteria.filter((x) => !x.met);
+      lines.push(`  HUGS eligibility (from the account): ${failed.length ? `not met — ${failed.map((x) => x.label).join(", ")}` : "met"}`);
+    }
   }
   const a = person?.account;
   if (a) {

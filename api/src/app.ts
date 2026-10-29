@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { GroupTasks } from "./groupTasks";
-import { SOLUTIONS, type SolutionId } from "@greenspark/shared";
+import { SOLUTIONS, SUPPORT_GROUPS, type SolutionId } from "@greenspark/shared";
 import { join } from "node:path";
 import compression from "compression";
 import express, { type NextFunction, type Request, type Response } from "express";
@@ -37,12 +37,16 @@ const reviewBody = z.object({ reviewStatus: z.enum(["needs_review", "reviewed"])
 // The worker for a new case: required from a manager; a support worker's new case is theirs.
 const assignee = { assigneeUserId: z.string().min(1).optional() };
 const taskDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => { const d = new Date(`${s}T00:00:00Z`); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s; }, "Choose a valid date");
-const taskPeople = z.array(z.string().min(1).max(100)).min(1).max(50000).refine((ids) => new Set(ids).size === ids.length, "Duplicate customers");
-const taskSelection = z.object({ groupId: z.enum(["health", "supply", "bills", "concessions", "coaching", "monitor"]),
-  solutionId: z.enum(Object.keys(SOLUTIONS) as [SolutionId, ...SolutionId[]]), eventDate: taskDate,
-  scope: z.string().trim().min(1).max(150), personIds: taskPeople }).strict();
+const taskPeople = z.array(z.string().min(1).max(100)).max(50000).refine((ids) => new Set(ids).size === ids.length, "Duplicate customers");
+const taskSelection = z.object({ kind: z.enum(["solution", "moratorium"]),
+  groupIds: z.array(z.enum(["health", "disconnected", "supply", "bills", "coaching"])).max(5),
+  solutionId: z.enum(Object.keys(SOLUTIONS) as [SolutionId, ...SolutionId[]]).nullable(),
+  scopePostcodes: z.array(z.string().min(1).max(10)).max(5000),
+  eventDate: taskDate, scope: z.string().trim().min(1).max(150), personIds: taskPeople }).strict();
 const taskCreate = taskSelection.extend({ assigneeUserId: z.string().min(1), dueDate: taskDate }).strict();
 const taskProgress = z.object({ expectedVersion: z.number().int().min(1), personIds: taskPeople, completed: z.boolean() }).strict();
+const taskPostcodes = z.array(z.string().min(1).max(10)).min(1).max(50000).refine((a) => new Set(a).size === a.length, "Duplicate postcodes");
+const taskAreaProgress = z.object({ expectedVersion: z.number().int().min(1), postcodes: taskPostcodes, completed: z.boolean() }).strict();
 const taskCancel = z.object({ expectedVersion: z.number().int().min(1) }).strict();
 const newCaseBody = z.union([
   z.object({ personId: z.string().min(1), ...assignee }).strict(),
@@ -181,7 +185,8 @@ export function createApp(store: Store, options: AppOptions = {}) {
     const hit = byCase.get(c.id);
     const wx = weatherKey();
     if (hit && hit.version === c.version && hit.wx === wx) return hit.result;
-    const person = store.getPerson(c.personId);
+    // The full account, so account facts like HUGS eligibility can be checked as well as the stored signal summary.
+    const person = store.getPersonWithAccount(c.personId);
     const result = evaluateCase(c, person, store.catalog, doc, catalogOf(doc), weatherFor(person));
     byCase.set(c.id, { version: c.version, wx, result });
     return result;
@@ -241,7 +246,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
   app.get("/api/group-tasks", (req, res) => {
     const eventDate = parse(taskDate, req.query.eventDate);
     const a = actor(res);
-    res.json({ tasks: groupTasks.list(eventDate), actorId: a.id,
+    res.json({ tasks: groupTasks.list(eventDate), ...groupTasks.coverage(eventDate), actorId: a.id,
       canAssignOthers: a.role === "manager", users: store.catalog.users.filter((u) => u.role === "support_worker") });
   });
   app.post("/api/group-tasks/preview", (req, res) => { res.json(groupTasks.preview(parse(taskSelection, req.body))); });
@@ -254,6 +259,9 @@ export function createApp(store: Store, options: AppOptions = {}) {
   });
   app.patch("/api/group-tasks/:taskId/progress", (req, res) => {
     res.json({ task: groupTasks.update(actor(res), String(req.params.taskId), parse(taskProgress, req.body)) });
+  });
+  app.patch("/api/group-tasks/:taskId/area-progress", (req, res) => {
+    res.json({ task: groupTasks.updateAreas(actor(res), String(req.params.taskId), parse(taskAreaProgress, req.body)) });
   });
   app.post("/api/group-tasks/:taskId/cancel", (req, res) => {
     res.json({ task: groupTasks.cancel(actor(res), String(req.params.taskId), parse(taskCancel, req.body).expectedVersion) });
@@ -371,6 +379,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
         kinds: [...new Set(o.hazards.map((h) => h.kind))], dates: [...new Set(o.hazards.map((h) => h.date))], firstDate: o.hazards.find((h) => h.kind !== "warning")?.date ?? null, firstKind: o.hazards.find((h) => h.kind !== "warning")?.kind ?? null, worst: worst?.text ?? null,
         sensitivity: o.sensitivity.map(({ id, group, label }) => ({ id, group, label })), accountNumber: p.accountNumber ?? null, displayName: p.displayName, suburb: p.suburb, postcode: p.address?.postcode ?? null, risk,
         priority: c?.modelAssessment.priority ? { label: c.modelAssessment.priority.label, score: c.modelAssessment.priority.score } : null, status: c?.workflow.status ?? null,
+        // No group when no recorded signal supports a specific action; those customers stay in the queue.
         group: primarySupportGroup(supportSignals), supportNeeds: supportGroupNeeds(supportSignals),
         location: p.address?.postcode ? POSTCODE_LOCATION[p.address.postcode] ?? null : null,
         assignedTo: c?.workflow.assignedToUserId ?? null,
@@ -400,14 +409,16 @@ export function createApp(store: Store, options: AppOptions = {}) {
       return { date, peak, exposed: on.length, act: on.filter((r) => r.tier === "act").length, watch: on.filter((r) => r.tier === "watch").length };
     });
     const listed = rows.filter((r) => r.tier).sort((a, b) => (a.tier === b.tier ? 0 : a.tier === "act" ? -1 : 1) || b.score - a.score);
+    // Group planning covers customers whose recorded signals support a specific action; customers
+    // without a risk signal are reviewed in the case queue, not on this weather-triggered view.
+    const grouped = rows.filter((r) => r.group);
     const body = {
       available: true, weather: status, today, demo: w.demo, issuedAt: w.issuedAt, days, towns,
       climate: options.climate ? { thresholds: options.climate.thresholds, baselineYears: options.climate.baseline.years, scenario: options.climate.projection.scenario, period: options.climate.projection.period } : null,
       warnings: w.warnings.filter((x) => x.districts.length).map((x) => ({ title: x.title, districts: x.districts.map((d) => w.districts[d] ?? d), expires: x.expires })),
-      totals: { covered: rows.length, uncovered, exposed: rows.filter((r) => r.exposure > 0).length, vulnerable: rows.filter((r) => r.vulnerable).length, act: listed.filter((r) => r.tier === "act").length, watch: listed.filter((r) => r.tier === "watch").length },
+      totals: { covered: rows.length, uncovered, unassigned: rows.length - grouped.length, exposed: rows.filter((r) => r.exposure > 0).length, vulnerable: rows.filter((r) => r.vulnerable).length, act: listed.filter((r) => r.tier === "act").length, watch: listed.filter((r) => r.tier === "watch").length },
       customers: listed.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
-      // Group planning includes covered customers outside the priority list, without changing the funnel contract.
-      groupCustomers: rows.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
+      groupCustomers: grouped.map(({ dates: _dates, vulnerable: _vulnerable, ...r }) => r),
     };
     outlookCache = { key, body };
     res.json(body);
@@ -564,7 +575,8 @@ export function createApp(store: Store, options: AppOptions = {}) {
       for (const g of new Set(sens.map((s) => s.group))) bump(needGroup, g);
       for (const s of sens) bump(need, s.id);
       const signals = [...sens, ...(p.signalSummary?.account ?? []), ...(p.signalSummary?.selfReport ?? [])];
-      bump(supportGroup, primarySupportGroup(signals));
+      const sg = primarySupportGroup(signals);
+      if (sg) bump(supportGroup, sg);
       const r = riskFor(p);
       if (!r) bump(risk, "none");
       else { const x = r.baseRate ? r.probability / r.baseRate : 0; bump(risk, x >= 10 ? "very_high" : x >= 4 ? "high" : x >= 1.5 ? "raised" : "low"); }
@@ -578,7 +590,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
       areas: top(area, 8).map(([id, count]) => ({ id, label: areaLabel.get(id) ?? id, count })),
       needGroups: ["health", "supply", "cost", "isolation"].map((group) => ({ group, count: needGroup.get(group) ?? 0 })),
       needs: top(need, 10).map(([id, count]) => ({ id, label: SENSITIVITY[id]?.label ?? id, group: SENSITIVITY[id]?.group ?? "cost", count })),
-      supportGroups: ["health", "supply", "bills", "concessions", "coaching", "monitor"].map((id) => ({ id, count: supportGroup.get(id) ?? 0 })),
+      supportGroups: SUPPORT_GROUPS.map((g) => g.id).map((id) => ({ id, count: supportGroup.get(id) ?? 0 })),
       risk: ["very_high", "high", "raised", "low", "none"].map((id) => ({ id, count: risk.get(id) ?? 0 })),
       howMany: [0, 1, 2, 3, 4, 5, 6].map((n) => ({ n, count: howMany.get(n) ?? 0 })),
     };

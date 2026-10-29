@@ -232,6 +232,19 @@ export function CaseDetails(props: { data: Catalog; item: CaseItem; user: StaffU
                       {d?.description ? <div><dt>Good to know</dt><dd>{d.description}</dd></div> : null}
                       <div><dt>For</dt><dd>{forNames.join(", ")}</dd></div>
                     </dl>
+                    {r.eligibility ? (
+                      <dl className="solution-facts eligibility">
+                        <div>
+                          <dt>HUGS eligibility</dt>
+                          <dd>
+                            <strong>{r.eligibility.meets ? "Meets the recorded criteria" : "Does not meet the recorded criteria"}</strong>
+                            {r.eligibility.criteria.map((x) => (
+                              <span key={x.id} className={x.met ? "elig-met" : "elig-not-met"}>{x.label}: {x.evidence}</span>
+                            ))}
+                          </dd>
+                        </div>
+                      </dl>
+                    ) : null}
                     {d?.sourceUrl ? <a className="sub" href={d.sourceUrl} target="_blank" rel="noreferrer">Source{d.verified ? "" : " (not re-checked)"}</a> : null}
                   </li>
                 );

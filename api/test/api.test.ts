@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MAX_BULK_ITEMS } from "@greenspark/shared";
 import { allCases, start, type Harness } from "./helpers";
 
 let h: Harness;
@@ -122,8 +123,16 @@ describe("assignment", () => {
     expect((await allCases(h)).find((x) => x.id === c.id)!.workflow.assignedToUserId).toBe(c.workflow.assignedToUserId);
     const dup = { caseId: c.id, expectedVersion: 1 };
     expect((await h.call(M, "POST", "/api/cases/bulk/assignment", { assigneeUserId: "staff-alex", items: [dup, dup] })).status).toBe(422);
-    const many = Array.from({ length: 101 }, (_, i) => ({ caseId: `GS-${i}`, expectedVersion: 1 }));
+    const many = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({ caseId: `GS-${i}`, expectedVersion: 1 }));
     expect((await h.call(M, "POST", "/api/cases/bulk/assignment", { assigneeUserId: "staff-alex", items: many })).status).toBe(422);
+  });
+
+  it("accepts a full-size bulk request (the cap is inclusive)", async () => {
+    const cases = await allCases(h);
+    expect(cases.length).toBe(MAX_BULK_ITEMS);
+    const ok = await h.call(M, "POST", "/api/cases/bulk/assignment", { assigneeUserId: "staff-alex", items: cases.map((c) => ({ caseId: c.id, expectedVersion: c.version })) });
+    expect(ok.status).toBe(200);
+    expect(ok.body.updated.length + ok.body.unchanged.length).toBe(MAX_BULK_ITEMS);
   });
 });
 

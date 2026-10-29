@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { SupportGroupId } from "@greenspark/shared";
+import { groupIn, type SupportGroupId } from "@greenspark/shared";
 import type { Outlook, OutlookCustomer } from "../data/api";
 import { customerOnDate, groupOf, inMapRegion, REGION_LABEL, type MapRegion } from "../domain/supportGroups";
 import { dayDate, dayName, tempColor } from "./outlookText";
@@ -10,7 +10,7 @@ export function SupportWeek({ data, region, groups, date, onDate }: {
   date: string; onDate: (date: string) => void;
 }) {
   const days = useMemo(() => {
-    const people = [...new Map((data.groupCustomers ?? data.customers).filter((c) => inMapRegion(c, region) && groups.includes(groupOf(c))).map((c) => [c.personId, c])).values()];
+    const people = [...new Map((data.groupCustomers ?? data.customers).filter((c) => inMapRegion(c, region) && groupIn(groups, groupOf(c))).map((c) => [c.personId, c])).values()];
     const towns = data.towns.filter((t) => inMapRegion({ location: [t.lat, t.lng], postcode: null }, region));
     return data.days.map(({ date }) => {
       const rows: OutlookCustomer[] = people.map((c) => customerOnDate(c, date));

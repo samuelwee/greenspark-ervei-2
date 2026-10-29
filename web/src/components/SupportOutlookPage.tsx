@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, emptySupportCounts, supportUrgency, type SupportGroupId } from "@greenspark/shared";
+import { SUPPORT_GROUPS, SUPPORT_GROUP_COLORS, SUPPORT_URGENCY, emptySupportCounts, groupIn, supportUrgency, type SupportGroupId } from "@greenspark/shared";
 import { SupportWeek } from "./SupportWeek";
 import { SupportWeatherKey } from "./SupportWeatherKey";
 import { SupportSolutions } from "./SupportSolutions";
 import { SupportActions, type ActionsClient } from "./SupportActions";
-import type { ApiClient, EmergencyFeed, Outlook, OutlookCustomer } from "../data/api";
+import type { ApiClient, EmergencyFeed, GroupTaskList, Outlook, OutlookCustomer } from "../data/api";
 import { accountHref, isModifiedClick } from "../route";
 import { customerOnDate, groupOf, inMapRegion, REGION_LABEL, supportAreas, type MapRegion } from "../domain/supportGroups";
 import { dayDate, dayName, isWarning, tempColor } from "./outlookText";
@@ -22,7 +22,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const [error, setError] = useState<string | null>(null), [notice, setNotice] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [tier, setTier] = useState<"" | "act" | "watch">(() => { const value = new URLSearchParams(window.location.search).get("tier"); return value === "act" || value === "watch" ? value : ""; });
-  const [groups, setGroups] = useState<SupportGroupId[]>(() => new URLSearchParams(window.location.search).has("tier") ? ALL_GROUPS : ALL_GROUPS.filter((id) => id !== "monitor"));
+  const [groups, setGroups] = useState<SupportGroupId[]>(() => ALL_GROUPS);
   const group = groups.length === 1 ? groups[0]! : "all";
   const [region, setRegion] = useState<MapRegion>("perth"), [date, setDate] = useState("");
   const [areaId, setAreaId] = useState<string | null>(null);
@@ -30,6 +30,8 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const [showCustomers, setShowCustomers] = useState(false), [shown, setShown] = useState(PAGE);
   const [emergency, setEmergency] = useState<EmergencyFeed | null>(null);
   const [supportTab, setSupportTab] = useState<"solutions" | "actions">("solutions");
+  const [hideCovered, setHideCovered] = useState(false);
+  const [taskCatalog, setTaskCatalog] = useState<GroupTaskList | null>(null), [taskError, setTaskError] = useState<string | null>(null), [tasksRetry, setTasksRetry] = useState(0);
 
   useEffect(() => {
     if (!client.outlook) { setError("The weather outlook isn't available on this server."); return; }
@@ -56,18 +58,26 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   }, [client]);
   useEffect(() => { document.title = "New outlook · ERVEI"; }, []);
   useEffect(() => { setAreaId(null); }, [region]);
-  useEffect(() => { setShown(PAGE); setShowCustomers(false); }, [groups, region, date, tier, onlyExposed]);
+  useEffect(() => { setShown(PAGE); setShowCustomers(false); }, [groups, region, date, tier, onlyExposed, hideCovered]);
 
   const ready = data?.available ? data : null;
-  const baseRows = useMemo(() => (ready?.groupCustomers ?? ready?.customers ?? [])
+  const allRows = useMemo(() => (ready?.groupCustomers ?? ready?.customers ?? [])
     .map((customer) => customerOnDate(customer, date))
     .filter((customer) => inMapRegion(customer, region) && (!tier || customer.tier === tier) && (!onlyExposed || customer.exposure > 0)), [ready, date, region, tier, onlyExposed]);
+  const covered = useMemo(() => {
+    if (!taskCatalog) return null;
+    return { personIds: new Set(taskCatalog.coveredPersonIds), postcodes: new Set(taskCatalog.coveredPostcodes) };
+  }, [taskCatalog]);
+  const baseRows = useMemo(() => allRows.filter((customer) => !hideCovered || !(covered && (covered.personIds.has(customer.personId) || (customer.postcode != null && covered.postcodes.has(customer.postcode))))), [allRows, hideCovered, covered]);
   const groupCounts = useMemo(() => {
     const counts = emptySupportCounts();
-    for (const customer of baseRows) counts[groupOf(customer)]++;
+    for (const customer of baseRows) {
+      const g = groupOf(customer);
+      if (g) counts[g]++;
+    }
     return counts;
   }, [baseRows]);
-  const rows = useMemo(() => baseRows.filter((customer) => groups.includes(groupOf(customer))), [baseRows, groups]);
+  const rows = useMemo(() => baseRows.filter((customer) => groupIn(groups, groupOf(customer))), [baseRows, groups]);
   const mapped = useMemo(() => supportAreas(rows, true), [rows]);
   const postcodeCount = new Set(mapped.areas.map((area) => area.postcode)).size;
   const selectedPostcode = areaId?.split(":")[0] ?? null;
@@ -86,6 +96,19 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   weekStart.setUTCDate(weekStart.getUTCDate() - (weekStart.getUTCDay() + 6) % 7);
   const eventDate = weekStart.toISOString().slice(0, 10);
   const defaultDue = date || members.map((c) => c.firstDate).filter((d): d is string => !!d).sort()[0] || forecastStart;
+  const hiddenCount = hideCovered ? allRows.length - baseRows.length : 0;
+
+  useEffect(() => {
+    if (!client.groupTasks) { setTaskError("Group tasks are unavailable on this server."); return; }
+    let current = true; setTaskError(null);
+    const load = () => client.groupTasks!(eventDate).then(
+      (result) => { if (current) { setTaskCatalog(result); setTaskError(null); } },
+      (failure: unknown) => { if (current) setTaskError(failure instanceof Error ? failure.message : "Could not load group tasks."); },
+    );
+    void load();
+    const timer = window.setInterval(load, 5 * 60 * 1000);
+    return () => { current = false; window.clearInterval(timer); };
+  }, [client, eventDate, tasksRetry]);
 
   if (error) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="alert"><h1>We couldn’t load the outlook</h1><p>{error}</p><button type="button" className="btn" onClick={() => setRetry((n) => n + 1)}>Try again</button></div></main>;
   if (!data) return <main id="queue" className="outlook" tabIndex={-1}><div className="empty" role="status"><p>Loading the forecast…</p></div></main>;
@@ -146,15 +169,17 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
           <p className="support-caution">Suggested support steps. Confirm individual needs, consent and eligibility before acting.</p>
           <button type="button" className="btn support-review" disabled={!members.length} onClick={review}>Review {selectedPostcode ? "this area" : "group"} <span aria-hidden="true">→</span></button>
           </div>
-          <div id="support-panel-actions" role="tabpanel" aria-labelledby="support-tab-actions" hidden={supportTab !== "actions"}>{supportTab === "actions" ? <SupportActions client={client} customers={members} groups={groups} scope={scopeLabel} eventDate={eventDate} defaultDue={defaultDue} focusGroup={picked?.group ?? null} /> : null}</div>
+          <div id="support-panel-actions" role="tabpanel" aria-labelledby="support-tab-actions" hidden={supportTab !== "actions"}>{supportTab === "actions" ? <SupportActions client={client} customers={members} groups={groups} scope={scopeLabel} eventDate={eventDate} defaultDue={defaultDue} focusGroup={picked?.group ?? null} catalog={taskCatalog} taskError={taskError} onRefresh={() => setTasksRetry((r) => r + 1)} /> : null}</div>
         </aside>
       </div>
     </section>
 
     <div className="support-scope">
       <label className="check"><input type="checkbox" checked={onlyExposed} onChange={() => setOnlyExposed((value) => !value)} /><span>Only customers exposed to forecast hazards</span></label>
+      <label className="check"><input type="checkbox" checked={hideCovered} onChange={() => setHideCovered((value) => !value)} /><span>Hide customers with a scheduled action this week</span></label>
       <label>Attention <select aria-label="Attention filter" value={tier} onChange={(event) => setTier(event.target.value as typeof tier)}><option value="">All attention levels</option><option value="act">Act now</option><option value="watch">Review soon</option></select></label>
-      <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
+      {hideCovered ? <span className="sub">{hiddenCount ? `${hiddenCount} hidden by saved tasks` : "No scheduled actions this week"}</span> : null}
+      <span className="sub">{ready.totals.covered.toLocaleString("en-AU")} forecast-covered · {ready.totals.uncovered} without forecast coverage{ready.totals.unassigned ? ` · ${ready.totals.unassigned} covered without a support group` : ""}{mapped.unplaced ? ` · ${mapped.unplaced} without a map location in this selection` : ""}</span>
     </div>
     {!rows.length ? <div className="empty"><h2>{groups.length ? "No customers match this selection" : "Select a support group"}</h2><p>Turn on one or more coloured group filters, or clear the attention and exposure filters.</p><button type="button" className="btn" onClick={() => { setGroups(ALL_GROUPS); setRegion("wa"); setTier(""); setOnlyExposed(false); }}>Show all covered customers</button></div> : null}
 
@@ -177,13 +202,13 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
 
 
     <details className="panel outlook-how"><summary>How the grouping and map work</summary><ul>
-      <li><strong>Six primary action groups:</strong> interrupted or low-credit supply first, then health, other supply needs, concession renewal, payment support, energy coaching and monitoring. Other recorded needs remain available as secondary tags and solutions. An active concession alone does not establish a need for payment support.</li>
+      <li><strong>Five primary action groups:</strong> a disconnected supply first, then low credit, medical needs, financial hardship and unusual usage or billing trends (including a lapsed concession that will raise the bill). Other recorded needs remain available as secondary tags and solutions. An active concession alone does not establish a need, and customers with no recorded risk signal are not shown here — review their cases separately.</li>
       <li><strong>Solutions:</strong> selected groups have their own coloured cards. The same solution is shown once when it applies across multiple groups, counting each relevant customer once. Clicking a circle scopes all selected groups to that postcode.</li>
       <li><strong>Circle size</strong> shows customer count. <strong>Colour</strong> identifies the support group. <strong>Darkness</strong> shows the highest weather-response urgency within that postcode group. Translucent fills reveal overlaps; symbols at a shared postcode are slightly offset for readability.</li>
-      <li><strong>Act now</strong> combines hazardous weather with a recorded health or supply need. <strong>Review soon</strong> combines hot weather with needs that add up, or dangerous weather with high predicted risk. Monitor does not mean safe or fully assessed.</li>
+      <li><strong>Act now</strong> combines hazardous weather with a recorded health or supply need. <strong>Review soon</strong> combines hot weather with needs that add up, or dangerous weather with high predicted risk. Monitor is the weather layer’s attention tier, not a group.</li>
       <li><strong>Forecast period</strong> recalculates attention from that day’s hazards. Group membership comes from recorded signals. A warning remains relevant until its expiry.</li>
       <li><strong>Temperature shading</strong> estimates the daily maximum between nearby town forecasts, using a fixed °C scale. Blank areas are cooler than 28°C or outside available coverage. Whole week shows each town’s peak, which can occur on different days; select a date to compare the same day. It is not BoM’s official heatwave-severity product. {ready.demo ? "The current forecast values are fictional demo inputs." : "Town forecast values come from the Bureau."}</li>
-      <li><strong>Approximate locations:</strong> circles use postcode centres. {ready.totals.uncovered} customers lack forecast coverage and are not included here. Check their cases separately.</li>
+      <li><strong>Approximate locations:</strong> circles use postcode centres. {ready.totals.uncovered} customers lack forecast coverage and are not included here; {ready.totals.unassigned} more are covered but carry no recorded risk group. Check their cases separately.</li>
       <li><strong>Staff decide:</strong> these groups suggest work to review. They do not send messages, change accounts or determine eligibility.</li>
     </ul></details>
   </main>;
