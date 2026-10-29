@@ -120,8 +120,7 @@ export function ClimateIncreaseMap({ data, threshold, selected, onSelect }: {
   useEffect(() => {
     if (selected?.from !== "table") return;
     const t = towns.find((x) => x.id === selected.id);
-    // A town already in view stays where it is, so clicking the selected town again doesn't move the map.
-    if (t && map.current && !(map.current.getZoom() >= 9 && map.current.getBounds().contains([t.lat, t.lng]))) map.current.flyTo([t.lat, t.lng], Math.max(map.current.getZoom(), 9), { duration: 0.8 });
+    if (t && map.current) map.current.flyTo([t.lat, t.lng], Math.max(map.current.getZoom(), 9), { duration: 0.8 });
   }, [selected, towns]);
 
   return (
