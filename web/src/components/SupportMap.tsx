@@ -16,12 +16,14 @@ const REGION_BOUNDS: Record<MapRegion, L.LatLngBoundsExpression> = {
 };
 
 /** Count markers and weather coverage deliberately use different visual encodings. */
-export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date, legend }: {
+export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showAlerts, chosen, onChoose, region, date, legend, hideShortcuts }: {
   areas: SupportArea[]; towns: OutlookTown[]; activeGroups: SupportGroupId[]; alerts: EmergencyAlert[];
   showHeat: boolean; showAlerts: boolean; chosen: string | null; onChoose: (id: string | null) => void;
   region: MapRegion; date: string;
   /** More legend sections, shown with the map's own under the map. */
   legend?: ReactNode;
+  /** Leaves out the Reset map and Mandurah shortcuts. */
+  hideShortcuts?: boolean;
 }) {
   const el = useRef<HTMLDivElement>(null), wrap = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -181,8 +183,8 @@ export function SupportMap({ areas, towns, activeGroups, alerts, showHeat, showA
     </div>
     <div className="map-zoom outlook-zoom">
       <span className="sub">Town forecast values · shading estimated · approximate postcode groups</span>
-      <button type="button" className="link-btn" onClick={() => map.current?.fitBounds(REGION_BOUNDS[region], { padding: [22, 22] })}>Reset map</button>
-      {region === "perth" ? <button type="button" className="link-btn" onClick={() => map.current?.setView([-32.53, 115.77], 11)}>Mandurah</button> : null}
+      {hideShortcuts ? null : <button type="button" className="link-btn" onClick={() => map.current?.fitBounds(REGION_BOUNDS[region], { padding: [22, 22] })}>Reset map</button>}
+      {region === "perth" && !hideShortcuts ? <button type="button" className="link-btn" onClick={() => map.current?.setView([-32.53, 115.77], 11)}>Mandurah</button> : null}
       <button type="button" className="btn btn-small map-full" aria-pressed={full} onClick={toggleFull}>{full ? "Exit full screen" : "Full screen"}</button>
     </div>
   </div>;

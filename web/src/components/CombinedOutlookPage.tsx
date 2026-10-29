@@ -171,7 +171,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
       </div>
       <div className="support-map-layout">
         <div className="support-map-column">
-          <Suspense fallback={<div className="outlook-map support-map" role="status">Loading the map…</div>}><SupportMap areas={mapped.areas} towns={ready.towns} activeGroups={groups} alerts={warnings} showHeat={showHeat} showAlerts={showAlerts && !!emergency?.available} chosen={picked?.id ?? null} onChoose={(id) => { setAreaId(id); setShown(PAGE); }} region={region} date={date} legend={<SupportWeatherKey feed={emergency} enabled={showAlerts && !!emergency?.available} />} /></Suspense>
+          <Suspense fallback={<div className="outlook-map support-map" role="status">Loading the map…</div>}><SupportMap areas={mapped.areas} towns={ready.towns} activeGroups={groups} alerts={warnings} showHeat={showHeat} showAlerts={showAlerts && !!emergency?.available} chosen={picked?.id ?? null} onChoose={(id) => { setAreaId(id); setShown(PAGE); }} region={region} date={date} hideShortcuts legend={<SupportWeatherKey feed={emergency} enabled={showAlerts && !!emergency?.available} />} /></Suspense>
         </div>
 
         <aside className="support-detail support-solutions-panel" aria-label="Support plan for selected groups">
