@@ -179,14 +179,14 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
             <button type="button" className={`support-filter support-filter-all${groups.length === ALL_GROUPS.length ? " is-on" : ""}`} aria-pressed={groups.length === ALL_GROUPS.length} onClick={() => setGroups((current) => current.length === ALL_GROUPS.length ? [] : ALL_GROUPS)}>All groups <span>{baseRows.length.toLocaleString("en-AU")}</span></button>
             {SUPPORT_GROUPS.map((item) => <button key={item.id} type="button" style={groupStyle(item.id)} className={`support-filter${groups.includes(item.id) ? " is-on" : ""}`} aria-pressed={groups.includes(item.id)} onClick={() => setGroups((current) => current.includes(item.id) ? current.filter((id) => id !== item.id) : [...current, item.id])}><i>{item.letter}</i>{item.label}<span>{groupCounts[item.id].toLocaleString("en-AU")}</span></button>)}
           </div>
-          <div className="support-detail-title"><p className="sub">{scopeLabel}</p></div>
-          <div className="support-panel-tabs" role="tablist" aria-label="Support plan view" onKeyDown={(event) => {
+                    <div className="support-panel-tabs" role="tablist" aria-label="Support plan view" onKeyDown={(event) => {
             if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
               event.preventDefault(); const next = event.key === "Home" ? "solutions" : event.key === "End" ? "actions" : supportTab === "solutions" ? "actions" : "solutions";
               setSupportTab(next); document.getElementById(`support-tab-${next}`)?.focus();
             }
           }}>{(["solutions", "actions"] as const).map((tab) => <button key={tab} id={`support-tab-${tab}`} role="tab" type="button" aria-selected={supportTab === tab} tabIndex={supportTab === tab ? 0 : -1} aria-controls={`support-panel-${tab}`} onClick={() => setSupportTab(tab)}>{tab === "solutions" ? "Solutions" : "Actions"}</button>)}</div>
           <p className="support-member-count"><strong>{members.length.toLocaleString("en-AU")}</strong> customers</p>
+          <p className="sub"><strong>{scopeLabel}</strong></p>
           <p className="sub">{selectedPostcode ? "All selected groups in this postcode" : "Select a circle to plan local support"}</p>
           {supportTab === "solutions" ? <div className="support-attention" aria-live="polite"><strong>{act ? `${act} need urgent review` : watch ? `${watch} to review soon` : "Monitor and check recorded needs"}</strong><span>{period} · {act ? "prioritise these customers today" : "review before the relevant forecast event"}</span></div> : <p className="task-attention-summary">{act ? `${act} need urgent review` : watch ? `${watch} to review soon` : "Monitor and follow up"} · {period}</p>}
           <details className="support-area-picker"><summary>Choose an area ({postcodeCount})</summary><div>{areaOptions.map((area) => <button key={area.id} type="button" aria-pressed={area.postcode === selectedPostcode} onClick={() => { setAreaId(mapped.areas.find((item) => item.postcode === area.postcode)!.id); setShown(PAGE); }}><span>{area.suburb}<small>{area.postcode} · {SUPPORT_URGENCY[area.urgency].label}</small></span><strong>{area.count}</strong></button>)}</div></details>
