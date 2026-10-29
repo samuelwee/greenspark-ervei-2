@@ -122,7 +122,6 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
   return <main id="queue" className="outlook support-outlook combined-outlook" tabIndex={-1}>
     <header className="page-head">
       <div><p className="eyebrow">Weather outlook · next 7 days</p><h1>Who this week’s weather could hurt</h1><p className="hint">The Bureau’s forecast for each customer’s area, matched against what we know about them. Find the groups to contact before dangerous weather arrives.</p></div>
-      <div className="outlook-source">{ready.demo ? null : <span className="demo-pill">Live Bureau forecast</span>}<span className="sub">{ready.issuedAt ? `Issued ${new Date(ready.issuedAt).toLocaleString("en-AU", { timeZone: "Australia/Perth", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}` : "Issue time not given"}</span></div>
     </header>
     {notice || ready.weather.error ? <p className="support-notice" role="status">{notice ?? `Weather refresh failed: ${ready.weather.error}. Showing the last available forecast.`}</p> : null}
 
