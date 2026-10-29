@@ -216,7 +216,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
       <div className="table-wrap"><table className="case-table support-customer-table"><thead><tr><th scope="col">Attention</th><th scope="col">Customer</th><th scope="col">Recorded needs</th><th scope="col">90-day predicted risk</th></tr></thead><tbody>
         {members.slice(0, shown).map((customer) => { const urgency = SUPPORT_URGENCY[supportUrgency(customer.tier)], risk = customer.risk ? band(customer.risk.probability, customer.risk.baseRate) : null; return <tr key={customer.personId}>
           <td><span className="support-urgency-pill" style={{ background: urgency.color, color: urgency.text }}>{urgency.label}</span></td>
-          <td>{customer.accountNumber ? <a className="name-link" href={accountHref(customer.accountNumber)} onClick={(event) => open(event, customer)}>{customer.displayName}</a> : customer.displayName}<span className="sub">{customer.accountNumber} · {customer.suburb}</span></td>
+          <td>{customer.accountNumber ? <a className="name-link" href={accountHref(customer.accountNumber)} onClick={(event) => open(event, customer)}>{customer.displayName}</a> : customer.displayName}<span className="sub">{customer.suburb}</span></td>
           <td>{customer.sensitivity.map((signal) => signal.label).join(" · ") || "No matching recorded sensitivity; review information"}</td>
           <td>{customer.risk && risk ? <span className={`pred-pill pred-${risk.id}`} title={`${percent(customer.risk.probability)} chance of any harm in 90 days`}>{risk.text}</span> : <span className="sub">No score</span>}</td>
         </tr>; })}
