@@ -121,8 +121,7 @@ export function InsightsSections({ client, showHeading = true }: { client: Pick<
   const multi = d.howMany.filter((h) => h.n >= 2).reduce((a, h) => a + h.count, 0);
   const maxHow = Math.max(1, ...d.howMany.map((h) => h.count));
   const groupLabel = (id: string) => SUPPORT_GROUPS.find((g) => g.id === id)!;
-  // Customers with nothing specific to act on (Monitor and follow-up) are left out of this picture.
-  const supportShown = d.supportGroups.filter((g) => g.id !== "monitor");
+  const supportShown = d.supportGroups;
   const needSupport = supportShown.reduce((a, g) => a + g.count, 0);
 
   return (

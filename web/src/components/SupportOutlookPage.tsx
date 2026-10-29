@@ -22,7 +22,7 @@ export function SupportOutlookPage({ client, navigate }: { client: Pick<ApiClien
   const [error, setError] = useState<string | null>(null), [notice, setNotice] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [tier, setTier] = useState<"" | "act" | "watch">(() => { const value = new URLSearchParams(window.location.search).get("tier"); return value === "act" || value === "watch" ? value : ""; });
-  const [groups, setGroups] = useState<SupportGroupId[]>(() => new URLSearchParams(window.location.search).has("tier") ? ALL_GROUPS : ALL_GROUPS.filter((id) => id !== "monitor"));
+  const [groups, setGroups] = useState<SupportGroupId[]>(() => ALL_GROUPS);
   const group = groups.length === 1 ? groups[0]! : "all";
   const [region, setRegion] = useState<MapRegion>("perth"), [date, setDate] = useState("");
   const [areaId, setAreaId] = useState<string | null>(null);

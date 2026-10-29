@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { GroupTasks } from "./groupTasks";
-import { SOLUTIONS, type SolutionId } from "@greenspark/shared";
+import { SOLUTIONS, SUPPORT_GROUPS, type SolutionId } from "@greenspark/shared";
 import { join } from "node:path";
 import compression from "compression";
 import express, { type NextFunction, type Request, type Response } from "express";
@@ -575,7 +575,8 @@ export function createApp(store: Store, options: AppOptions = {}) {
       for (const g of new Set(sens.map((s) => s.group))) bump(needGroup, g);
       for (const s of sens) bump(need, s.id);
       const signals = [...sens, ...(p.signalSummary?.account ?? []), ...(p.signalSummary?.selfReport ?? [])];
-      bump(supportGroup, primarySupportGroup(signals));
+      const sg = primarySupportGroup(signals);
+      if (sg) bump(supportGroup, sg);
       const r = riskFor(p);
       if (!r) bump(risk, "none");
       else { const x = r.baseRate ? r.probability / r.baseRate : 0; bump(risk, x >= 10 ? "very_high" : x >= 4 ? "high" : x >= 1.5 ? "raised" : "low"); }
@@ -589,7 +590,7 @@ export function createApp(store: Store, options: AppOptions = {}) {
       areas: top(area, 8).map(([id, count]) => ({ id, label: areaLabel.get(id) ?? id, count })),
       needGroups: ["health", "supply", "cost", "isolation"].map((group) => ({ group, count: needGroup.get(group) ?? 0 })),
       needs: top(need, 10).map(([id, count]) => ({ id, label: SENSITIVITY[id]?.label ?? id, group: SENSITIVITY[id]?.group ?? "cost", count })),
-      supportGroups: ["health", "supply", "bills", "concessions", "coaching", "monitor"].map((id) => ({ id, count: supportGroup.get(id) ?? 0 })),
+      supportGroups: SUPPORT_GROUPS.map((g) => g.id).map((id) => ({ id, count: supportGroup.get(id) ?? 0 })),
       risk: ["very_high", "high", "raised", "low", "none"].map((id) => ({ id, count: risk.get(id) ?? 0 })),
       howMany: [0, 1, 2, 3, 4, 5, 6].map((n) => ({ n, count: howMany.get(n) ?? 0 })),
     };
