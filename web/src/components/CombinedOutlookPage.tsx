@@ -158,7 +158,7 @@ export function CombinedOutlookPage({ client, navigate }: { client: Pick<ApiClie
       <div className="support-map-toolbar">
         <p aria-live="polite"><strong>{selectedDefinition?.label ?? selectionLabel}</strong> · {rows.length.toLocaleString("en-AU")} customers across {postcodeCount} postcode areas</p>
         <div className="support-map-controls" role="group" aria-label="Map controls">
-          <label className="support-region"><span className="sr-only">Map area</span><select aria-label="Map area" value={region} onChange={(event) => setRegion(event.target.value as MapRegion)}>{Object.entries(REGION_LABEL).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
+          <div className="support-time" role="group" aria-label="Map area"><strong>Map area</strong>{Object.entries(REGION_LABEL).map(([id, label]) => <button key={id} type="button" className={id === region ? "is-on" : ""} aria-pressed={id === region} onClick={() => setRegion(id as MapRegion)}>{label}</button>)}</div>
           <div className="support-time" role="group" aria-label="Forecast period">
             <strong>Forecast period</strong><button type="button" aria-pressed={!date} className={!date ? "is-on" : ""} onClick={() => setDate("")}>Whole week</button>
             {ready.days.map((day) => <button key={day.date} type="button" className={day.date === date ? "is-on" : ""} aria-pressed={day.date === date} onClick={() => setDate(day.date)}><span>{dayName(day.date)}</span>{dayDate(day.date)}</button>)}
