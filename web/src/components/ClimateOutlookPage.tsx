@@ -23,7 +23,8 @@ export function ClimateOutlookPage({ client }: { client: Pick<ApiClient, "climat
   const [error, setError] = useState<string | null>(null);
   // A town picked on the map or in the table, and where it was picked, so the map only moves for a table pick.
   const [selected, setSelected] = useState<{ id: string; from: "map" | "table" } | null>(null);
-  const pick = (id: string, from: "map" | "table") => setSelected({ id, from });
+  // Choosing the selected town again deselects it.
+  const pick = (id: string, from: "map" | "table") => setSelected((current) => current?.id === id ? null : { id, from });
   useEffect(() => { document.title = "Climate outlook · ERVEI"; }, []);
   useEffect(() => {
     let live = true;
