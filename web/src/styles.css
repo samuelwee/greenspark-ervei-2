@@ -945,3 +945,10 @@ select:not([multiple]):disabled { opacity: .6; }
 .topbar .mainnav.mainnav-left { margin-left: 8px; }
 @media (max-width: 899px) { .topbar .mainnav.mainnav-left { margin-left: 0; flex-wrap: wrap; } }
 .topbar .mainnav.mainnav-left a { padding: 10px 16px; font-size: 16px; }
+
+/* Combined outlook: each day in the week strip is a button that picks the day for the support workspace. */
+.day-strip li:has(> .day-pick) { display: block; padding: 0; }
+.day-pick { all: unset; box-sizing: border-box; width: 100%; height: 100%; display: grid; grid-template-rows: auto 72px auto auto; gap: 4px; justify-items: center; text-align: center; padding: 10px 6px; border-radius: var(--r-control); cursor: pointer; }
+.day-pick:hover { background: var(--surface-2, #f6f8f7); }
+.day-pick.is-on { background: var(--brand-soft, #e6f2ee); box-shadow: inset 0 0 0 2px var(--brand); }
+.day-pick:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }

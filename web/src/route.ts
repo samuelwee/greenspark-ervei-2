@@ -23,7 +23,7 @@ export function isModifiedClick(e: { metaKey: boolean; ctrlKey: boolean; shiftKe
   return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
 }
 
-export type Page = "outlook" | "classic" | "climate" | "areamap" | "insights" | "contactlist" | "funnel" | "queue" | "case" | "admin" | "data" | "priority" | "casepage" | "riskmodel" | "outlookmodel" | "predictions";
+export type Page = "outlook" | "classic" | "combined" | "climate" | "areamap" | "insights" | "contactlist" | "funnel" | "queue" | "case" | "admin" | "data" | "priority" | "casepage" | "riskmodel" | "outlookmodel" | "predictions";
 
 /** The home page is the classic outlook; the grouped support workspace is the new outlook. */
 export const QUEUE_PATH = "/queue";
@@ -36,6 +36,8 @@ export const CONTACT_LIST_PATH = "/contact-list";
 export const CLASSIC_OUTLOOK_PATH = "/";
 /** The grouped support workspace. */
 export const NEW_OUTLOOK_PATH = "/outlook/new";
+/** The classic summary on top of the grouped support workspace. */
+export const COMBINED_OUTLOOK_PATH = "/outlook/combined";
 
 /** Behind-the-scenes pages, under the BTS menu. */
 export const FLOWCHART_PATH = "/bts/flowchart";
@@ -59,6 +61,7 @@ export function pageFromPath(path: string): Page {
   if (/^\/insights\/?$/.test(path)) return "insights";
   if (/^\/contact-list\/?$/.test(path)) return "contactlist";
   if (/^\/outlook\/new\/?$/.test(path)) return "outlook";
+  if (/^\/outlook\/combined\/?$/.test(path)) return "combined";
   if (accountFromPath(path)) return "case";
   return /^\/queue\/?$/.test(path) ? "queue" : "classic"; // "/", the old /outlook/classic link and anything unknown
 }

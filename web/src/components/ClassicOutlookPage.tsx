@@ -23,7 +23,7 @@ const VIEW_KEY = "outlook-list-view";
 const storedView = (): "week" | "table" => { try { return localStorage.getItem(VIEW_KEY) === "table" ? "table" : "week"; } catch { return "week"; } };
 
 /** A day's act now and watch customers as a ring, filled as a share of the busiest day so days can be compared. */
-function DayDonut({ act, watch, max }: { act: number; watch: number; max: number }) {
+export function DayDonut({ act, watch, max }: { act: number; watch: number; max: number }) {
   const r = 24, c = 2 * Math.PI * r, a = (act / max) * c, w = (watch / max) * c;
   return (
     <svg className="day-donut" viewBox="0 0 64 64" role="img" aria-label={`${act} act now and ${watch} watch`}>
