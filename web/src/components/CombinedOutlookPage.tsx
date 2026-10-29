@@ -13,7 +13,7 @@ import "./supportOutlook.css";
 
 const InsightsSections = lazy(() => import("./InsightsPage").then((m) => ({ default: m.InsightsSections })));
 const SupportMap = lazy(() => import("./SupportMap").then((m) => ({ default: m.SupportMap })));
-const PAGE = 50;
+const PAGE = 10;
 const ALL_GROUPS = SUPPORT_GROUPS.map((item) => item.id);
 const groupStyle = (group: SupportGroupId): CSSProperties => ({ "--group-strong": SUPPORT_GROUP_COLORS[group].strong, "--group-light": SUPPORT_GROUP_COLORS[group].light, "--group-ink": SUPPORT_GROUP_COLORS[group].ink }) as CSSProperties;
 
