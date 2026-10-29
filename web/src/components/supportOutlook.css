@@ -319,3 +319,4 @@
 /* Home page: the scope filters sit in a "More filters" toggle under the group buttons. */
 .more-filters > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand-hover); padding: 4px 0; }
 .more-filters[open] > summary { margin-bottom: 8px; }
+.combined-outlook .support-group-filters-panel { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
