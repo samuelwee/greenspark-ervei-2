@@ -426,12 +426,10 @@ function Workspace(props: { catalog: Catalog; user: StaffUser; client: Client; o
             <a key={href} href={href} aria-current={props.page === page ? "page" : undefined} onClick={(e) => { if (isModifiedClick(e)) return; e.preventDefault(); navigate(href); }}>{label}</a>
           ))}
         </nav>
-        {SHOW_DEV_MENUS ? (
-          <nav className="mainnav" aria-label="More">
-            <NavMenu label="WIP" id="wip-menu" items={WIP_ITEMS} page={props.page} navigate={navigate} />
-            <NavMenu label="BTS" id="bts-menu" items={BTS_ITEMS} page={props.page} navigate={navigate} />
-          </nav>
-        ) : null}
+        <nav className="mainnav" aria-label="More">
+          <NavMenu label="WIP" id="wip-menu" items={WIP_ITEMS} page={props.page} navigate={navigate} />
+          <NavMenu label="BTS" id="bts-menu" items={BTS_ITEMS} page={props.page} navigate={navigate} />
+        </nav>
         <DemoSettings client={client} users={catalog.users} user={user} onSwitchUser={props.onSwitchUser} />
       </header>
 
@@ -660,8 +658,6 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   );
 }
 
-/** Temporarily off: the WIP and BTS menus are hidden from the header (their pages still open by URL). Set to true to bring them back. */
-const SHOW_DEV_MENUS = false;
 const WIP_ITEMS = [[CLASSIC_OUTLOOK_PATH, "Classic outlook", "classic"], [NEW_OUTLOOK_PATH, "New outlook", "outlook"], [AREA_MAP_PATH, "Area map", "areamap"], [INSIGHTS_PATH, "Customer insights", "insights"], [FUNNEL_PATH, "Funnel", "funnel"], [QUEUE_PATH, "Case queue", "queue"]] as const;
 // In the order the demo works: the data, the flowchart rules on it, the models built from them, then the pages they feed.
 const BTS_ITEMS = [[DATA_SOURCES_PATH, "Data sources", "data"], [FLOWCHART_PATH, "Flowchart", "admin"], [PRIORITY_MODEL_PATH, "Priority model", "priority"], [RISK_MODEL_PATH, "Risk model", "riskmodel"], [OUTLOOK_MODEL_PATH, "Classic outlook", "outlookmodel"], [CASE_PAGE_PATH, "Case page", "casepage"]] as const;
