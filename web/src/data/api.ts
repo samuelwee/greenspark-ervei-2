@@ -111,6 +111,8 @@ export interface ApiClient {
   /** The help chat: a visitor's questions so far, ending with theirs. */
   assistantStatus?(): Promise<{ on: boolean; available: boolean }>;
   setAssistant?(on: boolean): Promise<{ on: boolean; available: boolean }>;
+  /** Clears case work (status, notes, history, group tasks, customers made in the app) and keeps the demo data. */
+  resetCases?(): Promise<{ ok: boolean }>;
   insights?(): Promise<Insights>;
   /** How many customers each flowchart box applies to. */
   flowCounts?(): Promise<FlowCounts>;
@@ -291,6 +293,7 @@ export function createApiClient(getUser: () => string, base = ""): ApiClient {
     insights: () => req("GET", "/api/insights"),
     flowCounts: () => req("GET", "/api/flow/counts"),
     ask: (messages) => req("POST", "/api/assistant", { messages }),
+    resetCases: () => req("POST", "/api/admin/reset-cases"),
     assistantStatus: () => req("GET", "/api/assistant/status"),
     setAssistant: (on) => req("POST", "/api/assistant/status", { on }),
     forecastTowns: () => req("GET", "/api/forecast/towns"),

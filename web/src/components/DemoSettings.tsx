@@ -52,6 +52,30 @@ function AssistantSwitch({ client }: { client: Pick<ApiClient, "assistantStatus"
   );
 }
 
+/** Clears the case work for everyone, after a second click to confirm; the demo customers and accounts stay. */
+function ResetCases({ client }: { client: Pick<ApiClient, "resetCases"> }) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!client.resetCases) return null;
+  const reset = async () => {
+    setBusy(true); setError(null);
+    try { await client.resetCases!(); window.location.reload(); } catch (e) { setError(e instanceof Error ? e.message : "Couldn't reset the case data."); setBusy(false); }
+  };
+  return (
+    <>
+      {confirming ? (
+        <span className="settings-confirm">
+          <button type="button" className="btn btn-small" disabled={busy} onClick={() => void reset()}>{busy ? "Resetting…" : "Yes, reset"}</button>
+          <button type="button" className="btn btn-small" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button>
+        </span>
+      ) : <button type="button" className="btn btn-small" onClick={() => setConfirming(true)}>Reset case data</button>}
+      <span className="hint">Clears everyone's status changes, notes, undo history, group tasks and customers added in the app. The demo customers and accounts stay. Affects everyone.</span>
+      {error ? <span className="hint" role="alert">{error}</span> : null}
+    </>
+  );
+}
+
 /** Flowchart mode: Demo (the default), View only or Edit. A per-browser setting. */
 function FlowModeSelect() {
   const mode = useFlowMode();
@@ -110,6 +134,10 @@ export function DemoSettings({ client, users, user, onSwitchUser }: { client: Ap
           <div className="field">
             <span>Weather source</span>
             <WeatherSource client={client} />
+          </div>
+          <div className="field">
+            <span>Case data</span>
+            <ResetCases client={client} />
           </div>
         </div>
       ) : null}

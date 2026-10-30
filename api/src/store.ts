@@ -58,7 +58,7 @@ export class Store {
   readonly db: DatabaseSync;
   readonly catalog: QueueDataset; // read-only fixture data: catalogs, users
 
-  constructor(dbPath: string, fixturePath: string, private readonly accountsPath: string | null = null) {
+  constructor(dbPath: string, private readonly fixturePath: string, private readonly accountsPath: string | null = null) {
     const raw = JSON.parse(readFileSync(fixturePath, "utf8")) as RawFixture;
     // People and cases are always read from the database, so the catalog keeps only the fixed catalogs.
     this.catalog = { ...toDataset(raw), people: [], cases: [] };
@@ -240,6 +240,29 @@ export class Store {
     this.transaction(() => {
       for (const t of ["group_task_members", "group_task_areas", "group_tasks", "workflow_action_items", "workflow_actions", "note_edits", "notes", "cases", "accounts", "people", "meta"]) this.db.exec(`DELETE FROM ${t}`);
     });
+  }
+
+  /**
+   * Clears the case work without reseeding: every case goes back to the fixture's status, worker, follow-up and
+   * notes; edit and action history (Undo) and group tasks are removed; customers and cases created in the app
+   * are deleted. The seeded people, accounts and cases themselves are kept as they are.
+   */
+  resetWorkflow() {
+    const raw = JSON.parse(readFileSync(this.fixturePath, "utf8")) as RawFixture;
+    this.transaction(() => {
+      for (const t of ["group_task_members", "group_task_areas", "group_tasks", "workflow_action_items", "workflow_actions", "note_edits", "notes"]) this.db.exec(`DELETE FROM ${t}`);
+      this.db.exec("DELETE FROM cases WHERE is_created = 1");
+      this.db.exec("DELETE FROM accounts WHERE person_id IN (SELECT id FROM people WHERE is_created = 1)");
+      this.db.exec("DELETE FROM people WHERE is_created = 1");
+      const restore = this.db.prepare("UPDATE cases SET version = ?, status = ?, assigned_to = ?, follow_up_at = ?, review_status = ?, created_at = ?, updated_at = ? WHERE id = ?");
+      const addNote = this.db.prepare("INSERT INTO notes (id, case_id, author_id, text, created_at) VALUES (?,?,?,?,?)");
+      for (const c of raw.cases) {
+        const w = c.workflow;
+        restore.run(c.version, w.status, w.assignedToUserId, w.followUpAt, w.reviewStatus, w.createdAt, w.updatedAt, c.id);
+        for (const n of w.notes) addNote.run(n.id, c.id, n.authorUserId, n.text, n.createdAt);
+      }
+    });
+    this.assignCasesWithoutWorker(raw);
   }
 
   private seed(raw: RawFixture) {

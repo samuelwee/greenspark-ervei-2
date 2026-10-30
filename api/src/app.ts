@@ -535,6 +535,12 @@ export function createApp(store: Store, options: AppOptions = {}) {
     provider: ai?.provider ?? null, model: ai?.models.support ?? null, on: !!ai?.apiKey,
     options: AI_MODELS.map((m) => ({ ...m, available: !!keyFor(m.provider) })),
   });
+  // Settings menu: clears the case work (status, notes, history, group tasks, customers made in the app) and keeps the demo data.
+  app.post("/api/admin/reset-cases", (_req, res) => {
+    store.resetWorkflow();
+    outlookCache = null; insightsCache = null; flowCountsCache = null;
+    res.json({ ok: true });
+  });
   app.get("/api/ai", (_req, res) => { res.json(aiStatus()); });
   app.post("/api/ai", (req, res) => {
     const { model } = parse(z.object({ model: z.string() }), req.body);
